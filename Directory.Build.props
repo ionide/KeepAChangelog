@@ -4,6 +4,7 @@
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <Authors>Chet Husk</Authors>
         <PackageTags>version;changelog;keepachangelog</PackageTags>
+        <GeneratePathProperty>true</GeneratePathProperty>
     </PropertyGroup>
     <ItemGroup>
         <Content Include="$(MSBuildThisFileDirectory)README.md" PackagePath="./README.md" />

@@ -14,8 +14,8 @@
     <Compile Include="Library.fs" />
     <Content Include="build/Ionide.KeepAChangelog.props" LinkBase="build\" TargetPath="build\Ionide.KeepAChangelog.props" PackagePath="build\Ionide.KeepAChangelog.props" />
     <Content Include="build/Ionide.KeepAChangelog.targets" LinkBase="build\" TargetPath="build\Ionide.KeepAChangelog.targets" PackagePath="build\Ionide.KeepAChangelog.targets" />
-    <Content Include="build/Ionide.KeepAChangelog.props" LinkBase="build\multiTargeting" TargetPath="buildMultitargeting\Ionide.KeepAChangelog.props" PackagePath="buildMultitargeting\Ionide.KeepAChangelog.props" />
-    <Content Include="build/Ionide.KeepAChangelog.targets" LinkBase="build\multiTargeting" TargetPath="buildMultiTargeting\Ionide.KeepAChangelog.targets" PackagePath="buildMultiTargeting\Ionide.KeepAChangelog.targets" />
+    <!-- <Content Include="build/Ionide.KeepAChangelog.props" LinkBase="build\multiTargeting" TargetPath="buildMultiTargeting\Ionide.KeepAChangelog.props" PackagePath="buildMultiTargeting\Ionide.KeepAChangelog.props" />
+    <Content Include="build/Ionide.KeepAChangelog.targets" LinkBase="build\multiTargeting" TargetPath="buildMultiTargeting\Ionide.KeepAChangelog.targets" PackagePath="buildMultiTargeting\Ionide.KeepAChangelog.targets" /> -->
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.0.0" PrivateAssets="All" IncludeAssets="Compile" />
@@ -28,6 +28,12 @@
   <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="ResolveReferences">
     <ItemGroup>
       <BuildOutputInPackage Include="$(MSBuildThisProject)../Ionide.KeepAChangelog/bin/$(Configuration)/$(TargetFramework)/*.dll" />
+      <BuildOutputInPackage Include="$(PkgSemanticVersion)/lib/netstandard2.0/*.dll" />
+      <BuildOutputInPackage Include="$(PkgSemanticVersion)/lib/netstandard2.0/*.pdb" />
+      <BuildOutputInPackage Include="$(PkgFSharp_Core)/lib/netstandard2.0/*.dll" />
+      <BuildOutputInPackage Include="$(PkgFSharp_Core)/lib/netstandard2.0/*.pdb" />
+      <BuildOutputInPackage Include="$(PkgFParsec)/lib/netstandard2.0/*.dll" />
+      <BuildOutputInPackage Include="$(PkgFParsec)/lib/netstandard2.0/*.pdb" />
     </ItemGroup>
   </Target>
 

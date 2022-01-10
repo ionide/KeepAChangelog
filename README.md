@@ -2,6 +2,13 @@
 
 This project implements a Changelog parser according to the spec at KeepAChangelog. It also provides MSBuild tasks and targets to automate the setting of Versions and Package Release Notes for your NuGet packages, so that the Changelogs are your source of truth.
 
+## TBDs before release
+
+* [ ] successful end-to-end test of the generated package
+* [ ] package icon
+* [ ] CI pipeline
+* [ ] think about how to use CHANGELOG as the source of truth in this project (seems a bit circular now)
+
 ## Installation
 
 The MSBuild package is authored as a set of tasks and targets that are used automatically.  You just have to install the `Ionide.KeepAChangelog.Tasks` package and you're all set!
