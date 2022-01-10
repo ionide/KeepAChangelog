@@ -5,6 +5,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <DebugType>embedded</DebugType>
     <IsPackable>true</IsPackable>
+    <Description>A self-contained parser for the KeepAChangelog format.</Description>
   </PropertyGroup>
 
   <ItemGroup>

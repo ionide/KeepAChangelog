@@ -1,5 +1,5 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-    <UsingTask AssemblyFile="$(MSBuildThisFileDirectory)bin/Debug/net6.0/KeepAChangelog.Tasks.dll" TaskName="KeepAChangelog.Tasks.ParseChangeLogs"/>
+    <UsingTask AssemblyFile="$(MSBuildThisFileDirectory)../lib/netstandard2.0/Ionide.KeepAChangelog.Tasks.dll" TaskName="Ionide.KeepAChangelog.Tasks.ParseChangeLogs"/>
 
     <PropertyGroup>
         <PrepareForBuildDependsOn>
@@ -12,13 +12,13 @@
         Condition="'$(ChangelogFile)' != '' and Exists('$(ChangelogFile)')"
         Inputs="$(ChangelogFile)"
         Outputs="UnreleasedChangelog;CurrentReleaseChangelog;AllReleasedChangelogslLatestReleaseNotes">
-        <KeepAChangelog.Tasks.ParseChangeLogs 
+        <Ionide.KeepAChangelog.Tasks.ParseChangeLogs 
             ChangelogFile="$(ChangelogFile)">
             <Output TaskParameter="UnreleasedChangelog" ItemName="UnreleasedChangelog"/>
             <Output TaskParameter="CurrentReleaseChangelog" ItemName="CurrentReleaseChangelog"/>
             <Output TaskParameter="AllReleasedChangelogs" ItemName="AllReleasedChangelogs" />
             <Output TaskParameter="LatestReleaseNotes" ItemName="LatestReleaseNotes" />
-        </KeepAChangelog.Tasks.ParseChangeLogs>
+        </Ionide.KeepAChangelog.Tasks.ParseChangeLogs>
     </Target>
 
     <Target Name="SetVersionFromChangelog"

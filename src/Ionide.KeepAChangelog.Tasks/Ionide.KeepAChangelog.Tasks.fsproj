@@ -2,23 +2,33 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <!-- we need the assemblies bundled, so set this so we don't expose any dependencies to the outside world -->
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
     <DebugType>embedded</DebugType>
     <IsPackable>true</IsPackable>
+    <Description>MSBuild Tasks and Targets that set your Assembly Version , Package Version, and Package Release Notes from your KeepAChangelog-compatible Changelogs.</Description>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="Library.fs" />
-    <None Include="build/Ionide.KeepAChangelog.props" CopyToOutputDirectory="PreserveNewest"  LinkBase="build\" TargetPath="build\Ionide.KeepAChangelog.props" />
-    <None Include="build/Ionide.KeepAChangelog.targets" CopyToOutputDirectory="PreserveNewest"  LinkBase="build\" TargetPath="build\Ionide.KeepAChangelog.targets" />
+    <Content Include="build/Ionide.KeepAChangelog.props" LinkBase="build\" TargetPath="build\Ionide.KeepAChangelog.props" PackagePath="build\Ionide.KeepAChangelog.props" />
+    <Content Include="build/Ionide.KeepAChangelog.targets" LinkBase="build\" TargetPath="build\Ionide.KeepAChangelog.targets" PackagePath="build\Ionide.KeepAChangelog.targets" />
+    <Content Include="build/Ionide.KeepAChangelog.props" LinkBase="build\multiTargeting" TargetPath="buildMultitargeting\Ionide.KeepAChangelog.props" PackagePath="buildMultitargeting\Ionide.KeepAChangelog.props" />
+    <Content Include="build/Ionide.KeepAChangelog.targets" LinkBase="build\multiTargeting" TargetPath="buildMultiTargeting\Ionide.KeepAChangelog.targets" PackagePath="buildMultiTargeting\Ionide.KeepAChangelog.targets" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.0.0"/>
-    <PackageReference Include="SemanticVersion" Version="2.1.0" PrivateAssets="all"/>
-    <PackageReference Include="FParsec" Version="1.1.1" PrivateAssets="All"/>
-    <ProjectReference Include="../Ionide.KeepAChangelog/Ionide.KeepAChangelog.fsproj" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.0.0" PrivateAssets="All" IncludeAssets="Compile" />
+    <PackageReference Include="SemanticVersion" Version="2.1.0" PrivateAssets="All" IncludeAssets="Compile"/>
+    <PackageReference Include="FParsec" Version="1.1.1" PrivateAssets="All" IncludeAssets="Compile" />
+    <PackageReference Update="FSharp.Core" PrivateAssets="All" IncludeAssets="Compile" />
+    <ProjectReference Include="../Ionide.KeepAChangelog/Ionide.KeepAChangelog.fsproj" PrivateAssets="All" IncludeAssets="Compile"/>
   </ItemGroup>
+
+  <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="ResolveReferences">
+    <ItemGroup>
+      <BuildOutputInPackage Include="$(MSBuildThisProject)../Ionide.KeepAChangelog/bin/$(Configuration)/$(TargetFramework)/*.dll" />
+    </ItemGroup>
+  </Target>
 
 </Project>

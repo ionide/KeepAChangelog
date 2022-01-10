@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
@@ -14,8 +13,6 @@
   <ItemGroup>
     <ProjectReference Include="../../src/Ionide.KeepAChangelog/Ionide.KeepAChangelog.fsproj" />
     <PackageReference Include="FParsec" Version="1.1.1" />
-    <PackageReference Include="SemanticVersion" Version="2.1.0" PrivateAssets="all"/>
+    <PackageReference Include="SemanticVersion" Version="2.1.0" />
   </ItemGroup>
-  
-
 </Project>

@@ -1,5 +1,13 @@
 <Project>
+    <PropertyGroup>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <Authors>Chet Husk</Authors>
+        <PackageTags>version;changelog;keepachangelog</PackageTags>
+    </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Dotnet.ReproducibleBuilds" Version="1.1.1" />
+        <Content Include="$(MSBuildThisFileDirectory)README.md" PackagePath="./README.md" />
+        <PackageReference Include="Dotnet.ReproducibleBuilds" Version="1.1.1" PrivateAssets="All" />
+        <PackageReference Update="FSharp.Core" Version=""/>
     </ItemGroup>
 </Project>
