@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- we need the assemblies bundled, so set this so we don't expose any dependencies to the outside world -->
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <DebugType>embedded</DebugType>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Library.fs" />
+    <None Include="build/Ionide.KeepAChangelog.props" CopyToOutputDirectory="PreserveNewest"  LinkBase="build\" TargetPath="build\Ionide.KeepAChangelog.props" />
+    <None Include="build/Ionide.KeepAChangelog.targets" CopyToOutputDirectory="PreserveNewest"  LinkBase="build\" TargetPath="build\Ionide.KeepAChangelog.targets" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.0.0"/>
+    <PackageReference Include="SemanticVersion" Version="2.1.0" PrivateAssets="all"/>
+    <PackageReference Include="FParsec" Version="1.1.1" PrivateAssets="All"/>
+    <ProjectReference Include="../Ionide.KeepAChangelog/Ionide.KeepAChangelog.fsproj" />
+  </ItemGroup>
+
+</Project>
