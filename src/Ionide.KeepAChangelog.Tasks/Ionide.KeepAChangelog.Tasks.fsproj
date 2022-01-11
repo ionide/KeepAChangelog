@@ -27,13 +27,11 @@
 
   <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="ResolveReferences">
     <ItemGroup>
-      <BuildOutputInPackage Include="$(MSBuildThisProject)../Ionide.KeepAChangelog/bin/$(Configuration)/$(TargetFramework)/*.dll" />
-      <BuildOutputInPackage Include="$(PkgSemanticVersion)/lib/netstandard2.0/*.dll" />
-      <BuildOutputInPackage Include="$(PkgSemanticVersion)/lib/netstandard2.0/*.pdb" />
-      <BuildOutputInPackage Include="$(PkgFSharp_Core)/lib/netstandard2.0/*.dll" />
-      <BuildOutputInPackage Include="$(PkgFSharp_Core)/lib/netstandard2.0/*.pdb" />
-      <BuildOutputInPackage Include="$(PkgFParsec)/lib/netstandard2.0/*.dll" />
-      <BuildOutputInPackage Include="$(PkgFParsec)/lib/netstandard2.0/*.pdb" />
+      <BuildOutputInPackage Include="$(MSBuildThisProject)../Ionide.KeepAChangelog/bin/$(Configuration)/$(TargetFramework)/Ionide.KeepAChangelog.dll" />
+      <BuildOutputInPackage Include="$(PkgSemanticVersion)/lib/netstandard2.0/SemanticVersion.dll" />
+      <BuildOutputInPackage Include="$(PkgFSharp_Core)/lib/netstandard2.0/FSharp.Core.dll" />
+      <BuildOutputInPackage Include="$(PkgFParsec)/lib/netstandard2.0/FParsec.dll" />
+      <BuildOutputInPackage Include="$(PkgFParsec)/lib/netstandard2.0/FParsecCS.dll" />
     </ItemGroup>
   </Target>
 
