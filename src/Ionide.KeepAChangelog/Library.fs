@@ -70,10 +70,10 @@ module Parser =
 
             Reply(())
 
-    let pBullet: Parser<char> = (pchar '-' <|> pchar '*') <?> "bullet"
+    let pBullet: Parser<char> = (attempt (pchar '-') <|> pchar '*') <?> "bullet"
 
     let pEntry: Parser<string> =
-        let bullet = (pBullet .>> spaces1)
+        let bullet = attempt (pBullet .>> spaces1)
 
         let content =
             // we need to parse all of this line, sure
@@ -105,16 +105,16 @@ module Parser =
              <?> $"custom section header"
         sectionName
         .>>. (many pEntry <?> $"{sectionName} entries")
-        .>> newline
+        .>> attempt (opt newline)
 
     let pSection sectionName : Parser<string list> =
         (skipString "###"
          >>. spaces1
          >>. skipString sectionName)
         <?> $"{sectionName} section header"
-        >>. newline
+        >>. many1 newline
         >>. (many pEntry <?> $"{sectionName} entries")
-        .>> newline
+        .>> attempt (opt newline)
 
     let pAdded = pSection "Added"
     let pChanged = pSection "Changed"
@@ -124,7 +124,6 @@ module Parser =
     let pSecurity = pSection "Security"
     let pOrEmptyList p = opt (attempt p)
 
-    // TODO: this requires this exact ordering, revisit later
     let pSections: Parser<ChangelogData -> ChangelogData> =
         choice [
             attempt (pAdded |>> fun x data -> { data with Added = x })
@@ -154,17 +153,16 @@ module Parser =
 
     let pUnreleased: Parser<ChangelogData option, unit> =
         let unreleased = skipString "Unreleased"
-        let name =
+        let name = attempt (
             skipString "##"
             >>. spaces1
             >>. (mdUrl unreleased <|> unreleased)
             .>> skipRestOfLine true
             <?> "Unreleased label"
-
-        attempt(
-            name >>. opt (many newline) >>. opt pData
-            <?> "Unreleased version section"
         )
+
+        name >>. opt (many newline) >>. opt pData
+        <?> "Unreleased version section"
 
     let validSemverChars =
         [| for c in '0' .. '9' -> c
@@ -181,21 +179,28 @@ module Parser =
 
     let pDate: Parser<_> =
         let pYear =
-            pipe4 digit digit digit digit (fun y1 y2 y3 y4 -> System.Int32.Parse $"{y1}{y2}{y3}{y4}")
+            pint32
+            |> attempt
 
-        let pMonth = pipe2 digit digit (fun m1 m2 -> System.Int32.Parse $"{m1}{m2}")
 
-        let pDay = pipe2 digit digit (fun d1 d2 -> System.Int32.Parse $"{d1}{d2}")
-        
+        let pMonth = 
+            pint32
+            |> attempt
+
+        let pDay = 
+            pint32
+            |> attempt
+
         let ymdDashes = 
             let dash = pchar '-'
             pipe5 pYear dash pMonth dash pDay (fun y _ m _ d -> System.DateTime(y, m, d))
+
 
         let dmyDots = 
             let dot = pchar '.'
             pipe5 pDay dot pMonth dot pYear (fun d _ m _ y -> System.DateTime(y, m, d))
 
-        attempt (ymdDashes) <|> dmyDots
+        attempt dmyDots <|> ymdDashes
             
 
     let pVersion = mdUrl pSemver <|> pSemver
@@ -217,10 +222,10 @@ module Parser =
                      | Some unreleased -> Some unreleased 
         pipe3
             pHeader
-            (attempt unreleased)
+            (attempt (opt unreleased))
             (attempt (many pRelease))
             (fun header unreleased releases ->
-                { Unreleased = unreleased
+                { Unreleased = defaultArg unreleased None
                   Releases = releases })
 
     let parseChangeLog (file: FileInfo) =

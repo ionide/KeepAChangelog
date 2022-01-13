@@ -81,6 +81,17 @@ let headerAndUnreleased = header + emptyUnreleased
 let headerAndUnreleasedAndRelease = header + emptyUnreleased + singleRelease
 let headerAndUnreleasedAndReleaseExpected = None, singleReleaseExpected
 
+let sample1Release = """## [0.3.1] - 8.1.2022
+
+### Added
+
+- Add XmlDocs to the generated package
+
+"""
+
+let sample1ReleaseExpected = 
+    SemanticVersion.Parse "0.3.1", DateTime(2022, 1, 8), Some { ChangelogData.Default with Added = ["- Add XmlDocs to the generated package"] }
+
 let sample = """# Changelog
 All notable changes to this project will be documented in this file.
 
@@ -91,7 +102,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* 
+* Add XmlDocs to the generated package
 
 ## [0.3.0] - 23.11.2021
 
@@ -116,10 +127,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 let sampleExpected: Changelogs = {
     Unreleased = None
     Releases = [
-        SemanticVersion.Parse "0.3.1", DateTime(2022, 1, 8), Some { ChangelogData.Default with Added = ["- Add XmlDocs to the generated package"] }
-        SemanticVersion.Parse "0.3.0", DateTime(2021, 11, 23), Some { ChangelogData.Default with Added = ["- Expose client `CodeAction` caps as CodeActionClientCapabilities. (by @razzmatazz)"; "- Map CodeAction.IsPreferred & CodeAction.Disabled props. (by @razzmatazz)"] }
-        SemanticVersion.Parse "0.2.0", DateTime(2021, 11, 17), Some { ChangelogData.Default with Added = ["- Add support for `codeAction/resolve` (by @razzmatazz)"] }
-        SemanticVersion.Parse "0.1.1", DateTime(2021, 11, 15), Some { ChangelogData.Default with Added = ["- Initial implementation"] }
+        SemanticVersion.Parse "0.3.1", DateTime(2022, 1, 8), Some { ChangelogData.Default with Added = ["* Add XmlDocs to the generated package"] }
+        SemanticVersion.Parse "0.3.0", DateTime(2021, 11, 23), Some { ChangelogData.Default with Added = ["* Expose client `CodeAction` caps as CodeActionClientCapabilities. (by @razzmatazz)"; "* Map CodeAction.IsPreferred & CodeAction.Disabled props. (by @razzmatazz)"] }
+        SemanticVersion.Parse "0.2.0", DateTime(2021, 11, 17), Some { ChangelogData.Default with Added = ["* Add support for `codeAction/resolve` (by @razzmatazz)"] }
+        SemanticVersion.Parse "0.1.1", DateTime(2021, 11, 15), Some { ChangelogData.Default with Added = ["* Initial implementation"] }
     ]
 }
 
@@ -142,6 +153,7 @@ let tests = testList "parsing examples" [
     runSuccess "unreleased" Parser.pUnreleased emptyUnreleased None
     runSuccess "header and unreleased" (Parser.pHeader >>. Parser.pUnreleased) headerAndUnreleased None
     runSuccess "release" Parser.pRelease singleRelease singleReleaseExpected 
+    runSuccess "sample 1 release" Parser.pRelease sample1Release sample1ReleaseExpected 
     runSuccess
         "header and unreleased and released"
         (Parser.pHeader >>. Parser.pUnreleased
