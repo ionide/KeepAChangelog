@@ -16,4 +16,4 @@
     <PackageReference Include="FParsec" Version="1.1.1" />
     <PackageReference Include="SemanticVersion" Version="2.1.0" />
   </ItemGroup>
-</Project>
+ </Project>

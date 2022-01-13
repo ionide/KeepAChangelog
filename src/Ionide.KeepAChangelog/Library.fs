@@ -10,18 +10,20 @@ module Domain =
           Deprecated: string list
           Removed: string list
           Fixed: string list
-          Security: string list }
+          Security: string list
+          Custom: Map<string, string list>}
         static member Default =
             { Added = []
               Changed = []
               Deprecated = []
               Removed = []
               Fixed = []
-              Security = [] }
+              Security = []
+              Custom = Map.empty }
 
     type Changelogs =
         { Unreleased: ChangelogData option
-          Releases: (SemanticVersion * DateTime * ChangelogData) list }
+          Releases: (SemanticVersion * DateTime * ChangelogData option) list }
 
 module Parser =
 
@@ -44,6 +46,18 @@ module Parser =
             let! e = p5
             let! f = p6
             return fn a b c d e f
+        }
+
+    let pipe7 p1 p2 p3 p4 p5 p6 p7 fn =
+        parse {
+            let! a = p1
+            let! b = p2
+            let! c = p3
+            let! d = p4
+            let! e = p5
+            let! f = p6
+            let! g = p7
+            return fn a b c d e f g
         }
 
     let skipTillStringOrEof str : Parser<unit, _> =
@@ -79,6 +93,16 @@ module Parser =
 
         pipe2 bullet content (fun bullet text -> $"{bullet} {text}")
 
+    let pCustomSection: Parser<string * string list> =
+        let sectionName =
+            skipString "###"
+             >>. spaces1
+             >>. restOfLine true // TODO: maybe not the whole line?
+             <?> $"custom section header"
+        sectionName
+        .>>. (many pEntry <?> $"{sectionName} entries")
+        .>> newline
+
     let pSection sectionName : Parser<string list> =
         (skipString "###"
          >>. spaces1
@@ -94,35 +118,30 @@ module Parser =
     let pDeprecated = pSection "Deprecated"
     let pFixed = pSection "Fixed"
     let pSecurity = pSection "Security"
-
     let pOrEmptyList p = opt (attempt p)
 
     // TODO: this requires this exact ordering, revisit later
-    let pSections f =
-        pipe6
-            (pOrEmptyList pAdded)
-            (pOrEmptyList pChanged)
-            (pOrEmptyList pRemoved)
-            (pOrEmptyList pDeprecated)
-            (pOrEmptyList pFixed)
-            (pOrEmptyList pSecurity)
-            f
+    let pSections: Parser<ChangelogData -> ChangelogData> =
+        choice [
+            attempt (pAdded |>> fun x data -> { data with Added = x })
+            attempt (pChanged |>> fun x data -> { data with Changed = x })
+            attempt (pRemoved |>> fun x data -> { data with Removed = x })
+            attempt (pDeprecated |>> fun x data -> { data with Deprecated = x })
+            attempt (pFixed |>> fun x data -> { data with Fixed = x })
+            attempt (pSecurity |>> fun x data -> { data with Security = x })
+            attempt (many1 pCustomSection |>> fun x data -> { data with Custom = Map.ofList x })
+        ]
 
     let pData: Parser<ChangelogData, unit> =
-        pSections (fun added changed removed deprecated fix security ->
-            { Added = defaultArg added []
-              Changed = defaultArg changed []
-              Deprecated = defaultArg deprecated []
-              Removed = defaultArg removed []
-              Fixed = defaultArg fix []
-              Security = defaultArg security [] })
+        many1 pSections
+        |>> List.fold (fun x f -> f x) ChangelogData.Default
 
     let pHeader: Parser<unit> =
         (skipString "# Changelog" >>. skipNewline
          .>> skipTillStringOrEof "##")
         <?> "Changelog header"
 
-    let pUnreleased: Parser<ChangelogData, unit> =
+    let pUnreleased: Parser<ChangelogData option, unit> =
         let name =
             skipString "##"
             >>. spaces1
@@ -131,7 +150,7 @@ module Parser =
             .>> skipRestOfLine true
             <?> "Unreleased label"
 
-        name .>> opt (many newline) >>. pData
+        name .>> opt (many newline) >>. opt pData
         <?> "Unreleased version section"
 
 
@@ -167,17 +186,17 @@ module Parser =
 
     let pVersion = mdUrl pSemver <|> pSemver
 
-    let pRelease: Parser<SemVersion.SemanticVersion * System.DateTime * ChangelogData> =
+    let pRelease: Parser<SemVersion.SemanticVersion * System.DateTime * ChangelogData option> =
         let vPart = skipString "##" >>. spaces1 >>. pVersion
         let middle = spaces1 .>> pchar '-' .>> spaces1
         let date = pDate .>> skipRestOfLine true
 
-        pipe5 vPart middle date (opt (many newline)) pData (fun v _ date _ data -> v, date, data)
+        pipe5 vPart middle date (opt (many newline)) (opt pData) (fun v _ date _ data -> v, date, data)
 
     let pChangeLogs: Parser<Changelogs, unit> =
         pipe3
             pHeader
-            (opt pUnreleased
+            (pUnreleased
              |>> fun unreleased ->
                      match unreleased with
                      | None -> None

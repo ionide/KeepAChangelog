@@ -25,12 +25,14 @@ module Util =
 
         String.concat
             System.Environment.NewLine
-            (List.concat [ section "Added" data.Added
-                           section "Changed" data.Changed
-                           section "Deprecated" data.Deprecated
-                           section "Removed" data.Removed
-                           section "Fixed" data.Fixed
-                           section "Security" data.Security ])
+            ([ yield! section "Added" data.Added
+               yield! section "Changed" data.Changed
+               yield! section "Deprecated" data.Deprecated
+               yield! section "Removed" data.Removed
+               yield! section "Fixed" data.Fixed
+               yield! section "Security" data.Security
+               for KeyValue(heading, lines) in data.Custom do
+                 yield! section heading lines ])
 
     let stitch items =
         String.concat System.Environment.NewLine items
@@ -42,6 +44,8 @@ module Util =
         item.SetMetadata("Removed", stitch data.Removed)
         item.SetMetadata("Fixed", stitch data.Fixed)
         item.SetMetadata("Security", stitch data.Security)
+        for (KeyValue(heading, lines)) in data.Custom do
+            item.SetMetadata(heading, stitch lines)
         item
 
 type ParseChangelogs() =
@@ -87,8 +91,9 @@ type ParseChangelogs() =
                     sortedReleases
                     |> Seq.map (fun (version, date, data) ->
                         TaskItem()
-                        |> Util.mapChangelogData data
-                        |> Util.mapReleaseInfo version date)
+                        |> Util.mapReleaseInfo version date
+                        |> fun d -> match data with Some data -> Util.mapChangelogData data d | None -> d
+                    )
                     |> Seq.toArray
 
                 this.AllReleasedChangelogs <- items
@@ -96,7 +101,11 @@ type ParseChangelogs() =
 
                 sortedReleases
                 |> Seq.tryHead
-                |> Option.iter (fun (version, date, data) -> this.LatestReleaseNotes <- Util.allReleaseNotesFor data)
+                |> Option.iter (fun (version, date, data) ->
+                    data
+                    |> Option.iter (fun data ->
+                        this.LatestReleaseNotes <- Util.allReleaseNotesFor data)
+                    )
 
                 true
             | Error (formatted, msg) ->
