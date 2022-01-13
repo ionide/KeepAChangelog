@@ -15,5 +15,6 @@
     <ProjectReference Include="../../src/Ionide.KeepAChangelog/Ionide.KeepAChangelog.fsproj" />
     <PackageReference Include="FParsec" Version="1.1.1" />
     <PackageReference Include="SemanticVersion" Version="2.1.0" />
+	<PackageReference Include="Expecto" Version="9.0.4" />
   </ItemGroup>
  </Project>

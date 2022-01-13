@@ -3,7 +3,8 @@
 module Domain =
     open SemVersion
     open System
-
+    
+    // TODO: a changelog entry may have a description?
     type ChangelogData =
         { Added: string list
           Changed: string list
@@ -83,12 +84,15 @@ module Parser =
 
             let followingLine =
                 nextCharSatisfiesNot (fun c -> c = '\n' || c = '-' || c = '*')
-                >>. spaces
+                >>. spaces1
                 >>. FParsec.CharParsers.restOfLine true
 
-            let rest = many followingLine
+            let rest = opt (many1 (attempt followingLine))
 
-            pipe2 firstLine rest (fun f rest -> String.concat " " (f :: rest))
+            pipe2 firstLine rest (fun f rest -> 
+                match rest with
+                | None -> f 
+                | Some parts -> String.concat " " (f :: parts))
             <?> "line item"
 
         pipe2 bullet content (fun bullet text -> $"{bullet} {text}")
@@ -141,18 +145,26 @@ module Parser =
          .>> skipTillStringOrEof "##")
         <?> "Changelog header"
 
+    let mdUrl inner =
+        let linkText = between (pchar '[') (pchar ']') inner
+
+        let linkTarget = between (pchar '(') (pchar ')') (skipMany1Till anyChar (pchar ')'))
+
+        linkText .>> opt linkTarget
+
     let pUnreleased: Parser<ChangelogData option, unit> =
+        let unreleased = skipString "Unreleased"
         let name =
             skipString "##"
             >>. spaces1
-            >>. (skipString "Unreleased"
-                 <|> skipString "[Unreleased")
+            >>. (mdUrl unreleased <|> unreleased)
             .>> skipRestOfLine true
             <?> "Unreleased label"
 
-        name .>> opt (many newline) >>. opt pData
-        <?> "Unreleased version section"
-
+        attempt(
+            name >>. opt (many newline) >>. opt pData
+            <?> "Unreleased version section"
+        )
 
     let validSemverChars =
         [| for c in '0' .. '9' -> c
@@ -174,15 +186,17 @@ module Parser =
         let pMonth = pipe2 digit digit (fun m1 m2 -> System.Int32.Parse $"{m1}{m2}")
 
         let pDay = pipe2 digit digit (fun d1 d2 -> System.Int32.Parse $"{d1}{d2}")
+        
+        let ymdDashes = 
+            let dash = pchar '-'
+            pipe5 pYear dash pMonth dash pDay (fun y _ m _ d -> System.DateTime(y, m, d))
 
-        pipe5 pYear (pchar '-') pMonth (pchar '-') pDay (fun y _ m _ d -> System.DateTime(y, m, d))
+        let dmyDots = 
+            let dot = pchar '.'
+            pipe5 pDay dot pMonth dot pYear (fun d _ m _ y -> System.DateTime(y, m, d))
 
-    let mdUrl inner =
-        let linkText = between (pchar '[') (pchar ']') inner
-
-        let linkTarget = between (pchar '(') (pchar ')') (skipMany1Till anyChar (pchar ')'))
-
-        linkText .>> opt linkTarget
+        attempt (ymdDashes) <|> dmyDots
+            
 
     let pVersion = mdUrl pSemver <|> pSemver
 
@@ -194,14 +208,16 @@ module Parser =
         pipe5 vPart middle date (opt (many newline)) (opt pData) (fun v _ date _ data -> v, date, data)
 
     let pChangeLogs: Parser<Changelogs, unit> =
-        pipe3
-            pHeader
-            (pUnreleased
+        let unreleased =
+            pUnreleased
              |>> fun unreleased ->
                      match unreleased with
                      | None -> None
                      | Some u when u = ChangelogData.Default -> None
-                     | Some unreleased -> Some unreleased)
+                     | Some unreleased -> Some unreleased 
+        pipe3
+            pHeader
+            (attempt unreleased)
             (attempt (many pRelease))
             (fun header unreleased releases ->
                 { Unreleased = unreleased
