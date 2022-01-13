@@ -12,17 +12,17 @@
 
   <ItemGroup>
     <Compile Include="Library.fs" />
-    <Content Include="build/Ionide.KeepAChangelog.props" LinkBase="build\" TargetPath="build\Ionide.KeepAChangelog.props" PackagePath="build\Ionide.KeepAChangelog.props" />
-    <Content Include="build/Ionide.KeepAChangelog.targets" LinkBase="build\" TargetPath="build\Ionide.KeepAChangelog.targets" PackagePath="build\Ionide.KeepAChangelog.targets" />
+    <Content Include="build\Ionide.KeepAChangelog.Tasks.props" PackagePath="build\" />
+    <Content Include="build\Ionide.KeepAChangelog.Tasks.targets" PackagePath="build\" />
     <!-- <Content Include="build/Ionide.KeepAChangelog.props" LinkBase="build\multiTargeting" TargetPath="buildMultiTargeting\Ionide.KeepAChangelog.props" PackagePath="buildMultiTargeting\Ionide.KeepAChangelog.props" />
     <Content Include="build/Ionide.KeepAChangelog.targets" LinkBase="build\multiTargeting" TargetPath="buildMultiTargeting\Ionide.KeepAChangelog.targets" PackagePath="buildMultiTargeting\Ionide.KeepAChangelog.targets" /> -->
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.0.0" PrivateAssets="All" IncludeAssets="Compile" />
-    <PackageReference Include="SemanticVersion" Version="2.1.0" PrivateAssets="All" IncludeAssets="Compile"/>
+    <PackageReference Include="SemanticVersion" Version="2.1.0" PrivateAssets="All" IncludeAssets="Compile" />
     <PackageReference Include="FParsec" Version="1.1.1" PrivateAssets="All" IncludeAssets="Compile" />
     <PackageReference Update="FSharp.Core" PrivateAssets="All" IncludeAssets="Compile" />
-    <ProjectReference Include="../Ionide.KeepAChangelog/Ionide.KeepAChangelog.fsproj" PrivateAssets="All" IncludeAssets="Compile"/>
+    <ProjectReference Include="../Ionide.KeepAChangelog/Ionide.KeepAChangelog.fsproj" PrivateAssets="All" IncludeAssets="Compile" />
   </ItemGroup>
 
   <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="ResolveReferences">
