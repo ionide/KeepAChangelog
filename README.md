@@ -49,7 +49,8 @@ packaging the project with this library results in the same result as packing a 
  <PropertyGroup>
    <TargetFramework>netstandard2.0</TargetFramework>
    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-   <Versions>1.0.0</Versions>
+   <Version>1.0.0</Version>
+   <PackageVersion>1.0.0</PackageVersion>
    <ReleaseNotes>
 ## 1.0.0 - 2022-01-14
 
