@@ -147,6 +147,7 @@ let runSuccess label p text expected =
             failwithf "%A" m
     }
 
+[<Tests>]
 let tests = testList "parsing examples" [
     runSuccess "line entry" Parser.pEntry "- A" "- A"
     runSuccess "header" Parser.pHeader header ()

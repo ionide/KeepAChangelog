@@ -5,6 +5,8 @@
     <ChangelogFile>CHANGELOG.md</ChangelogFile>
     <DebugType>embedded</DebugType>
     <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <GenerateProgramFile>false</GenerateProgramFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,6 +17,8 @@
     <ProjectReference Include="../../src/Ionide.KeepAChangelog/Ionide.KeepAChangelog.fsproj" />
     <PackageReference Include="FParsec" Version="1.1.1" />
     <PackageReference Include="SemanticVersion" Version="2.1.0" />
-	<PackageReference Include="Expecto" Version="9.0.4" />
+    <PackageReference Include="Expecto" Version="9.0.4" />
+    <PackageReference Include="YoloDev.Expecto.TestSdk" Version="0.12.13" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
   </ItemGroup>
  </Project>
