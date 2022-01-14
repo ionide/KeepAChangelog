@@ -38,4 +38,4 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         generateReleaseNotes: true
     - name: Push packages
-      run: dotnet nuget push packages/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_KEY}
+      run: dotnet nuget push packages/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_KEY }}
