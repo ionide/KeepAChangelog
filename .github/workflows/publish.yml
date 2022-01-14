@@ -38,7 +38,4 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         generateReleaseNotes: true
     - name: Push packages
-      uses: EasyDesk/action-nuget-push@v1
-      with:
-          nuget-api-key: ${{ secrets.NUGET_KEY }}
-          publish-dir: packages
+      run: dotnet nuget push packages/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_KEY}
