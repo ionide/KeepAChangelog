@@ -32,7 +32,7 @@ jobs:
       with:
         path: packages
     - name: Create Release
-      uses: ncipollo/release-action
+      uses: ncipollo/release-action@v2.3.1
       with:
         artifacts: packages/*.nupkg
         token: ${{ secrets.GITHUB_TOKEN }}
