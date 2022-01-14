@@ -6,6 +6,8 @@
     <DebugType>embedded</DebugType>
     <IsPackable>true</IsPackable>
     <Description>A self-contained parser for the KeepAChangelog format.</Description>
+    <Version>0.1.0</Version>
+    <PackageReleaseNotes>Initial release of the KeepAChangelog parser.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

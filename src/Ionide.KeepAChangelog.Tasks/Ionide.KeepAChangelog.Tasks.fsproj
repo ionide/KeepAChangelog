@@ -8,6 +8,8 @@
     <DebugType>embedded</DebugType>
     <IsPackable>true</IsPackable>
     <Description>MSBuild Tasks and Targets that set your Assembly Version, Package Version, and Package Release Notes from your KeepAChangelog-compatible Changelogs.</Description>
+    <Version>0.1.0</Version>
+    <PackageReleaseNotes>Initial release of the Changelog parsing tasks.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
