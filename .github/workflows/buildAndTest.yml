@@ -1,0 +1,32 @@
+name: Build and test
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    timeout-minutes: 15 # we have a locking issue, so cap the runs at ~15m to account for varying build times, etc
+    strategy:
+      matrix:
+        os: [ubuntu-20.04]
+        dotnet: [6.0.101]
+      fail-fast: false # we have timing issues on some OS, so we want them all to run
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: ${{ matrix.dotnet }}
+    - name: Restore
+      run: dotnet restore
+    - name: Run Build
+      run: dotnet build --no-restore
+    - name: Test
+      run: dotnet test --verbosity normal
+    - name: Pack
+      run: dotnet pack --no-build --no-restore
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v2.3.1
+      with:
+        path: src/**/bin/Debug/*.nupkg
