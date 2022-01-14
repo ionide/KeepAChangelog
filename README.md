@@ -4,7 +4,6 @@ This project implements a Changelog parser according to the spec at KeepAChangel
 
 ## TBDs before release
 
-* [ ] CI pipeline
 * [ ] think about how to use CHANGELOG as the source of truth in this project (seems a bit circular now)
 
 ## Installation
