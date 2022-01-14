@@ -8,7 +8,6 @@
         <PackageIcon>ionide.png</PackageIcon>
     </PropertyGroup>
     <ItemGroup>
-        <Content Include="$(MSBuildThisFileDirectory)README.md" PackagePath="./README.md" />
         <PackageReference Include="Dotnet.ReproducibleBuilds" Version="1.1.1" PrivateAssets="All" />
         <PackageReference Update="FSharp.Core" Version=""/>
     </ItemGroup>
