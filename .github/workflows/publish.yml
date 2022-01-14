@@ -22,7 +22,7 @@ jobs:
       with:
         dotnet-version: ${{ matrix.dotnet }}
     - name: Restore
-      run: dotnet restore -c Release
+      run: dotnet restore
     - name: Run Build
       run: dotnet build --no-restore -c Release
     - name: Pack
