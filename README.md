@@ -1,14 +1,70 @@
 # Ionide.KeepAChangelog
 
-This project implements a Changelog parser according to the spec at KeepAChangelog. It also provides MSBuild tasks and targets to automate the setting of Versions and Package Release Notes for your NuGet packages, so that the Changelogs are your source of truth.
+This project implements a Changelog parser according to the spec at KeepAChangelog. It also provides MSBuild tasks and targets to automate the setting of **Versions** and **Package Release Notes** for your NuGet packages, so that the Changelogs are your source of truth.
 
-## TBDs before release
-
-* [ ] think about how to use CHANGELOG as the source of truth in this project (seems a bit circular now)
+When configured, this package will set the `Version`, `PackageVersion`, and `PackageReleaseNotes` of your packable project with the matching data from the latest Changelog release, as well as adding AssemblyMetadata for the `BuildDate` in the `YYYY-mm-dd` format.
 
 ## Installation
 
 The MSBuild package is authored as a set of tasks and targets that are used automatically.  You just have to install the `Ionide.KeepAChangelog.Tasks` package and you're all set!
+
+```xml
+<ItemGroup>
+    <PackageReference Include="Ionide.KeepAChangelog.Tasks" Version="<insert here>" PrivateAssets="all" />
+</ItemGroup>
+```
+
+## Examples
+
+It might be helpful to see how this library can help you.  Imagine you have a project file like this:
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Main.fs" />
+  </ItemGroup>
+</Project>
+```
+
+and a CHANGELOG.md file like this:
+
+```md
+# Changelog 
+
+## 1.0.0 - 2022-01-14
+
+### Added
+
+* Initial release
+```
+
+packaging the project with this library results in the same result as packing a project that looks like this:
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+ <PropertyGroup>
+   <TargetFramework>netstandard2.0</TargetFramework>
+   <GenerateDocumentationFile>true</GenerateDocumentationFile>
+   <Versions>1.0.0</Versions>
+   <ReleaseNotes>
+## 1.0.0 - 2022-01-14
+
+### Added
+
+* Initial release
+   </ReleaseNotes>
+ </PropertyGroup>
+ <ItemGroup>
+   <Compile Include="Main.fs" />
+ </ItemGroup>
+</Project>
+```
+
+If your changelog has multiple versions, the latest one will be used.
 
 ## Customization
 
