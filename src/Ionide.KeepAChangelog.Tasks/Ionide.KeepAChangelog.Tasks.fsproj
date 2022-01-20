@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <Compile Include="Library.fs" />
+    <!-- these lines pack the build props/targets files to the `build` folder in the generated package -->
     <Content Include="build\Ionide.KeepAChangelog.Tasks.props" PackagePath="build\" />
     <Content Include="build\Ionide.KeepAChangelog.Tasks.targets" PackagePath="build\" />
   </ItemGroup>
@@ -30,6 +31,7 @@
 
   <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="ResolveReferences">
     <ItemGroup>
+      <!-- the dependencies of your MSBuild task must be packaged inside the package, they cannot be expressed as normal PackageReferences -->
       <BuildOutputInPackage Include="$(MSBuildThisProject)../Ionide.KeepAChangelog/bin/$(Configuration)/$(TargetFramework)/Ionide.KeepAChangelog.dll" />
       <BuildOutputInPackage Include="$(PkgSemanticVersion)/lib/netstandard2.0/SemanticVersion.dll" />
       <BuildOutputInPackage Include="$(PkgFSharp_Core)/lib/netstandard2.0/FSharp.Core.dll" />
