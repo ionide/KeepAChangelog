@@ -1,4 +1,4 @@
-﻿namespace KeepAChangelog.Tasks
+﻿namespace Ionide.KeepAChangelog.Tasks
 
 open Microsoft.Build.Utilities
 open Microsoft.Build.Framework
