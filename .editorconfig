@@ -1,0 +1,13 @@
+root = true
+
+# All files
+[*]
+indent_style = space
+trim_trailing_whitespace = true
+
+# Xml files
+[*.xml]
+indent_size = 2
+
+[.fs]
+indent_size = 2

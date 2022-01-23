@@ -1,5 +1,10 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
+        <!-- Points to the location of the file used to determine the assembly/package version and release notes -->
         <ChangelogFile Condition="'$(ChangelogFile)' == ''">CHANGELOG.md</ChangelogFile>
+        <!-- If true, assembly metadata for the build date of the release will be written -->
+        <GenerateAssemblyBuildDateAttribute Condition="'$(GenerateAssemblyBuildDateAttribute)' == ''">true</GenerateAssemblyBuildDateAttribute>
+        <!-- If set, the assembly/package version and release notes will be set from Unreleased changes, if any are present -->
+        <GenerateVersionForUnreleasedChanges Condition="'$(GenerateVersionForUnreleasedChanges)' == ''">true</GenerateVersionForUnreleasedChanges>
     </PropertyGroup>
 </Project>
