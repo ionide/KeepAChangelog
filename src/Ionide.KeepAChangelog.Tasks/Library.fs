@@ -1,20 +1,17 @@
-﻿namespace KeepAChangelog.Tasks
+﻿namespace Ionide.KeepAChangelog.Tasks
 
 open Microsoft.Build.Utilities
 open Microsoft.Build.Framework
 open System.IO
 open Ionide.KeepAChangelog
-open Ionide.KeepAChangelog.Domain
 open System.Linq
+open SemVersion
+open System
 
 module Util =
-    let mapReleaseInfo (version: SemVersion.SemanticVersion) (date: System.DateTime) (item: ITaskItem) : ITaskItem =
+    let mapReleaseInfo (version: SemanticVersion) (date: DateTime) (item: ITaskItem) : ITaskItem =
         item.ItemSpec <- string version
         item.SetMetadata("Date", date.ToString("yyyy-MM-dd"))
-        item
-
-    let mapUnreleasedInfo (item: ITaskItem) : ITaskItem =
-        item.ItemSpec <- "Unreleased"
         item
 
     let allReleaseNotesFor (data: ChangelogData) =
@@ -24,18 +21,17 @@ module Util =
             | items -> $"### {name}" :: items @ [ "" ]
 
         String.concat
-            System.Environment.NewLine
+            Environment.NewLine
             ([ yield! section "Added" data.Added
                yield! section "Changed" data.Changed
                yield! section "Deprecated" data.Deprecated
                yield! section "Removed" data.Removed
                yield! section "Fixed" data.Fixed
                yield! section "Security" data.Security
-               for KeyValue(heading, lines) in data.Custom do
-                 yield! section heading lines ])
+               for KeyValue (heading, lines) in data.Custom do
+                   yield! section heading lines ])
 
-    let stitch items =
-        String.concat System.Environment.NewLine items
+    let stitch items = String.concat Environment.NewLine items
 
     let mapChangelogData (data: ChangelogData) (item: ITaskItem) : ITaskItem =
         item.SetMetadata("Added", stitch data.Added)
@@ -44,9 +40,26 @@ module Util =
         item.SetMetadata("Removed", stitch data.Removed)
         item.SetMetadata("Fixed", stitch data.Fixed)
         item.SetMetadata("Security", stitch data.Security)
-        for (KeyValue(heading, lines)) in data.Custom do
+
+        for (KeyValue (heading, lines)) in data.Custom do
             item.SetMetadata(heading, stitch lines)
+
         item
+
+    let mapUnreleasedInfo changelogs (item: ITaskItem) : ITaskItem =
+        match Promote.fromUnreleased changelogs with
+        | None ->
+            item.ItemSpec <- "Unreleased"
+
+            changelogs.Unreleased
+            |> Option.map (fun d -> mapChangelogData d item)
+            |> Option.defaultValue item
+        | Some (unreleasedVersion, releaseDate, data) ->
+            let item = mapReleaseInfo unreleasedVersion releaseDate item
+
+            data
+            |> Option.map (fun d -> mapChangelogData d item)
+            |> Option.defaultValue item
 
 type ParseChangelogs() =
     inherit Task()
@@ -58,6 +71,9 @@ type ParseChangelogs() =
     member val UnreleasedChangelog: ITaskItem = null with get, set
 
     [<Output>]
+    member val UnreleasedReleaseNotes: string = null with get, set
+
+    [<Output>]
     member val CurrentReleaseChangelog: ITaskItem = null with get, set
 
     [<Output>]
@@ -65,6 +81,7 @@ type ParseChangelogs() =
 
     [<Output>]
     member val LatestReleaseNotes: string = null with get, set
+
 
     override this.Execute() : bool =
         let file = this.ChangelogFile |> FileInfo
@@ -77,10 +94,8 @@ type ParseChangelogs() =
             | Ok changelogs ->
                 changelogs.Unreleased
                 |> Option.iter (fun unreleased ->
-                    this.UnreleasedChangelog <-
-                        TaskItem()
-                        |> Util.mapChangelogData unreleased
-                        |> Util.mapUnreleasedInfo)
+                    this.UnreleasedChangelog <- TaskItem() |> Util.mapUnreleasedInfo changelogs
+                    this.UnreleasedReleaseNotes <- Util.allReleaseNotesFor unreleased)
 
                 let sortedReleases =
                     // have to use LINQ here because List.sortBy* require IComparable, which
@@ -92,8 +107,10 @@ type ParseChangelogs() =
                     |> Seq.map (fun (version, date, data) ->
                         TaskItem()
                         |> Util.mapReleaseInfo version date
-                        |> fun d -> match data with Some data -> Util.mapChangelogData data d | None -> d
-                    )
+                        |> fun d ->
+                            match data with
+                            | Some data -> Util.mapChangelogData data d
+                            | None -> d)
                     |> Seq.toArray
 
                 this.AllReleasedChangelogs <- items
@@ -103,9 +120,7 @@ type ParseChangelogs() =
                 |> Seq.tryHead
                 |> Option.iter (fun (version, date, data) ->
                     data
-                    |> Option.iter (fun data ->
-                        this.LatestReleaseNotes <- Util.allReleaseNotesFor data)
-                    )
+                    |> Option.iter (fun data -> this.LatestReleaseNotes <- Util.allReleaseNotesFor data))
 
                 true
             | Error (formatted, msg) ->
