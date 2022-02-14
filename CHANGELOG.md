@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.2] - 2022.02.13
+
+### Added
+
+- Now supports multiTargeted builds and packs by the addition of the buildMultiTargeting folder. The outer build is hooked at the GenerateNuspec target.
+
 ## [0.1.1] - 2022.01.14
 
 ### Added

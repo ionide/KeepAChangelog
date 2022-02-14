@@ -2,12 +2,14 @@
     <UsingTask AssemblyFile="$(MSBuildThisFileDirectory)../lib/netstandard2.0/Ionide.KeepAChangelog.Tasks.dll" TaskName="Ionide.KeepAChangelog.Tasks.ParseChangeLogs" />
 
     <PropertyGroup>
-        <!-- For single-target builds (or inner builds of a multi-targeted build) we must run before any of the normal versioning-related targets are run.
-             This is surprisingly hard to time correctly. PrepareForBuild is the best location I've been able to find, and Rainer agrees this is a logical spot. -->
-        <PrepareForBuildDependsOn>
+        <!-- For multitargeting builds, the 'outer' build is used for things like packing, and so never hits the `PrepareForBuildDependsOn` condition group
+             That works for 'inner', TFM-specific builds. Therefore we need another hook. Luckily, for packaging we can be much less restrictive on 
+             _when_ the versioning information is collected, because assemblies don't need to be stamped, so this can just happen sometime before
+             the GenerateNuspec task. -->
+        <GenerateNuspecDependsOn>
             SetVersionFromChangelog;
-            $(PrepareForBuildDependsOn)
-          </PrepareForBuildDependsOn>
+            $(GenerateNuspecDependsOn)
+          </GenerateNuspecDependsOn>
     </PropertyGroup>
 
     <Target Name="GetChangelogVersion" Condition="'$(ChangelogFile)' != '' and Exists('$(ChangelogFile)')" Inputs="$(ChangelogFile)" Outputs="UnreleasedChangelog;CurrentReleaseChangelog;AllReleasedChangelogslLatestReleaseNotes">
