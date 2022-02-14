@@ -8,20 +8,24 @@
     <DebugType>embedded</DebugType>
     <IsPackable>true</IsPackable>
     <Description>MSBuild Tasks and Targets that set your Assembly Version, Package Version, and Package Release Notes from your KeepAChangelog-compatible Changelogs.</Description>
-    <Version>0.1.1</Version>
-    <PackageReleaseNotes>### Added
+    <Version>0.1.2</Version>
+    <PackageReleaseNotes>
+### Added
 
-- Now writes an assembly-level AssemblyMetadataAttribute with the key "BuildDate" whose value is the `YYYY-mm-dd`-formatted date in the release changelog
+- Now supports multiTargeted builds and packs by the addition of the buildMultiTargeting folder. The outer build is hooked at the GenerateNuspec target.
 </PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="Library.fs" />
-    <!-- these lines pack the build props/targets files to the `build` folder in the generated package.
-         by convention, the .NET SDK will look for build\<Package Id>.props and build\<Package Id>.targets 
-         for automatic inclusion in the build. -->
-    <Content Include="build\Ionide.KeepAChangelog.Tasks.props" PackagePath="build\" />
-    <Content Include="build\Ionide.KeepAChangelog.Tasks.targets" PackagePath="build\" />
+    <!-- these lines pack the single-TFM build props/targets files to the `build` folder in the generated package.
+         By convention, the .NET SDK will look for `build\<Package Id>.props` and `build\<Package Id>.targets`
+         for automatic inclusion in a single-TFM build. -->
+    <Content Include="build\*" PackagePath="build\" />
+    <!-- these lines pack the multi-target TFM build props/targets files to the `buildMultiTargeting` folder in the generated package.
+         By convention, the .NET SDK will look for `buildMultiTargeting\<Package Id>.props` and `buildMultiTargeting\<Package Id>.targets`
+         for automatic inclusion in a multi-TFM build. -->
+    <Content Include="buildMultiTargeting\*" PackagePath="buildMultiTargeting\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.0.0" PrivateAssets="All" IncludeAssets="Compile" />

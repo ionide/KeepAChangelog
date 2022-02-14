@@ -6,8 +6,11 @@
     <DebugType>embedded</DebugType>
     <IsPackable>true</IsPackable>
     <Description>A self-contained parser for the KeepAChangelog format.</Description>
-    <Version>0.1.1</Version>
-    <PackageReleaseNotes>Initial release of the KeepAChangelog parser.</PackageReleaseNotes>
+    <Version>0.1.2</Version>
+    <PackageReleaseNotes>
+### Added
+
+- Now supports multiTargeted builds and packs by the addition of the buildMultiTargeting folder. The outer build is hooked at the GenerateNuspec target.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
