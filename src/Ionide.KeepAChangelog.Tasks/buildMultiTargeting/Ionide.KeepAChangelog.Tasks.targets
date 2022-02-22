@@ -1,5 +1,10 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-    <UsingTask AssemblyFile="$(MSBuildThisFileDirectory)../lib/netstandard2.0/Ionide.KeepAChangelog.Tasks.dll" TaskName="Ionide.KeepAChangelog.Tasks.ParseChangeLogs" />
+    <PropertyGroup>
+        <Ionide_KeepAChangelog_PackageRoot>$([System.IO.Path]::GetFullPath("$(MSBuildThisFileDirectory)..\..\"))</Ionide_KeepAChangelog_PackageRoot>
+        <Ionide_KeepAChangelog_AssemblyPath Condition=" '$(Ionide_KeepAChangelog_AssemblyPath)' == '' and '$(MSBuildRuntimeType)' == 'Core' ">$(Ionide_KeepAChangelog_PackageRoot)lib\netstandard2.0\</Ionide_KeepAChangelog_AssemblyPath>
+        <Ionide_KeepAChangelog_AssemblyPath Condition=" '$(Ionide_KeepAChangelog_AssemblyPath)' == '' ">$(Ionide_KeepAChangelog_PackageRoot)lib\net472\</Ionide_KeepAChangelog_AssemblyPath>
+    </PropertyGroup>
+    <UsingTask AssemblyFile="$(Ionide_KeepAChangelog_AssemblyPath)Ionide.KeepAChangelog.Tasks.dll" TaskName="Ionide.KeepAChangelog.Tasks.ParseChangeLogs" />
 
     <PropertyGroup>
         <!-- For multitargeting builds, the 'outer' build is used for things like packing, and so never hits the `PrepareForBuildDependsOn` condition group

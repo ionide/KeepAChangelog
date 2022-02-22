@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.3] - 2022.02.21
+
+### Added
+
+- Now supports running in Visual Studio thanks to a net472-targeted build and packaging
+
 ## [0.1.2] - 2022.02.13
 
 ### Added

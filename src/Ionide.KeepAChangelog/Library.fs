@@ -95,25 +95,25 @@ module Parser =
                 | Some parts -> String.concat " " (f :: parts))
             <?> "line item"
 
-        pipe2 bullet content (fun bullet text -> $"{bullet} {text}")
+        pipe2 bullet content (fun bullet text -> sprintf "%c %s" bullet text)
 
     let pCustomSection: Parser<string * string list> =
         let sectionName =
             skipString "###"
              >>. spaces1
              >>. restOfLine true // TODO: maybe not the whole line?
-             <?> $"custom section header"
+             <?> "custom section header"
         sectionName
-        .>>. (many pEntry <?> $"{sectionName} entries")
+        .>>. (many pEntry <?> "custom section entries")
         .>> attempt (opt newline)
 
     let pSection sectionName : Parser<string list> =
         (skipString "###"
          >>. spaces1
          >>. skipString sectionName)
-        <?> $"{sectionName} section header"
+        <?> sprintf "%s section header" sectionName
         >>. many1 newline
-        >>. (many pEntry <?> $"{sectionName} entries")
+        >>. (many pEntry <?> sprintf "%s entries" sectionName)
         .>> attempt (opt newline)
 
     let pAdded = pSection "Added"
