@@ -1,16 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;net472</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <DebugType>embedded</DebugType>
     <IsPackable>true</IsPackable>
     <Description>A self-contained parser for the KeepAChangelog format.</Description>
-    <Version>0.1.2</Version>
+    <Version>0.1.3</Version>
     <PackageReleaseNotes>
 ### Added
 
-- Now supports multiTargeted builds and packs by the addition of the buildMultiTargeting folder. The outer build is hooked at the GenerateNuspec target.</PackageReleaseNotes>
+- Now supports running in Visual Studio thanks to a net472-targeted build and packaging
+    </PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,6 +19,8 @@
   </ItemGroup>
   
   <ItemGroup>
+    <!-- overwrite fsharp.core for VS build -->
+    <PackageReference Update="FSharp.Core" Version="4.7.2" Condition="'$(TargetFramework)' == 'net472'" />
     <PackageReference Include="FParsec" Version="1.1.1"/>
     <PackageReference Include="SemanticVersion" Version="2.1.0"/>
   </ItemGroup>

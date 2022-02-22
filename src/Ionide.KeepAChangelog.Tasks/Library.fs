@@ -21,7 +21,7 @@ module Util =
         let section name items =
             match items with
             | [] -> []
-            | items -> $"### {name}" :: items @ [ "" ]
+            | items -> sprintf "### %s" name :: items @ [ "" ]
 
         String.concat
             System.Environment.NewLine
@@ -70,7 +70,7 @@ type ParseChangelogs() =
         let file = this.ChangelogFile |> FileInfo
 
         if not file.Exists then
-            this.Log.LogError($"The file {file.FullName} could not be found.")
+            this.Log.LogError(sprintf "The file %s could not be found." file.FullName)
             false
         else
             match Parser.parseChangeLog file with
@@ -111,7 +111,7 @@ type ParseChangelogs() =
             | Error (formatted, msg) ->
 
                 this.Log.LogError(
-                    $"Error parsing Changelog at {file.FullName}. The error occurred at {msg.Position}.{System.Environment.NewLine}{formatted}"
+                    sprintf "Error parsing Changelog at %s. The error occurred at %O.%s%s" file.FullName msg.Position System.Environment.NewLine formatted
                 )
 
                 false

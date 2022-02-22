@@ -1,18 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;net472</TargetFrameworks>
     <!-- we need the assemblies bundled, so set this so we don't expose any dependencies to the outside world -->
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
     <DebugType>embedded</DebugType>
     <IsPackable>true</IsPackable>
     <Description>MSBuild Tasks and Targets that set your Assembly Version, Package Version, and Package Release Notes from your KeepAChangelog-compatible Changelogs.</Description>
-    <Version>0.1.2</Version>
+    <Version>0.1.3</Version>
     <PackageReleaseNotes>
 ### Added
 
-- Now supports multiTargeted builds and packs by the addition of the buildMultiTargeting folder. The outer build is hooked at the GenerateNuspec target.
+- Now supports running in Visual Studio thanks to a net472-targeted build and packaging
 </PackageReleaseNotes>
   </PropertyGroup>
 
@@ -21,26 +21,45 @@
     <!-- these lines pack the single-TFM build props/targets files to the `build` folder in the generated package.
          By convention, the .NET SDK will look for `build\<Package Id>.props` and `build\<Package Id>.targets`
          for automatic inclusion in a single-TFM build. -->
-    <Content Include="build\*" PackagePath="build\" />
+    <Content Include="build\*" PackagePath="build\net472" />
+    <Content Include="build\*" PackagePath="build\netstandard2.0" />
     <!-- these lines pack the multi-target TFM build props/targets files to the `buildMultiTargeting` folder in the generated package.
          By convention, the .NET SDK will look for `buildMultiTargeting\<Package Id>.props` and `buildMultiTargeting\<Package Id>.targets`
          for automatic inclusion in a multi-TFM build. -->
-    <Content Include="buildMultiTargeting\*" PackagePath="buildMultiTargeting\" />
+    <Content Include="buildMultiTargeting\*" PackagePath="buildMultiTargeting\net472" />
+    <Content Include="buildMultiTargeting\*" PackagePath="buildMultiTargeting\netstandard2.0" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.0.0" PrivateAssets="All" IncludeAssets="Compile" />
     <PackageReference Include="SemanticVersion" Version="2.1.0" PrivateAssets="All" IncludeAssets="Compile" />
     <PackageReference Include="FParsec" Version="1.1.1" PrivateAssets="All" IncludeAssets="Compile" />
+    <PackageReference Update="FSharp.Core" Version="4.7.2" Condition="'$(TargetFramework)' == 'net472'" />
     <PackageReference Update="FSharp.Core" PrivateAssets="All" IncludeAssets="Compile" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
     <ProjectReference Include="../Ionide.KeepAChangelog/Ionide.KeepAChangelog.fsproj" PrivateAssets="All" IncludeAssets="Compile" />
   </ItemGroup>
 
   <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="ResolveReferences">
-    <ItemGroup>
+    <ItemGroup Condition="'$(TargetFramework)' == 'net472'">
       <!-- the dependencies of your MSBuild task must be packaged inside the package, they cannot be expressed as normal PackageReferences -->
       <BuildOutputInPackage Include="$(MSBuildThisProject)../Ionide.KeepAChangelog/bin/$(Configuration)/$(TargetFramework)/Ionide.KeepAChangelog.dll" />
-      <BuildOutputInPackage Include="$(PkgSemanticVersion)/lib/netstandard2.0/SemanticVersion.dll" />
+      <BuildOutputInPackage Include="$(PkgFSharp_Core)/lib/net45/FSharp.Core.dll" />
+      <!-- SemanticVersion .NET Framework DLL -->
+      <BuildOutputInPackage Include="$(PkgSemanticVersion)/lib/net462/SemanticVersion.dll" />
+      <!-- FParsec .NET Framework DLLS  -->
+      <BuildOutputInPackage Include="$(PkgFParsec)/lib/net45/FParsec.dll" />
+      <BuildOutputInPackage Include="$(PkgFParsec)/lib/net45/FParsecCS.dll" />
+    </ItemGroup>
+    <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0' ">
+      <!-- the dependencies of your MSBuild task must be packaged inside the package, they cannot be expressed as normal PackageReferences -->
+      <BuildOutputInPackage Include="$(MSBuildThisProject)../Ionide.KeepAChangelog/bin/$(Configuration)/$(TargetFramework)/Ionide.KeepAChangelog.dll" />
       <BuildOutputInPackage Include="$(PkgFSharp_Core)/lib/netstandard2.0/FSharp.Core.dll" />
+      <!-- SemanticVersion .NET DLL -->
+      <BuildOutputInPackage Include="$(PkgSemanticVersion)/lib/netstandard2.0/SemanticVersion.dll" />
+      <!-- FParsec .NET DLLS  -->
       <BuildOutputInPackage Include="$(PkgFParsec)/lib/netstandard2.0/FParsec.dll" />
       <BuildOutputInPackage Include="$(PkgFParsec)/lib/netstandard2.0/FParsecCS.dll" />
     </ItemGroup>
