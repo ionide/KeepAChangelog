@@ -1,0 +1,10 @@
+<Project>
+    <PropertyGroup>
+        <Version>0.1.4</Version>
+        <PackageReleaseNotes>
+### Fixed
+
+- Support supplying package versions for project-to-project references in multitargeting scenarios.
+        </PackageReleaseNotes>
+    </PropertyGroup>
+</Project>

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4] - 2022.03.20
+
+### Fixed
+
+- Support supplying package versions for project-to-project references in multitargeting scenarios.
+
+
 ## [0.1.3] - 2022.03.20
 
 ### Fixed

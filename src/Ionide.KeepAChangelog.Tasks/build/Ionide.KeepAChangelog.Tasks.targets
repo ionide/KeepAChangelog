@@ -12,8 +12,8 @@
           </PrepareForBuildDependsOn>
         <!-- For project-to-project dependencies, GetPackageVersionDependsOn can be used as a well-known hook to ensure the project's versioning properties are run. -->
         <GetPackageVersionDependsOn>
-            $(GetPackageVersionDependsOn);
             SetVersionFromChangelog
+            $(GetPackageVersionDependsOn);
         </GetPackageVersionDependsOn>
     </PropertyGroup>
 
