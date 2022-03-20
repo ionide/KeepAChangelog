@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.3] - 2022.03.20
+
+### Fixed
+
+- Support supplying package versions for project-to-project references.
+
 ## [0.1.2] - 2022.02.13
 
 ### Added
