@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.5] - 2022.03.31
+
+### Fixed
+
+- Embed a deps.json file in the package.
+
 ## [0.1.4] - 2022.03.20
 
 ### Fixed
