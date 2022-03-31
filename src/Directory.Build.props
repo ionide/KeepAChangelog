@@ -1,10 +1,10 @@
 <Project>
     <PropertyGroup>
-        <Version>0.1.5</Version>
+        <Version>0.1.6</Version>
         <PackageReleaseNotes>
-### Fixed
+### Changed
 
-- Embed a deps.json file in the package.
+- bump SDK
         </PackageReleaseNotes>
     </PropertyGroup>
 </Project>

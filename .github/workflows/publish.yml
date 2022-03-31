@@ -9,7 +9,7 @@ jobs:
   release:
     strategy:
       matrix:
-        dotnet: [6.0.101]
+        dotnet: [6.0.201]
 
     runs-on: ubuntu-20.04
 
