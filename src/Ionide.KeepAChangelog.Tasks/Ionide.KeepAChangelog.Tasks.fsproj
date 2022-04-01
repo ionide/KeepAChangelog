@@ -23,22 +23,18 @@
     <Content Include="buildMultiTargeting\*" PackagePath="buildMultiTargeting\" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.0.0" PrivateAssets="All" IncludeAssets="Compile" />
-    <PackageReference Include="SemanticVersion" Version="2.1.0" PrivateAssets="All" IncludeAssets="Compile" />
-    <PackageReference Include="FParsec" Version="1.1.1" PrivateAssets="All" IncludeAssets="Compile" />
-    <PackageReference Update="FSharp.Core" PrivateAssets="All" IncludeAssets="Compile" />
-    <ProjectReference Include="../Ionide.KeepAChangelog/Ionide.KeepAChangelog.fsproj" PrivateAssets="All" IncludeAssets="Compile" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.0.0" PrivateAssets="All" ExcludeAssets="Runtime" />
+    <PackageReference Include="SemanticVersion" Version="2.1.0" PrivateAssets="All" />
+    <PackageReference Include="FParsec" Version="1.1.1" PrivateAssets="All" />
+    <PackageReference Update="FSharp.Core" PrivateAssets="All" />
+    <ProjectReference Include="../Ionide.KeepAChangelog/Ionide.KeepAChangelog.fsproj" PrivateAssets="All" />
   </ItemGroup>
 
   <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="ResolveReferences">
     <ItemGroup>
       <BuildOutputInPackage Include="$(OutputPath)/*.deps.json" />
       <!-- the dependencies of your MSBuild task must be packaged inside the package, they cannot be expressed as normal PackageReferences -->
-      <BuildOutputInPackage Include="$(MSBuildThisProject)../Ionide.KeepAChangelog/bin/$(Configuration)/$(TargetFramework)/Ionide.KeepAChangelog.dll" />
-      <BuildOutputInPackage Include="$(PkgSemanticVersion)/lib/netstandard2.0/SemanticVersion.dll" />
-      <BuildOutputInPackage Include="$(PkgFSharp_Core)/lib/netstandard2.0/FSharp.Core.dll" />
-      <BuildOutputInPackage Include="$(PkgFParsec)/lib/netstandard2.0/FParsec.dll" />
-      <BuildOutputInPackage Include="$(PkgFParsec)/lib/netstandard2.0/FParsecCS.dll" />
+      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths)" TargetPath="%(ReferenceCopyLocalPaths.DestinationSubPath)" />
     </ItemGroup>
   </Target>
 
