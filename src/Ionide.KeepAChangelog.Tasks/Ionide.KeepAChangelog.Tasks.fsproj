@@ -23,11 +23,11 @@
     <Content Include="buildMultiTargeting\*" PackagePath="buildMultiTargeting\" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.0.0" PrivateAssets="All" IncludeAssets="Compile" />
-    <PackageReference Include="SemanticVersion" Version="2.1.0" PrivateAssets="All" IncludeAssets="Compile" />
-    <PackageReference Include="FParsec" Version="1.1.1" PrivateAssets="All" IncludeAssets="Compile" />
-    <PackageReference Update="FSharp.Core" PrivateAssets="All" IncludeAssets="Compile" />
-    <ProjectReference Include="../Ionide.KeepAChangelog/Ionide.KeepAChangelog.fsproj" PrivateAssets="All" IncludeAssets="Compile" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.0.0" PrivateAssets="All" ExcludeAssets="Runtime" />
+    <PackageReference Include="SemanticVersion" Version="2.1.0" PrivateAssets="All" />
+    <PackageReference Include="FParsec" Version="1.1.1" PrivateAssets="All" />
+    <PackageReference Update="FSharp.Core" PrivateAssets="All" />
+    <ProjectReference Include="../Ionide.KeepAChangelog/Ionide.KeepAChangelog.fsproj" PrivateAssets="All" />
   </ItemGroup>
 
   <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="ResolveReferences">
