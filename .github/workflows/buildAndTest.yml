@@ -8,7 +8,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-20.04]
-        dotnet: [6.0.101]
+        dotnet: [6.0.201]
       fail-fast: false # we have timing issues on some OS, so we want them all to run
 
     runs-on: ${{ matrix.os }}
