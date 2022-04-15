@@ -3,7 +3,7 @@
 module Domain =
     open SemVersion
     open System
-    
+
     // TODO: a changelog entry may have a description?
     type ChangelogData =
         { Added: string list
@@ -21,6 +21,39 @@ module Domain =
               Fixed = []
               Security = []
               Custom = Map.empty }
+
+        member this.ToMarkdown () =
+
+            let renderItems (items : string list) =
+                items
+                |> List.map (fun item ->
+                    "* " + item
+                )
+                |> String.concat Environment.NewLine
+
+            let section name items =
+                match items with
+                | [] -> []
+                | items ->
+                    $"### {name}"
+                    + Environment.NewLine
+                    + Environment.NewLine
+                    + (renderItems items)
+                    + Environment.NewLine
+                    |> List.singleton
+
+            String.concat
+                Environment.NewLine
+                [
+                    yield! section "Added" this.Added
+                    yield! section "Changed" this.Changed
+                    yield! section "Deprecated" this.Deprecated
+                    yield! section "Removed" this.Removed
+                    yield! section "Fixed" this.Fixed
+                    yield! section "Security" this.Security
+                    for KeyValue(heading, lines) in this.Custom do
+                        yield! section heading lines
+                ]
 
     type Changelogs =
         { Unreleased: ChangelogData option
@@ -89,9 +122,9 @@ module Parser =
 
             let rest = opt (many1 (attempt followingLine))
 
-            pipe2 firstLine rest (fun f rest -> 
+            pipe2 firstLine rest (fun f rest ->
                 match rest with
-                | None -> f 
+                | None -> f
                 | Some parts -> String.concat " " (f :: parts))
             <?> "line item"
 
@@ -183,25 +216,25 @@ module Parser =
             |> attempt
 
 
-        let pMonth = 
+        let pMonth =
             pint32
             |> attempt
 
-        let pDay = 
+        let pDay =
             pint32
             |> attempt
 
-        let ymdDashes = 
+        let ymdDashes =
             let dash = pchar '-'
             pipe5 pYear dash pMonth dash pDay (fun y _ m _ d -> System.DateTime(y, m, d))
 
 
-        let dmyDots = 
+        let dmyDots =
             let dot = pchar '.'
             pipe5 pDay dot pMonth dot pYear (fun d _ m _ y -> System.DateTime(y, m, d))
 
         attempt dmyDots <|> ymdDashes
-            
+
 
     let pVersion = mdUrl pSemver <|> pSemver
 
@@ -219,7 +252,7 @@ module Parser =
                      match unreleased with
                      | None -> None
                      | Some u when u = ChangelogData.Default -> None
-                     | Some unreleased -> Some unreleased 
+                     | Some unreleased -> Some unreleased
         pipe3
             pHeader
             (attempt (opt unreleased))

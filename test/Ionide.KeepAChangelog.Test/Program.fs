@@ -18,8 +18,8 @@ let singleRelease =
 
 """
 
-let singleReleaseExpected = 
-    (SemanticVersion.Parse "1.0.0", DateTime(2017, 06, 20), Some { 
+let singleReleaseExpected =
+    (SemanticVersion.Parse "1.0.0", DateTime(2017, 06, 20), Some {
             ChangelogData.Default with
                 Added = ["- A"]
                 Changed = ["- B"]
@@ -53,7 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 """
 
-let keepAChangelogExpected: Changelogs = 
+let keepAChangelogExpected: Changelogs =
     {
         Unreleased = None
         Releases = [
@@ -89,7 +89,7 @@ let sample1Release = """## [0.3.1] - 8.1.2022
 
 """
 
-let sample1ReleaseExpected = 
+let sample1ReleaseExpected =
     SemanticVersion.Parse "0.3.1", DateTime(2022, 1, 8), Some { ChangelogData.Default with Added = ["- Add XmlDocs to the generated package"] }
 
 let sample = """# Changelog
@@ -141,20 +141,19 @@ let runSuccess label p text expected =
     test $"parsing {label}" {
 
         match FParsec.CharParsers.run p text with
-        | FParsec.CharParsers.Success (r, _, _) -> 
+        | FParsec.CharParsers.Success (r, _, _) ->
             Expect.equal r expected "Should have produced expected value"
-        | FParsec.CharParsers.Failure (m, _, _) -> 
+        | FParsec.CharParsers.Failure (m, _, _) ->
             failwithf "%A" m
     }
 
-[<Tests>]
-let tests = testList "parsing examples" [
+let parsingExamples = testList "parsing examples" [
     runSuccess "line entry" Parser.pEntry "- A" "- A"
     runSuccess "header" Parser.pHeader header ()
     runSuccess "unreleased" Parser.pUnreleased emptyUnreleased None
     runSuccess "header and unreleased" (Parser.pHeader >>. Parser.pUnreleased) headerAndUnreleased None
-    runSuccess "release" Parser.pRelease singleRelease singleReleaseExpected 
-    runSuccess "sample 1 release" Parser.pRelease sample1Release sample1ReleaseExpected 
+    runSuccess "release" Parser.pRelease singleRelease singleReleaseExpected
+    runSuccess "sample 1 release" Parser.pRelease sample1Release sample1ReleaseExpected
     runSuccess
         "header and unreleased and released"
         (Parser.pHeader >>. Parser.pUnreleased
@@ -167,6 +166,77 @@ let tests = testList "parsing examples" [
     runSuccess "lsp changelog" Parser.pChangeLogs sample sampleExpected
 ]
 
+let changelogDataTest =
+    test "Transform ChangelogData to Markdown" {
+        let changelogData =
+            {
+                Added = [ "Added line 1"; "Added line 2" ]
+                Changed = [ "Changed line 1"; "Changed line 2" ]
+                Deprecated = [ "Deprecated line 1"; "Deprecated line 2" ]
+                Removed = [ "Removed line 1"; "Removed line 2" ]
+                Fixed = [ "Fixed line 1"; "Fixed line 2" ]
+                Security = [ "Security line 1"; "Security line 2" ]
+                Custom =
+                    [
+                        "CustomHeaderA", [ "Custom line 1"; "Custom line 2" ]
+                        "CustomHeaderB", [ "Custom line 3"; "Custom line 4" ]
+                    ]
+                    |> Map.ofList
+            }
+
+        printfn "%A" (changelogData.ToMarkdown())
+
+        let expected =
+            """### Added
+
+* Added line 1
+* Added line 2
+
+### Changed
+
+* Changed line 1
+* Changed line 2
+
+### Deprecated
+
+* Deprecated line 1
+* Deprecated line 2
+
+### Removed
+
+* Removed line 1
+* Removed line 2
+
+### Fixed
+
+* Fixed line 1
+* Fixed line 2
+
+### Security
+
+* Security line 1
+* Security line 2
+
+### CustomHeaderA
+
+* Custom line 1
+* Custom line 2
+
+### CustomHeaderB
+
+* Custom line 3
+* Custom line 4
+"""
+
+        Expect.equal (changelogData.ToMarkdown()) expected "Should have produced expected value"
+}
+
+[<Tests>]
+let tests = testList "All" [
+    parsingExamples
+    changelogDataTest
+]
+
 [<EntryPoint>]
-let main argv = 
+let main argv =
     runTestsWithCLIArgs Seq.empty argv tests
