@@ -13,9 +13,8 @@
             $(GetPackageVersionDependsOn);
         </GetPackageVersionDependsOn>
 
-        <_Ionide_KeepAChangelog_Tasks_TFM Condition=" '$(MSBuildRuntimeType)' == 'Full' ">net472</_Ionide_KeepAChangelog_Tasks_TFM>
+        <_Ionide_KeepAChangelog_Tasks_TFM Condition=" '$(MSBuildRuntimeType)' != 'Core' ">net472</_Ionide_KeepAChangelog_Tasks_TFM>
         <_Ionide_KeepAChangelog_Tasks_TFM Condition=" '$(MSBuildRuntimeType)' == 'Core' ">net6.0</_Ionide_KeepAChangelog_Tasks_TFM>
-        <_Ionide_KeepAChangelog_Tasks_TFM Condition="'$(_Ionide_KeepAChangelog_Tasks_TFM)' == '' ">net6.0</_Ionide_KeepAChangelog_Tasks_TFM>
     </PropertyGroup>
 
     <UsingTask

@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.8] - 2022.03.31
+
+### Changed
+
+* Minor packaging fix for non-Core MSBuild versions
+
 ## [0.1.7] - 2022.03.31
 
 ### Changed

@@ -1,11 +1,10 @@
 <Project>
     <PropertyGroup>
-        <Version>0.1.7</Version>
+        <Version>0.1.8</Version>
         <PackageReleaseNotes>
 ### Changed
 
-* Better packaging of the task to prevent task DLL dependencies from impacting your project's dependencies
-* Updated the parser to provide to `ToMarkdown()` member for more general use
+* Minor packaging fix for non-Core MSBuild versions
         </PackageReleaseNotes>
     </PropertyGroup>
 </Project>
