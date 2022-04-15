@@ -17,23 +17,6 @@ module Util =
         item.ItemSpec <- "Unreleased"
         item
 
-    let allReleaseNotesFor (data: ChangelogData) =
-        let section name items =
-            match items with
-            | [] -> []
-            | items -> $"### {name}" :: items @ [ "" ]
-
-        String.concat
-            System.Environment.NewLine
-            ([ yield! section "Added" data.Added
-               yield! section "Changed" data.Changed
-               yield! section "Deprecated" data.Deprecated
-               yield! section "Removed" data.Removed
-               yield! section "Fixed" data.Fixed
-               yield! section "Security" data.Security
-               for KeyValue(heading, lines) in data.Custom do
-                 yield! section heading lines ])
-
     let stitch items =
         String.concat System.Environment.NewLine items
 
@@ -104,7 +87,7 @@ type ParseChangelogs() =
                 |> Option.iter (fun (version, date, data) ->
                     data
                     |> Option.iter (fun data ->
-                        this.LatestReleaseNotes <- Util.allReleaseNotesFor data)
+                        this.LatestReleaseNotes <- data.ToMarkdown())
                     )
 
                 true
