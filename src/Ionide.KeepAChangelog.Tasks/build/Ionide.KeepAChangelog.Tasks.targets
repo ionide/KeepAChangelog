@@ -1,21 +1,26 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-    <UsingTask
-            AssemblyFile="$(MSBuildThisFileDirectory)../lib/netstandard2.0/Ionide.KeepAChangelog.Tasks.dll"
-            TaskName="Ionide.KeepAChangelog.Tasks.ParseChangeLogs" />
 
     <PropertyGroup>
         <!-- For single-target builds (or inner builds of a multi-targeted build) we must run before any of the normal versioning-related targets are run.
-             This is surprisingly hard to time correctly. PrepareForBuild is the best location I've been able to find, and Rainer agrees this is a logical spot. -->
+            This is surprisingly hard to time correctly. PrepareForBuild is the best location I've been able to find, and Rainer agrees this is a logical spot. -->
         <PrepareForBuildDependsOn>
-            SetVersionFromChangelog;
-            $(PrepareForBuildDependsOn)
-          </PrepareForBuildDependsOn>
+                SetVersionFromChangelog;
+                $(PrepareForBuildDependsOn)
+            </PrepareForBuildDependsOn>
         <!-- For project-to-project dependencies, GetPackageVersionDependsOn can be used as a well-known hook to ensure the project's versioning properties are run. -->
         <GetPackageVersionDependsOn>
-            SetVersionFromChangelog
-            $(GetPackageVersionDependsOn);
-        </GetPackageVersionDependsOn>
+                SetVersionFromChangelog
+                $(GetPackageVersionDependsOn);
+            </GetPackageVersionDependsOn>
+
+        <_Ionide_KeepAChangelog_Tasks_TFM Condition=" '$(MSBuildRuntimeType)' == 'Full' ">net472</_Ionide_KeepAChangelog_Tasks_TFM>
+        <_Ionide_KeepAChangelog_Tasks_TFM Condition=" '$(MSBuildRuntimeType)' == 'Core' ">net6.0</_Ionide_KeepAChangelog_Tasks_TFM>
+        <_Ionide_KeepAChangelog_Tasks_TFM Condition="'$(_Ionide_KeepAChangelog_Tasks_TFM)' == '' ">net6.0</_Ionide_KeepAChangelog_Tasks_TFM>
     </PropertyGroup>
+
+    <UsingTask
+            AssemblyFile="$(MSBuildThisFileDirectory)../tasks/$(_Ionide_KeepAChangelog_Tasks_TFM)/Ionide.KeepAChangelog.Tasks.dll"
+            TaskName="Ionide.KeepAChangelog.Tasks.ParseChangeLogs" />
 
     <Target
             Name="GetChangelogVersion"

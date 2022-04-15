@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>net472;net6.0</TargetFrameworks>
     <!-- we need the assemblies bundled, so set this so we don't expose any dependencies to the outside world -->
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
@@ -9,6 +9,10 @@
     <IsPackable>true</IsPackable>
     <Description>MSBuild Tasks and Targets that set your Assembly Version, Package Version, and Package Release Notes from your KeepAChangelog-compatible Changelogs.</Description>
     <EnableDynamicLoading>true</EnableDynamicLoading>
+    <GenerateDependencyFile>true</GenerateDependencyFile>
+    <!-- <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking> -->
+    <NoWarn>NU5128;NU5100</NoWarn><!-- NU5100 is because we pack to tasks/, not lib/ -->
+    <BuildOutputTargetFolder>tasks</BuildOutputTargetFolder>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,25 +20,55 @@
     <!-- these lines pack the single-TFM build props/targets files to the `build` folder in the generated package.
          By convention, the .NET SDK will look for `build\<Package Id>.props` and `build\<Package Id>.targets`
          for automatic inclusion in a single-TFM build. -->
-    <Content Include="build\*" PackagePath="build\" />
+    <Content
+        Include="build\*"
+        PackagePath="build\" />
     <!-- these lines pack the multi-target TFM build props/targets files to the `buildMultiTargeting` folder in the generated package.
          By convention, the .NET SDK will look for `buildMultiTargeting\<Package Id>.props` and `buildMultiTargeting\<Package Id>.targets`
          for automatic inclusion in a multi-TFM build. -->
-    <Content Include="buildMultiTargeting\*" PackagePath="buildMultiTargeting\" />
+    <Content
+        Include="buildMultiTargeting\*"
+        PackagePath="buildMultiTargeting\" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.0.0" PrivateAssets="All" ExcludeAssets="Runtime" />
-    <PackageReference Include="SemanticVersion" Version="2.1.0" PrivateAssets="All" />
-    <PackageReference Include="FParsec" Version="1.1.1" PrivateAssets="All" />
-    <PackageReference Update="FSharp.Core" PrivateAssets="All" />
-    <ProjectReference Include="../Ionide.KeepAChangelog/Ionide.KeepAChangelog.fsproj" PrivateAssets="All" />
+    <PackageReference
+        Include="Microsoft.Build.Utilities.Core"
+        Version="17.0.0"
+        ExcludeAssets="Runtime"
+        PrivateAssets="all"/>
+    <PackageReference
+        Include="SemanticVersion"
+        Version="2.1.0"
+        PrivateAssets="all"/>
+    <PackageReference
+        Include="FParsec"
+        Version="1.1.1"
+        PrivateAssets="all"/>
+    <PackageReference Update="FSharp.Core" PrivateAssets="all"/>
+    <ProjectReference Include="../Ionide.KeepAChangelog/Ionide.KeepAChangelog.fsproj" PrivateAssets="all"/>
   </ItemGroup>
 
-  <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="ResolveReferences">
+  <Target
+      Name="AddBuildDependencyFileToBuiltProjectOutputGroupOutput"
+      BeforeTargets="BuiltProjectOutputGroup"
+      Condition=" '$(GenerateDependencyFile)' == 'true'">
+
     <ItemGroup>
-      <BuildOutputInPackage Include="$(OutputPath)/*.deps.json" />
+      <BuiltProjectOutputGroupOutput
+          Include="$(ProjectDepsFilePath)"
+          TargetPath="$(ProjectDepsFileName)"
+          FinalOutputPath="$(ProjectDepsFilePath)" />
+    </ItemGroup>
+  </Target>
+
+  <Target
+      Name="CopyProjectReferencesToPackage"
+      DependsOnTargets="ResolveReferences">
+    <ItemGroup>
       <!-- the dependencies of your MSBuild task must be packaged inside the package, they cannot be expressed as normal PackageReferences -->
-      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths)" TargetPath="%(ReferenceCopyLocalPaths.DestinationSubPath)" />
+      <BuildOutputInPackage
+          Include="@(ReferenceCopyLocalPaths)"
+          TargetPath="%(ReferenceCopyLocalPaths.DestinationSubPath)" />
     </ItemGroup>
   </Target>
 

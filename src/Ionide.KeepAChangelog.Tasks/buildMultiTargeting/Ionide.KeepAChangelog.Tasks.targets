@@ -1,8 +1,4 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-    <UsingTask
-            AssemblyFile="$(MSBuildThisFileDirectory)../lib/netstandard2.0/Ionide.KeepAChangelog.Tasks.dll"
-            TaskName="Ionide.KeepAChangelog.Tasks.ParseChangeLogs" />
-
     <PropertyGroup>
         <!-- For multitargeting builds, the 'outer' build is used for things like packing, and so never hits the `PrepareForBuildDependsOn` condition group
              That works for 'inner', TFM-specific builds. Therefore we need another hook. Luckily, for packaging we can be much less restrictive on 
@@ -16,7 +12,15 @@
             SetVersionFromChangelog
             $(GetPackageVersionDependsOn);
         </GetPackageVersionDependsOn>
+
+        <_Ionide_KeepAChangelog_Tasks_TFM Condition=" '$(MSBuildRuntimeType)' == 'Full' ">net472</_Ionide_KeepAChangelog_Tasks_TFM>
+        <_Ionide_KeepAChangelog_Tasks_TFM Condition=" '$(MSBuildRuntimeType)' == 'Core' ">net6.0</_Ionide_KeepAChangelog_Tasks_TFM>
+        <_Ionide_KeepAChangelog_Tasks_TFM Condition="'$(_Ionide_KeepAChangelog_Tasks_TFM)' == '' ">net6.0</_Ionide_KeepAChangelog_Tasks_TFM>
     </PropertyGroup>
+
+    <UsingTask
+            AssemblyFile="$(MSBuildThisFileDirectory)../tasks/$(_Ionide_KeepAChangelog_Tasks_TFM)/Ionide.KeepAChangelog.Tasks.dll"
+            TaskName="Ionide.KeepAChangelog.Tasks.ParseChangeLogs" />
 
     <Target
             Name="GetChangelogVersion"
