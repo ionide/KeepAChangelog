@@ -5,9 +5,7 @@ VisualStudioVersion = 16.0.30114.105
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{31D4F8AF-532B-4DDF-BBA3-FD9B4C8FDA73}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Ionide.KeepAChangelog.Tasks", "src\Ionide.KeepAChangelog.Tasks\Ionide.KeepAChangelog.Tasks.fsproj", "{6CCAEBD2-9EE9-4540-AECF-02F0221B9C87}"
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Ionide.KeepAChangelog", "src\Ionide.KeepAChangelog\Ionide.KeepAChangelog.fsproj", "{7C0C4ECD-27AF-47DD-904D-7952AC01A7A8}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Ionide.KeepAChangelog.Tasks", "src\Ionide.KeepAChangelog.Tasks\Ionide.KeepAChangelog.Tasks.csproj", "{6CCAEBD2-9EE9-4540-AECF-02F0221B9C87}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{B66528FD-2329-4D67-9C9A-3EF46C301815}"
 EndProject
@@ -26,10 +24,6 @@ Global
 		{6CCAEBD2-9EE9-4540-AECF-02F0221B9C87}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6CCAEBD2-9EE9-4540-AECF-02F0221B9C87}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6CCAEBD2-9EE9-4540-AECF-02F0221B9C87}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7C0C4ECD-27AF-47DD-904D-7952AC01A7A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7C0C4ECD-27AF-47DD-904D-7952AC01A7A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7C0C4ECD-27AF-47DD-904D-7952AC01A7A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7C0C4ECD-27AF-47DD-904D-7952AC01A7A8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{349B0A8F-FBE0-4363-A950-ED4D6564560F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{349B0A8F-FBE0-4363-A950-ED4D6564560F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{349B0A8F-FBE0-4363-A950-ED4D6564560F}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -37,7 +31,6 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{6CCAEBD2-9EE9-4540-AECF-02F0221B9C87} = {31D4F8AF-532B-4DDF-BBA3-FD9B4C8FDA73}
-		{7C0C4ECD-27AF-47DD-904D-7952AC01A7A8} = {31D4F8AF-532B-4DDF-BBA3-FD9B4C8FDA73}
 		{349B0A8F-FBE0-4363-A950-ED4D6564560F} = {B66528FD-2329-4D67-9C9A-3EF46C301815}
 	EndGlobalSection
 EndGlobal

@@ -1,240 +1,71 @@
-﻿open Ionide.KeepAChangelog
-
-open System
+﻿open System
 open SemVersion
 open Expecto
-open Ionide.KeepAChangelog.Domain
+open Microsoft.Build.Utilities
+open Microsoft.Build.Framework
 
-let singleRelease =
-    """## [1.0.0] - 2017-06-20
-### Added
-- A
+let getMockedTask() = 
+    let t = Ionide.KeepAChangelog.Tasks.ParseChangelogs()
+    let engine = 
+        { new IBuildEngine with 
+              member x.LogErrorEvent(e: BuildErrorEventArgs) = 
+                  Console.WriteLine(e.Message)
+              member this.BuildProjectFile(projectFileName: string, targetNames: string[], globalProperties: Collections.IDictionary, targetOutputs: Collections.IDictionary): bool = 
+                failwith "Not Implemented"
+              member this.ColumnNumberOfTaskNode: int = 1 
+              member this.ContinueOnError: bool = 
+                failwith "Not Implemented"
+              member this.LineNumberOfTaskNode: int = 2
+              member this.LogCustomEvent(e: CustomBuildEventArgs): unit = 
+                failwith "Not Implemented"
+              member this.LogMessageEvent(e: BuildMessageEventArgs): unit = 
+                failwith "Not Implemented"
+              member this.LogWarningEvent(e: BuildWarningEventArgs): unit = 
+                failwith "Not Implemented"
+              member this.ProjectFileOfTaskNode: string = System.IO.Path.GetTempFileName()
+        }
+    t.BuildEngine <- engine
+    t
 
-### Changed
-- B
+let changelogFile = System.IO.Path.GetFullPath "./CHANGELOG.md"
 
-### Removed
-- C
-
-"""
-
-let singleReleaseExpected =
-    (SemanticVersion.Parse "1.0.0", DateTime(2017, 06, 20), Some {
-            ChangelogData.Default with
-                Added = ["- A"]
-                Changed = ["- B"]
-                Removed = ["- C"]
-            })
-
-let keepAChangelog =
-    """# Changelog
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
-## [Unreleased]
-
-## [1.0.0] - 2017-06-20
-### Added
-- A
-
-### Changed
-- B
-
-### Removed
-- C
-
-## [0.3.0] - 2015-12-03
-### Added
-- A
-- B
-- C
-
-"""
-
-let keepAChangelogExpected: Changelogs =
-    {
-        Unreleased = None
-        Releases = [
-            singleReleaseExpected
-            SemanticVersion.Parse("0.3.0"), DateTime(2015, 12, 03), Some { ChangelogData.Default with Added = ["- A";"- B";"- C"]}
-        ]
-    }
-
-let header =
-    """# Changelog
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
-"""
-
-let emptyUnreleased =
-    """## [Unreleased]
-
-"""
-
-let headerAndUnreleased = header + emptyUnreleased
-
-let headerAndUnreleasedAndRelease = header + emptyUnreleased + singleRelease
-let headerAndUnreleasedAndReleaseExpected = None, singleReleaseExpected
-
-let sample1Release = """## [0.3.1] - 8.1.2022
-
-### Added
-
-- Add XmlDocs to the generated package
-
-"""
-
-let sample1ReleaseExpected =
-    SemanticVersion.Parse "0.3.1", DateTime(2022, 1, 8), Some { ChangelogData.Default with Added = ["- Add XmlDocs to the generated package"] }
-
-let sample = """# Changelog
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
-## [0.3.1] - 8.1.2022
-
-### Added
-
-* Add XmlDocs to the generated package
-
-## [0.3.0] - 23.11.2021
-
-### Added
-
-* Expose client `CodeAction` caps as CodeActionClientCapabilities. (by @razzmatazz)
-* Map CodeAction.IsPreferred & CodeAction.Disabled props. (by @razzmatazz)
-
-## [0.2.0] - 17.11.2021
-
-### Added
-
-* Add support for `codeAction/resolve` (by @razzmatazz)
-
-## [0.1.1] - 15.11.2021
-
-### Added
-
-* Initial implementation
-"""
-
-let sampleExpected: Changelogs = {
-    Unreleased = None
-    Releases = [
-        SemanticVersion.Parse "0.3.1", DateTime(2022, 1, 8), Some { ChangelogData.Default with Added = ["* Add XmlDocs to the generated package"] }
-        SemanticVersion.Parse "0.3.0", DateTime(2021, 11, 23), Some { ChangelogData.Default with Added = ["* Expose client `CodeAction` caps as CodeActionClientCapabilities. (by @razzmatazz)"; "* Map CodeAction.IsPreferred & CodeAction.Disabled props. (by @razzmatazz)"] }
-        SemanticVersion.Parse "0.2.0", DateTime(2021, 11, 17), Some { ChangelogData.Default with Added = ["* Add support for `codeAction/resolve` (by @razzmatazz)"] }
-        SemanticVersion.Parse "0.1.1", DateTime(2021, 11, 15), Some { ChangelogData.Default with Added = ["* Initial implementation"] }
-    ]
+let canRunTask = test "Can run task" {
+    let t = getMockedTask()
+    t.ChangelogFile <- changelogFile
+    let result = t.Execute()
+    Expect.equal result true "Should have successfully parsed the changelog data"
+    let versions = t.AllReleasedChangelogs
+    Expect.equal versions.Length 9 "Should have 9 versions"
+    let mostRecent = t.CurrentReleaseChangelog
+    Expect.equal mostRecent.ItemSpec "0.1.8" "Should have the most recent version"
+    Expect.equal (mostRecent.GetMetadata("Date")) "2022-03-31" "Should have the most recent version's date"
+    let metadatas = mostRecent.MetadataNames |> Seq.cast |> Seq.toList
+    Expect.containsAll metadatas ["Changed"; "Date"] "Should have the metadatas"
+    
 }
 
-open FParsec
-open FParsec.Primitives
+let tokenize file = 
+    let text = System.IO.File.ReadAllText file
+    let tokenizerTy =
+        typeof<KeepAChangelogParser.ChangelogParser>.Assembly.GetTypes()
+        |> Array.find (fun t -> t.Name = "ChangelogTokenizer")
+    let tokenizeMethod = tokenizerTy.GetMethod("Tokenize", [| typeof<string>; typeof<string> |])
+    let tokenizer = tokenizerTy.GetConstructor(Array.empty).Invoke(Array.empty)
+    tokenizeMethod.Invoke(tokenizer, [| text; System.Environment.NewLine |]) :?> seq<obj>
 
-let runSuccess label p text expected =
-    test $"parsing {label}" {
+let debuggerDisplay (o: obj) = 
+    o.GetType().GetProperty("debuggerDisplay", Reflection.BindingFlags.NonPublic ||| Reflection.BindingFlags.Instance).GetValue(o) :?> string
 
-        match FParsec.CharParsers.run p text with
-        | FParsec.CharParsers.Success (r, _, _) ->
-            Expect.equal r expected "Should have produced expected value"
-        | FParsec.CharParsers.Failure (m, _, _) ->
-            failwithf "%A" m
-    }
-
-let parsingExamples = testList "parsing examples" [
-    runSuccess "line entry" Parser.pEntry "- A" "- A"
-    runSuccess "header" Parser.pHeader header ()
-    runSuccess "unreleased" Parser.pUnreleased emptyUnreleased None
-    runSuccess "header and unreleased" (Parser.pHeader >>. Parser.pUnreleased) headerAndUnreleased None
-    runSuccess "release" Parser.pRelease singleRelease singleReleaseExpected
-    runSuccess "sample 1 release" Parser.pRelease sample1Release sample1ReleaseExpected
-    runSuccess
-        "header and unreleased and released"
-        (Parser.pHeader >>. Parser.pUnreleased
-         .>>. Parser.pRelease)
-        headerAndUnreleasedAndRelease
-        headerAndUnreleasedAndReleaseExpected
-
-    runSuccess "keepachangelog" Parser.pChangeLogs keepAChangelog keepAChangelogExpected
-
-    runSuccess "lsp changelog" Parser.pChangeLogs sample sampleExpected
-]
-
-let changelogDataTest =
-    test "Transform ChangelogData to Markdown" {
-        let changelogData =
-            {
-                Added = [ "Added line 1"; "Added line 2" ]
-                Changed = [ "Changed line 1"; "Changed line 2" ]
-                Deprecated = [ "Deprecated line 1"; "Deprecated line 2" ]
-                Removed = [ "Removed line 1"; "Removed line 2" ]
-                Fixed = [ "Fixed line 1"; "Fixed line 2" ]
-                Security = [ "Security line 1"; "Security line 2" ]
-                Custom =
-                    [
-                        "CustomHeaderA", [ "Custom line 1"; "Custom line 2" ]
-                        "CustomHeaderB", [ "Custom line 3"; "Custom line 4" ]
-                    ]
-                    |> Map.ofList
-            }
-
-        printfn "%A" (changelogData.ToMarkdown())
-
-        let expected =
-            """### Added
-
-* Added line 1
-* Added line 2
-
-### Changed
-
-* Changed line 1
-* Changed line 2
-
-### Deprecated
-
-* Deprecated line 1
-* Deprecated line 2
-
-### Removed
-
-* Removed line 1
-* Removed line 2
-
-### Fixed
-
-* Fixed line 1
-* Fixed line 2
-
-### Security
-
-* Security line 1
-* Security line 2
-
-### CustomHeaderA
-
-* Custom line 1
-* Custom line 2
-
-### CustomHeaderB
-
-* Custom line 3
-* Custom line 4
-"""
-
-        Expect.equal (changelogData.ToMarkdown()) expected "Should have produced expected value"
+let sampleTokenize = test "tokenization" {
+    let tokens = tokenize changelogFile
+    for token in tokens do 
+        printfn "%s" (debuggerDisplay token)
 }
 
 [<Tests>]
 let tests = testList "All" [
-    parsingExamples
-    changelogDataTest
+    canRunTask
+    // sampleTokenize
 ]
 
 [<EntryPoint>]

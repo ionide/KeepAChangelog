@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>net472;net6.0</TargetFrameworks>
+    <LangVersion>10</LangVersion>
     <DebugType>embedded</DebugType>
     <IsPackable>true</IsPackable>
     <Description>MSBuild Tasks and Targets that set your Assembly Version, Package Version, and Package Release Notes from your KeepAChangelog-compatible Changelogs.</Description>
@@ -16,7 +17,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Library.fs" />
     <!-- these lines pack the single-TFM build props/targets files to the `build` folder in the generated package.
          By convention, the .NET SDK will look for `build\<Package Id>.props` and `build\<Package Id>.targets`
          for automatic inclusion in a single-TFM build. -->
@@ -35,19 +35,14 @@
     <!-- MSBUC specifically-->
     <PackageReference
         Include="Microsoft.Build.Utilities.Core"
-        Version="17.0.0"
         ExcludeAssets="Runtime"
         PrivateAssets="all"/>
     <PackageReference
         Include="SemanticVersion"
-        Version="2.1.0"
         PrivateAssets="all"/>
     <PackageReference
-        Include="FParsec"
-        Version="1.1.1"
-        PrivateAssets="all"/>
-    <PackageReference Update="FSharp.Core" PrivateAssets="all"/>
-    <ProjectReference Include="../Ionide.KeepAChangelog/Ionide.KeepAChangelog.fsproj" PrivateAssets="all"/>
+        Include="KeepAChangelogParser"
+        PrivateAssets="all" />
   </ItemGroup>
 
   <Target

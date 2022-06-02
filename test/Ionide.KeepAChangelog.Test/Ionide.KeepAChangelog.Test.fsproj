@@ -7,18 +7,24 @@
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <GenerateProgramFile>false</GenerateProgramFile>
+    <DisableImplicitFSharpCoreReference>true</DisableImplicitFSharpCoreReference>
+    <NoWarn>$(NoWarn);NU1507</NoWarn> <!-- SDK adds a local file source for FSharp.Core, but that conflicts with central versions -->
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="Program.fs" />
+    <Content Include="CHANGELOG.md" />
+    <Watch Include="CHANGELOG.md" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../src/Ionide.KeepAChangelog/Ionide.KeepAChangelog.fsproj" />
-    <PackageReference Include="FParsec" Version="1.1.1" />
-    <PackageReference Include="SemanticVersion" Version="2.1.0" />
-    <PackageReference Include="Expecto" Version="9.0.4" />
-    <PackageReference Include="YoloDev.Expecto.TestSdk" Version="0.12.13" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
+    <ProjectReference Include="../../src/Ionide.KeepAChangelog.Tasks/Ionide.KeepAChangelog.Tasks.csproj" />
+    <PackageReference Include="KeepAChangelogParser" />
+    <PackageReference Include="SemanticVersion" />
+    <PackageReference Include="Expecto" />
+    <PackageReference Include="YoloDev.Expecto.TestSdk" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core"  />
+    <PackageReference Include="FSharp.Core" />
   </ItemGroup>
  </Project>
