@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <Compile Include="Program.fs" />
-    <Content Include="CHANGELOG.md" />
+    <None Include="CHANGELOG.md" CopyToOutputDirectory="PreserveNewest" />
     <Watch Include="CHANGELOG.md" />
   </ItemGroup>
 
