@@ -148,13 +148,17 @@ public class ParseChangelogs : Task
     {
         Log.LogError("CHANGELOG", code, helpCategory, this.BuildEngine.ProjectFileOfTaskNode, this.BuildEngine.LineNumberOfTaskNode, this.BuildEngine.ColumnNumberOfTaskNode, this.BuildEngine.LineNumberOfTaskNode, this.BuildEngine.ColumnNumberOfTaskNode, messageFormat, messageArgs);
     }
+
+    private void LogNoChangelogSetError() {
+        LogAnnotatedError("CNG0001", "No Changelog Set", "The ChangelogFile property was not set", ChangelogFile);
+    }
     private void LogMissingFileError()
     {
-        LogAnnotatedError("CNG0001", "Missing Changelog File", "The Changelog file {0} was not found.", ChangelogFile);
+        LogAnnotatedError("CNG0002", "Missing Changelog File", "The Changelog file {0} was not found.", ChangelogFile);
     }
     private void LogInvalidChangelogError(string parseError)
     {
-        LogAnnotatedError("CNG0002", "Invalid Changelog", "The Changelog file {0} is invalid. The error was: {1}", ChangelogFile, parseError);
+        LogAnnotatedError("CNG0003", "Invalid Changelog", "The Changelog file {0} is invalid. The error was: {1}", ChangelogFile, parseError);
     }
 }
 

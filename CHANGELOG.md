@@ -1,6 +1,13 @@
 
 # Changelog
 
+## [0.2.0] - 2022-06-02
+
+### Changed
+
+- Move to a different changelog parser
+- Make the Changelog file required, and make it user-specified only. We no longer infer it.
+
 ## [0.1.8] - 2022.03.31
 
 ### Changed

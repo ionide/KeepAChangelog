@@ -4,5 +4,9 @@
     },
     "files.associations": {
         "**/build*/*[props|targets]": "msbuild"
+    },
+    "[msbuild]": {
+        "editor.defaultFormatter": "redhat.vscode-xml"
     }
+    
 }

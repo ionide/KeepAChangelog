@@ -39,7 +39,7 @@
         PrivateAssets="all"/>
     <PackageReference
         Include="SemanticVersion"
-        PrivateAssets="all"/>
+        PrivateAssets="all" />
     <PackageReference
         Include="KeepAChangelogParser"
         PrivateAssets="all" />
