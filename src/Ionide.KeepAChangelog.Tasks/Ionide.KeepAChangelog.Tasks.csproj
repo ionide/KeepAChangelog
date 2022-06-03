@@ -12,8 +12,14 @@
     <NoWarn>NU5128;NU5100</NoWarn><!-- NU5100 is because we pack to tasks/, not lib/ -->
     <BuildOutputTargetFolder>tasks</BuildOutputTargetFolder>
 
-    <!-- deps.json generation -->
-    <GenerateDependencyFile>true</GenerateDependencyFile>
+    <!-- 
+        deps.json generation/package dependency file resolution
+
+        With this set, two primary things happen:
+          * we generate a deps.json file describing how to load our 3rd-party dependencies, and
+          * we tell the packaging infrastructure to bundle all of our dependencies as copy-local
+     -->
+    <EnableDynamicLoading>true</EnableDynamicLoading>
   </PropertyGroup>
 
   <ItemGroup>
@@ -36,7 +42,7 @@
     <PackageReference
         Include="Microsoft.Build.Utilities.Core"
         ExcludeAssets="Runtime"
-        PrivateAssets="all"/>
+        PrivateAssets="all" />
     <PackageReference
         Include="SemanticVersion"
         PrivateAssets="all" />

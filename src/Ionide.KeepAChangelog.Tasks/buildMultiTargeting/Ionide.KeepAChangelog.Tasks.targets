@@ -14,5 +14,5 @@
         </GetPackageVersionDependsOn>
     <PropertyGroup>
 
-    <Import Project="./Core.targets">
+    <Import Project="../build/Core.targets">
 </Project>
