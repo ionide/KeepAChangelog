@@ -9,9 +9,13 @@
     
     <!-- we need the assemblies bundled, so set this so we don't expose any dependencies to the outside world -->
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
+    <BuildOutputTargetFolder>tasks</BuildOutputTargetFolder> <!-- this sets the default package output folder to `tasks` instead of lib, 
+                                                                  so that our runtime dependencies can be bundled underneath there and not
+                                                                  contaminate the runtime deps of any projects that use this project. -->
     <NoWarn>NU5128;NU5100</NoWarn><!-- NU5100 is because we pack to tasks/, not lib/ -->
-    <BuildOutputTargetFolder>tasks</BuildOutputTargetFolder>
-
+    <DevelopmentDependency>true</DevelopmentDependency> <!-- Setting this sets the `developmentDependency` flag on our generated package, 
+                                                             which means that consumers don't need to set PrivateAssets="all" and IncludeAssets="build, buildMultitargeting"
+                                                             to make use of this project without impacting their own dependency trees. -->
     <!-- 
         deps.json generation/package dependency file resolution
 
@@ -38,7 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <!-- All dependencies need PrivateAssets="all" not flow as a nuget-dependency to consumers -->
-    <!-- MSBUC specifically-->
+    <!-- MS.B.U.C specifically-->
     <PackageReference
         Include="Microsoft.Build.Utilities.Core"
         ExcludeAssets="Runtime"
@@ -51,6 +55,7 @@
         PrivateAssets="all" />
   </ItemGroup>
 
+  <!-- This target adds the deps.json file to the TFM-specific subfolder of runtime dependencies of the app. -->
   <Target
       Name="AddBuildDependencyFileToBuiltProjectOutputGroupOutput"
       BeforeTargets="BuiltProjectOutputGroup"
@@ -64,6 +69,8 @@
     </ItemGroup>
   </Target>
 
+  <!-- This target copies the runtime dependencies of this project (all PackageReferences without ExcludeAssets="runtime") to the package
+       without having to manually specify the correct sub-paths. -->
   <Target
       Name="CopyProjectReferencesToPackage"
       DependsOnTargets="ResolveReferences">
