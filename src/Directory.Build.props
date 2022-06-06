@@ -1,10 +1,11 @@
 <Project>
     <PropertyGroup>
-        <Version>0.1.8</Version>
+        <Version>0.2.0</Version>
         <PackageReleaseNotes>
 ### Changed
 
-* Minor packaging fix for non-Core MSBuild versions
+- Move to a different changelog parser
+- Make the Changelog file required, and make it user-specified only. We no longer infer it.
         </PackageReleaseNotes>
     </PropertyGroup>
 </Project>

@@ -1,0 +1,29 @@
+<Project>
+    <PropertyGroup>
+        <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+        <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+        <EnablePackageVersionOverride>false</EnablePackageVersionOverride>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="17.0.0" />
+        <PackageVersion
+                Include="KeepAChangelogParser"
+                Version="1.2.2"/>
+        <PackageVersion
+                Include="SemanticVersion"
+                Version="2.1.0" />
+        <PackageVersion
+                Include="Dotnet.ReproducibleBuilds"
+                Version="1.1.1" />
+        <PackageVersion
+                Include="Expecto"
+                Version="9.0.4" />
+        <PackageVersion
+                Include="YoloDev.Expecto.TestSdk"
+                Version="0.12.13" />
+        <PackageVersion
+                Include="Microsoft.NET.Test.Sdk"
+                Version="17.0.0" />
+        <PackageVersion Include="FSharp.Core" Version="6.0.4" />
+    </ItemGroup>
+</Project>
