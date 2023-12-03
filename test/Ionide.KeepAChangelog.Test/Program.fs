@@ -21,9 +21,9 @@ let singleRelease =
 let singleReleaseExpected =
     (SemanticVersion.Parse "1.0.0", DateTime(2017, 06, 20), Some {
             ChangelogData.Default with
-                Added = ["- A"]
-                Changed = ["- B"]
-                Removed = ["- C"]
+                Added = { Section.Default with Items = ["- A"] }
+                Changed = { Section.Default with Items = ["- B"] }
+                Removed = { Section.Default with Items = ["- C"] }
             })
 
 let keepAChangelog =
@@ -58,7 +58,7 @@ let keepAChangelogExpected: Changelogs =
         Unreleased = None
         Releases = [
             singleReleaseExpected
-            SemanticVersion.Parse("0.3.0"), DateTime(2015, 12, 03), Some { ChangelogData.Default with Added = ["- A";"- B";"- C"]}
+            SemanticVersion.Parse("0.3.0"), DateTime(2015, 12, 03), Some { ChangelogData.Default with Added = { Section.Default with Items =["- A";"- B";"- C"] } }
         ]
     }
 
@@ -90,7 +90,7 @@ let sample1Release = """## [0.3.1] - 8.1.2022
 """
 
 let sample1ReleaseExpected =
-    SemanticVersion.Parse "0.3.1", DateTime(2022, 1, 8), Some { ChangelogData.Default with Added = ["- Add XmlDocs to the generated package"] }
+    SemanticVersion.Parse "0.3.1", DateTime(2022, 1, 8), Some { ChangelogData.Default with Added = { Section.Default with Items = ["- Add XmlDocs to the generated package"] } }
 
 let sample = """# Changelog
 All notable changes to this project will be documented in this file.
@@ -127,10 +127,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 let sampleExpected: Changelogs = {
     Unreleased = None
     Releases = [
-        SemanticVersion.Parse "0.3.1", DateTime(2022, 1, 8), Some { ChangelogData.Default with Added = ["* Add XmlDocs to the generated package"] }
-        SemanticVersion.Parse "0.3.0", DateTime(2021, 11, 23), Some { ChangelogData.Default with Added = ["* Expose client `CodeAction` caps as CodeActionClientCapabilities. (by @razzmatazz)"; "* Map CodeAction.IsPreferred & CodeAction.Disabled props. (by @razzmatazz)"] }
-        SemanticVersion.Parse "0.2.0", DateTime(2021, 11, 17), Some { ChangelogData.Default with Added = ["* Add support for `codeAction/resolve` (by @razzmatazz)"] }
-        SemanticVersion.Parse "0.1.1", DateTime(2021, 11, 15), Some { ChangelogData.Default with Added = ["* Initial implementation"] }
+        SemanticVersion.Parse "0.3.1", DateTime(2022, 1, 8), Some { ChangelogData.Default with Added = { Section.Default with Items = ["* Add XmlDocs to the generated package"] } }
+        SemanticVersion.Parse "0.3.0", DateTime(2021, 11, 23), Some { ChangelogData.Default with Added = { Section.Default with Items = ["* Expose client `CodeAction` caps as CodeActionClientCapabilities. (by @razzmatazz)"; "* Map CodeAction.IsPreferred & CodeAction.Disabled props. (by @razzmatazz)"] } }
+        SemanticVersion.Parse "0.2.0", DateTime(2021, 11, 17), Some { ChangelogData.Default with Added = { Section.Default with Items = ["* Add support for `codeAction/resolve` (by @razzmatazz)"] } }
+        SemanticVersion.Parse "0.1.1", DateTime(2021, 11, 15), Some { ChangelogData.Default with Added = { Section.Default with Items = ["* Initial implementation"] } }
     ]
 }
 
@@ -170,16 +170,16 @@ let changelogDataTest =
     test "Transform ChangelogData to Markdown" {
         let changelogData =
             {
-                Added = [ "Added line 1"; "Added line 2" ]
-                Changed = [ "Changed line 1"; "Changed line 2" ]
-                Deprecated = [ "Deprecated line 1"; "Deprecated line 2" ]
-                Removed = [ "Removed line 1"; "Removed line 2" ]
-                Fixed = [ "Fixed line 1"; "Fixed line 2" ]
-                Security = [ "Security line 1"; "Security line 2" ]
+                Added = { Section.Default with Items = [ "Added line 1"; "Added line 2" ] }
+                Changed = { Section.Default with Items = [ "Changed line 1"; "Changed line 2" ] }
+                Deprecated = { Section.Default with Items = [ "Deprecated line 1"; "Deprecated line 2" ] }
+                Removed = { Section.Default with Items = [ "Removed line 1"; "Removed line 2" ] }
+                Fixed = { Section.Default with Items = [ "Fixed line 1"; "Fixed line 2" ] }
+                Security = { Section.Default with Items = [ "Security line 1"; "Security line 2" ] }
                 Custom =
                     [
-                        "CustomHeaderA", [ "Custom line 1"; "Custom line 2" ]
-                        "CustomHeaderB", [ "Custom line 3"; "Custom line 4" ]
+                        "CustomHeaderA", { Section.Default with Items = [ "Custom line 1"; "Custom line 2" ] }
+                        "CustomHeaderB", { Section.Default with Items = [ "Custom line 3"; "Custom line 4" ] }
                     ]
                     |> Map.ofList
             }
@@ -231,6 +231,67 @@ let changelogDataTest =
         Expect.equal (changelogData.ToMarkdown()) expected "Should have produced expected value"
 }
 
+let FableSample = """# Changelog
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## Unreleased
+
+### Fixed
+
+#### Python
+
+* Fix #3617: Fix comparaison between list option when one is None
+* Fix #3615: Fix remove from dictionary with tuple as key
+* Fix #3598: Using obj () now generated an empty dict instead of None
+* Fix #3597: Do not translate .toString methods to str
+* Fix #3610: Cleanup Python regex handling
+* Fix #3628: System.DateTime.Substract not correctly transpiled
+
+## 4.6.0 - 2023-11-27
+
+### Changed
+
+#### All
+
+* Updated .NET metadata to 8.0.100 (by @ncave)
+
+### Added
+
+#### All
+
+* Fix #3584: Unit type compiles to undeclared variable (by @ncave)
+
+#### Python
+
+* Support `DateTime(..., DateTimeKind.Utc).ToString("O")` (by @MangelMaxime)
+
+#### Rust
+
+* Added `Guid.TryParse`, `Guid.ToByteArray` (by @ncave)
+
+### Fixed
+
+#### Python
+
+* Fixed char to string type regression with binary operator (by @dbrattli)
+* Fix `DateTime(..., DateTimeKind.Local).ToString("O")` (by @MangelMaxime)
+* Fix calling `value.ToString(CultureInfo.InvariantCulture)` (by @MangelMaxime)
+* Fix #3605: Fix record equality comparison to works with optional fields (by @MangelMaxime and @dbrattli)
+* PR #3608: Rewrite `time_span.py` allowing for better precision by using a number representation intead of native `timedelta`. (by @MangelMaxime)
+"""
+
+let FableSampleExpected :Changelogs = {
+    Unreleased = None
+    Releases = []
+}
+
+let subSectionTests = testList "subsections" [
+    runSuccess "Fable example" Parser.pChangeLogs FableSample FableSampleExpected
+]
+
 [<Tests>]
 let tests = testList "All" [
     parsingExamples
@@ -239,4 +300,4 @@ let tests = testList "All" [
 
 [<EntryPoint>]
 let main argv =
-    runTestsWithCLIArgs Seq.empty argv tests
+    runTestsWithCLIArgs Seq.empty argv subSectionTests // tests

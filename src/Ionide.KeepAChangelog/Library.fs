@@ -4,22 +4,32 @@ module Domain =
     open SemVersion
     open System
 
+    type Section =
+        {
+            Items: string list
+            SubSection: Map<string, string list>
+        }
+        static member Default = {
+            Items = List.empty
+            SubSection = Map.empty 
+        }
+    
     // TODO: a changelog entry may have a description?
     type ChangelogData =
-        { Added: string list
-          Changed: string list
-          Deprecated: string list
-          Removed: string list
-          Fixed: string list
-          Security: string list
-          Custom: Map<string, string list>}
+        { Added: Section
+          Changed: Section
+          Deprecated: Section
+          Removed: Section
+          Fixed: Section
+          Security: Section
+          Custom: Map<string, Section>}
         static member Default =
-            { Added = []
-              Changed = []
-              Deprecated = []
-              Removed = []
-              Fixed = []
-              Security = []
+            { Added = Section.Default
+              Changed = Section.Default
+              Deprecated = Section.Default
+              Removed = Section.Default
+              Fixed = Section.Default
+              Security = Section.Default
               Custom = Map.empty }
 
         member this.ToMarkdown () =
@@ -31,8 +41,8 @@ module Domain =
                 )
                 |> String.concat Environment.NewLine
 
-            let section name items =
-                match items with
+            let section name (section: Section) =
+                match section.Items with
                 | [] -> []
                 | items ->
                     $"### {name}"
@@ -130,23 +140,27 @@ module Parser =
 
         pipe2 bullet content (fun bullet text -> $"{bullet} {text}")
 
-    let pCustomSection: Parser<string * string list> =
+    let pEntriesInASection sectionName =
+        (many pEntry <?> $"{sectionName} entries")
+            |>> (fun entries -> { Items = entries; SubSection = Map.empty })
+    
+    let pCustomSection: Parser<string * Section> =
         let sectionName =
             skipString "###"
              >>. spaces1
              >>. restOfLine true // TODO: maybe not the whole line?
              <?> $"custom section header"
         sectionName
-        .>>. (many pEntry <?> $"{sectionName} entries")
+        .>>. (pEntriesInASection sectionName)
         .>> attempt (opt newline)
 
-    let pSection sectionName : Parser<string list> =
+    let pSection sectionName : Parser<Section> =
         (skipString "###"
          >>. spaces1
          >>. skipString sectionName)
         <?> $"{sectionName} section header"
         >>. many1 newline
-        >>. (many pEntry <?> $"{sectionName} entries")
+        >>. (pEntriesInASection sectionName)
         .>> attempt (opt newline)
 
     let pAdded = pSection "Added"
