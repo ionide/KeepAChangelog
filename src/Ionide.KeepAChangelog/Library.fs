@@ -7,11 +7,11 @@ module Domain =
     type Section =
         {
             Items: string list
-            SubSection: Map<string, string list>
+            SubSections: Map<string, string list>
         }
         static member Default = {
             Items = List.empty
-            SubSection = Map.empty 
+            SubSections = Map.empty 
         }
     
     // TODO: a changelog entry may have a description?
@@ -141,8 +141,35 @@ module Parser =
         pipe2 bullet content (fun bullet text -> $"{bullet} {text}")
 
     let pEntriesInASection sectionName =
-        (many pEntry <?> $"{sectionName} entries")
-            |>> (fun entries -> { Items = entries; SubSection = Map.empty })
+        let pSubSection: Parser<string * string list> =
+            let sectionName =
+                skipString "####"
+                 >>. spaces1
+                 >>. restOfLine true
+            
+            sectionName
+            .>> many1 newline
+            .>>. many pEntry
+        
+        let pEntryOrSubSectionOrNewline =
+            choice [
+                pSubSection |>> Choice2Of3
+                pEntry |>> Choice1Of3
+                newline |>> Choice3Of3
+            ]
+        
+        (many pEntryOrSubSectionOrNewline <?> $"{sectionName} entries")
+        |>> (fun entries ->
+                (entries, Section.Default)
+                ||> List.foldBack(fun entry section ->
+                    match entry with
+                    // Ignore blank line
+                    | Choice3Of3 _ -> section
+                    | Choice1Of3 item -> { section with Items = item :: section.Items  }
+                    | Choice2Of3 (subSectionName, subSectionItems) ->
+                        { section with SubSections = Map.add subSectionName subSectionItems section.SubSections  }
+                )
+        )
     
     let pCustomSection: Parser<string * Section> =
         let sectionName =

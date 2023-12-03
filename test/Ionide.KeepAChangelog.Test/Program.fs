@@ -284,8 +284,64 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 """
 
 let FableSampleExpected :Changelogs = {
-    Unreleased = None
-    Releases = []
+    Unreleased = Some {
+        ChangelogData.Default with
+            Fixed = {
+                Items =  []
+                SubSections = [
+                        "Python", [
+                            "* Fix #3617: Fix comparaison between list option when one is None"
+                            "* Fix #3615: Fix remove from dictionary with tuple as key"
+                            "* Fix #3598: Using obj () now generated an empty dict instead of None"
+                            "* Fix #3597: Do not translate .toString methods to str"
+                            "* Fix #3610: Cleanup Python regex handling"
+                            "* Fix #3628: System.DateTime.Substract not correctly transpiled"
+                        ]
+                    ]
+                    |> Map.ofList
+            }
+    }
+    Releases = [
+        SemanticVersion.Parse "4.6.0",
+        DateTime(2023, 11, 27),
+        Some {
+            ChangelogData.Default with
+                Changed = {
+                    Section.Default with
+                        SubSections =[
+                            "All", [
+                                "* Updated .NET metadata to 8.0.100 (by @ncave)"
+                            ]
+                        ] |> Map.ofList
+                }
+                Added = {
+                    Section.Default with
+                        SubSections = [
+                            "All", [
+                                "* Fix #3584: Unit type compiles to undeclared variable (by @ncave)"
+                            ]
+                            "Python", [
+                                "* Support `DateTime(..., DateTimeKind.Utc).ToString(\"O\")` (by @MangelMaxime)"
+                            ]
+                            "Rust", [
+                                "* Added `Guid.TryParse`, `Guid.ToByteArray` (by @ncave)"
+                            ]
+                        ] |> Map.ofList
+                }
+                Fixed = {
+                    Section.Default with
+                        SubSections = [
+                            "Python", [
+                                "* Fixed char to string type regression with binary operator (by @dbrattli)"
+                                "* Fix `DateTime(..., DateTimeKind.Local).ToString(\"O\")` (by @MangelMaxime)"
+                                "* Fix calling `value.ToString(CultureInfo.InvariantCulture)` (by @MangelMaxime)"
+                                "* Fix #3605: Fix record equality comparison to works with optional fields (by @MangelMaxime and @dbrattli)"
+                                "* PR #3608: Rewrite `time_span.py` allowing for better precision by using a number representation intead of native `timedelta`. (by @MangelMaxime)"
+                            ]
+                        ] |> Map.ofList
+                }
+        }
+    ]
 }
 
 let subSectionTests = testList "subsections" [
@@ -300,4 +356,4 @@ let tests = testList "All" [
 
 [<EntryPoint>]
 let main argv =
-    runTestsWithCLIArgs Seq.empty argv subSectionTests // tests
+    runTestsWithCLIArgs Seq.empty argv tests
