@@ -67,6 +67,7 @@ module Domain =
                     yield! section "Security" this.Security
                     for KeyValue(heading, lines) in this.Custom do
                         yield! section heading lines
+                    yield renderItems this.SectionLessItems
                 ]
 
     type Changelogs =
