@@ -21,14 +21,14 @@ module Util =
         String.concat System.Environment.NewLine items
 
     let mapChangelogData (data: ChangelogData) (item: ITaskItem) : ITaskItem =
-        item.SetMetadata("Added", stitch data.Added)
-        item.SetMetadata("Changed", stitch data.Changed)
-        item.SetMetadata("Deprecated", stitch data.Deprecated)
-        item.SetMetadata("Removed", stitch data.Removed)
-        item.SetMetadata("Fixed", stitch data.Fixed)
-        item.SetMetadata("Security", stitch data.Security)
+        item.SetMetadata("Added", stitch data.Added.Items)
+        item.SetMetadata("Changed", stitch data.Changed.Items)
+        item.SetMetadata("Deprecated", stitch data.Deprecated.Items)
+        item.SetMetadata("Removed", stitch data.Removed.Items)
+        item.SetMetadata("Fixed", stitch data.Fixed.Items)
+        item.SetMetadata("Security", stitch data.Security.Items)
         for (KeyValue(heading, lines)) in data.Custom do
-            item.SetMetadata(heading, stitch lines)
+            item.SetMetadata(heading, stitch lines.Items)
         item
 
 type ParseChangelogs() =
