@@ -22,7 +22,10 @@ module Domain =
           Removed: Section
           Fixed: Section
           Security: Section
-          Custom: Map<string, Section>}
+          Custom: Map<string, Section>
+          /// Release entries not tied to a section.
+          /// This should be avoided in real-world scenarios.
+          SectionLessItems: string list }
         static member Default =
             { Added = Section.Default
               Changed = Section.Default
@@ -30,7 +33,8 @@ module Domain =
               Removed = Section.Default
               Fixed = Section.Default
               Security = Section.Default
-              Custom = Map.empty }
+              Custom = Map.empty
+              SectionLessItems = List.empty }
 
         member this.ToMarkdown () =
 
@@ -197,6 +201,9 @@ module Parser =
     let pFixed = pSection "Fixed"
     let pSecurity = pSection "Security"
     let pOrEmptyList p = opt (attempt p)
+    let pSectionLessItems =
+        many1 pEntry
+        .>> attempt (opt newline)
 
     let pSections: Parser<ChangelogData -> ChangelogData> =
         choice [
@@ -207,6 +214,7 @@ module Parser =
             attempt (pFixed |>> fun x data -> { data with Fixed = x })
             attempt (pSecurity |>> fun x data -> { data with Security = x })
             attempt (many1 pCustomSection |>> fun x data -> { data with Custom = Map.ofList x })
+            attempt (pSectionLessItems |>> fun x data -> { data with SectionLessItems =  x })
         ]
 
     let pData: Parser<ChangelogData, unit> =

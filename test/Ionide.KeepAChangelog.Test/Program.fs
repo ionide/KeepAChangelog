@@ -170,6 +170,7 @@ let changelogDataTest =
     test "Transform ChangelogData to Markdown" {
         let changelogData =
             {
+                SectionLessItems = List.empty
                 Added = { Section.Default with Items = [ "Added line 1"; "Added line 2" ] }
                 Changed = { Section.Default with Items = [ "Changed line 1"; "Changed line 2" ] }
                 Deprecated = { Section.Default with Items = [ "Deprecated line 1"; "Deprecated line 2" ] }
@@ -348,10 +349,58 @@ let subSectionTests = testList "subsections" [
     runSuccess "Fable example" Parser.pChangeLogs FableSample FableSampleExpected
 ]
 
+let FableSectionLessSample = """# Changelog
+
+## 4.0.6 - 2023-04-08
+
+* JS Hotfix: Skip compiler generated decls
+* TS: Fixes for unions, pattern matching and interface function getters
+
+## 4.0.5 - 2023-04-08
+
+* Use native JS BigInt for int64/uint64
+* Fix #3402: Rust type mismatch error when compiling F# closure code
+* Improve optional field and argument typing in TypeScript
+* Fix fable-library-ts when used with Vite
+"""
+
+let FableSectionLessSampleExpected : Changelogs = {
+    Unreleased = None
+    Releases = [
+        SemanticVersion.Parse "4.0.6",
+        DateTime(2023, 4, 8),
+        Some {
+            ChangelogData.Default with
+                SectionLessItems = [
+                    "* JS Hotfix: Skip compiler generated decls"
+                    "* TS: Fixes for unions, pattern matching and interface function getters"
+                ]
+        }
+        
+        SemanticVersion.Parse "4.0.5",
+        DateTime(2023, 4, 8),
+        Some {
+            ChangelogData.Default with
+                SectionLessItems = [
+                    "* Use native JS BigInt for int64/uint64"
+                    "* Fix #3402: Rust type mismatch error when compiling F# closure code"
+                    "* Improve optional field and argument typing in TypeScript"
+                    "* Fix fable-library-ts when used with Vite"
+                ] 
+        }
+    ] 
+}
+
+let sectionLessTests = testList "releases without sections" [
+    runSuccess "Fable release wihtout sections" Parser.pChangeLogs FableSectionLessSample FableSectionLessSampleExpected
+]
+
 [<Tests>]
 let tests = testList "All" [
     parsingExamples
     changelogDataTest
+    subSectionTests
+    sectionLessTests
 ]
 
 [<EntryPoint>]
