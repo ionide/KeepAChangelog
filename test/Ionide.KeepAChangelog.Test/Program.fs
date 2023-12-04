@@ -5,8 +5,10 @@ open SemVersion
 open Expecto
 open Ionide.KeepAChangelog.Domain
 
+let normalizeNewline (v:string) = v.Replace("\r", "")
+
 let singleRelease =
-    """## [1.0.0] - 2017-06-20
+    normalizeNewline """## [1.0.0] - 2017-06-20
 ### Added
 - A
 
@@ -15,19 +17,18 @@ let singleRelease =
 
 ### Removed
 - C
-
 """
 
 let singleReleaseExpected =
     (SemanticVersion.Parse "1.0.0", DateTime(2017, 06, 20), Some {
             ChangelogData.Default with
-                Added = { Section.Default with Items = ["- A"] }
-                Changed = { Section.Default with Items = ["- B"] }
-                Removed = { Section.Default with Items = ["- C"] }
+                Added = "- A\n"
+                Changed = "- B\n"
+                Removed = "- C\n"
             })
 
 let keepAChangelog =
-    """# Changelog
+    normalizeNewline """# Changelog
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
@@ -58,12 +59,17 @@ let keepAChangelogExpected: Changelogs =
         Unreleased = None
         Releases = [
             singleReleaseExpected
-            SemanticVersion.Parse("0.3.0"), DateTime(2015, 12, 03), Some { ChangelogData.Default with Added = { Section.Default with Items =["- A";"- B";"- C"] } }
+            SemanticVersion.Parse("0.3.0"),
+            DateTime(2015, 12, 03),
+            Some {
+                ChangelogData.Default with
+                    Added = "- A\n- B\n- C\n\n" 
+            }
         ]
     }
 
 let header =
-    """# Changelog
+    normalizeNewline """# Changelog
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
@@ -72,7 +78,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 """
 
 let emptyUnreleased =
-    """## [Unreleased]
+    normalizeNewline """## [Unreleased]
 
 """
 
@@ -81,7 +87,7 @@ let headerAndUnreleased = header + emptyUnreleased
 let headerAndUnreleasedAndRelease = header + emptyUnreleased + singleRelease
 let headerAndUnreleasedAndReleaseExpected = None, singleReleaseExpected
 
-let sample1Release = """## [0.3.1] - 8.1.2022
+let sample1Release = normalizeNewline """## [0.3.1] - 8.1.2022
 
 ### Added
 
@@ -90,9 +96,9 @@ let sample1Release = """## [0.3.1] - 8.1.2022
 """
 
 let sample1ReleaseExpected =
-    SemanticVersion.Parse "0.3.1", DateTime(2022, 1, 8), Some { ChangelogData.Default with Added = { Section.Default with Items = ["- Add XmlDocs to the generated package"] } }
+    SemanticVersion.Parse "0.3.1", DateTime(2022, 1, 8), Some { ChangelogData.Default with Added = "- Add XmlDocs to the generated package\n\n" }
 
-let sample = """# Changelog
+let sample = normalizeNewline """# Changelog
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
@@ -127,10 +133,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 let sampleExpected: Changelogs = {
     Unreleased = None
     Releases = [
-        SemanticVersion.Parse "0.3.1", DateTime(2022, 1, 8), Some { ChangelogData.Default with Added = { Section.Default with Items = ["* Add XmlDocs to the generated package"] } }
-        SemanticVersion.Parse "0.3.0", DateTime(2021, 11, 23), Some { ChangelogData.Default with Added = { Section.Default with Items = ["* Expose client `CodeAction` caps as CodeActionClientCapabilities. (by @razzmatazz)"; "* Map CodeAction.IsPreferred & CodeAction.Disabled props. (by @razzmatazz)"] } }
-        SemanticVersion.Parse "0.2.0", DateTime(2021, 11, 17), Some { ChangelogData.Default with Added = { Section.Default with Items = ["* Add support for `codeAction/resolve` (by @razzmatazz)"] } }
-        SemanticVersion.Parse "0.1.1", DateTime(2021, 11, 15), Some { ChangelogData.Default with Added = { Section.Default with Items = ["* Initial implementation"] } }
+        SemanticVersion.Parse "0.3.1",
+        DateTime(2022, 1, 8),
+        Some { ChangelogData.Default with Added = "* Add XmlDocs to the generated package\n" }
+
+        SemanticVersion.Parse "0.3.0",
+        DateTime(2021, 11, 23),
+        Some {
+            ChangelogData.Default with
+                Added =
+                    normalizeNewline
+                        """* Expose client `CodeAction` caps as CodeActionClientCapabilities. (by @razzmatazz)
+* Map CodeAction.IsPreferred & CodeAction.Disabled props. (by @razzmatazz)
+"""             }
+        SemanticVersion.Parse "0.2.0",
+        DateTime(2021, 11, 17),
+        Some { ChangelogData.Default with Added = "* Add support for `codeAction/resolve` (by @razzmatazz)\n" }
+        
+        SemanticVersion.Parse "0.1.1",
+        DateTime(2021, 11, 15),
+        Some { ChangelogData.Default with Added = "* Initial implementation\n" }
     ]
 }
 
@@ -143,6 +165,17 @@ let runSuccess label p text expected =
         match FParsec.CharParsers.run p text with
         | FParsec.CharParsers.Success (r, _, _) ->
             Expect.equal r expected "Should have produced expected value"
+        | FParsec.CharParsers.Failure (m, _, _) ->
+            failwithf "%A" m
+    }
+
+let runSuccessNormalized label (p: Parser<string,unit>) text (expected:string) =
+    test $"parsing {label}" {
+        match FParsec.CharParsers.run p text with
+        | FParsec.CharParsers.Success (r, _, _) ->
+            let normalizedR = r.Replace("\r", "")
+            let normalizedExpected = expected.Replace("\r", "")
+            Expect.equal normalizedR normalizedExpected "Should have produced expected value"
         | FParsec.CharParsers.Failure (m, _, _) ->
             failwithf "%A" m
     }
@@ -160,9 +193,7 @@ let parsingExamples = testList "parsing examples" [
          .>>. Parser.pRelease)
         headerAndUnreleasedAndRelease
         headerAndUnreleasedAndReleaseExpected
-
     runSuccess "keepachangelog" Parser.pChangeLogs keepAChangelog keepAChangelogExpected
-
     runSuccess "lsp changelog" Parser.pChangeLogs sample sampleExpected
 ]
 
@@ -170,25 +201,22 @@ let changelogDataTest =
     test "Transform ChangelogData to Markdown" {
         let changelogData =
             {
-                SectionLessItems = List.empty
-                Added = { Section.Default with Items = [ "Added line 1"; "Added line 2" ] }
-                Changed = { Section.Default with Items = [ "Changed line 1"; "Changed line 2" ] }
-                Deprecated = { Section.Default with Items = [ "Deprecated line 1"; "Deprecated line 2" ] }
-                Removed = { Section.Default with Items = [ "Removed line 1"; "Removed line 2" ] }
-                Fixed = { Section.Default with Items = [ "Fixed line 1"; "Fixed line 2" ] }
-                Security = { Section.Default with Items = [ "Security line 1"; "Security line 2" ] }
+                Added = "* Added line 1\n* Added line 2\n"
+                Changed = "* Changed line 1\n* Changed line 2\n"
+                Deprecated = "* Deprecated line 1\n* Deprecated line 2\n"
+                Removed = "* Removed line 1\n* Removed line 2\n"
+                Fixed = "* Fixed line 1\n* Fixed line 2\n"
+                Security = "* Security line 1\n* Security line 2\n"
                 Custom =
                     [
-                        "CustomHeaderA", { Section.Default with Items = [ "Custom line 1"; "Custom line 2" ] }
-                        "CustomHeaderB", { Section.Default with Items = [ "Custom line 3"; "Custom line 4" ] }
+                        "CustomHeaderA", "* Custom line 1\n* Custom line 2\n"
+                        "CustomHeaderB", "* Custom line 3\n* Custom line 4\n"
                     ]
                     |> Map.ofList
             }
 
-        printfn "%A" (changelogData.ToMarkdown())
-
         let expected =
-            """### Added
+            normalizeNewline """### Added
 
 * Added line 1
 * Added line 2
@@ -229,7 +257,7 @@ let changelogDataTest =
 * Custom line 4
 """
 
-        Expect.equal (changelogData.ToMarkdown()) expected "Should have produced expected value"
+        Expect.equal (normalizeNewline (changelogData.ToMarkdown())) expected "Should have produced expected value"
 }
 
 let FableSample = """# Changelog
@@ -287,60 +315,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 let FableSampleExpected :Changelogs = {
     Unreleased = Some {
         ChangelogData.Default with
-            Fixed = {
-                Items =  []
-                SubSections = [
-                        "Python", [
-                            "* Fix #3617: Fix comparaison between list option when one is None"
-                            "* Fix #3615: Fix remove from dictionary with tuple as key"
-                            "* Fix #3598: Using obj () now generated an empty dict instead of None"
-                            "* Fix #3597: Do not translate .toString methods to str"
-                            "* Fix #3610: Cleanup Python regex handling"
-                            "* Fix #3628: System.DateTime.Substract not correctly transpiled"
-                        ]
-                    ]
-                    |> Map.ofList
-            }
+            Fixed =
+                normalizeNewline
+                    """#### Python
+
+* Fix #3617: Fix comparaison between list option when one is None
+* Fix #3615: Fix remove from dictionary with tuple as key
+* Fix #3598: Using obj () now generated an empty dict instead of None
+* Fix #3597: Do not translate .toString methods to str
+* Fix #3610: Cleanup Python regex handling
+* Fix #3628: System.DateTime.Substract not correctly transpiled
+"""
     }
     Releases = [
         SemanticVersion.Parse "4.6.0",
         DateTime(2023, 11, 27),
         Some {
             ChangelogData.Default with
-                Changed = {
-                    Section.Default with
-                        SubSections =[
-                            "All", [
-                                "* Updated .NET metadata to 8.0.100 (by @ncave)"
-                            ]
-                        ] |> Map.ofList
-                }
-                Added = {
-                    Section.Default with
-                        SubSections = [
-                            "All", [
-                                "* Fix #3584: Unit type compiles to undeclared variable (by @ncave)"
-                            ]
-                            "Python", [
-                                "* Support `DateTime(..., DateTimeKind.Utc).ToString(\"O\")` (by @MangelMaxime)"
-                            ]
-                            "Rust", [
-                                "* Added `Guid.TryParse`, `Guid.ToByteArray` (by @ncave)"
-                            ]
-                        ] |> Map.ofList
-                }
-                Fixed = {
-                    Section.Default with
-                        SubSections = [
-                            "Python", [
-                                "* Fixed char to string type regression with binary operator (by @dbrattli)"
-                                "* Fix `DateTime(..., DateTimeKind.Local).ToString(\"O\")` (by @MangelMaxime)"
-                                "* Fix calling `value.ToString(CultureInfo.InvariantCulture)` (by @MangelMaxime)"
-                                "* Fix #3605: Fix record equality comparison to works with optional fields (by @MangelMaxime and @dbrattli)"
-                                "* PR #3608: Rewrite `time_span.py` allowing for better precision by using a number representation intead of native `timedelta`. (by @MangelMaxime)"
-                            ]
-                        ] |> Map.ofList
-                }
+                Changed =
+                    normalizeNewline """#### All
+
+* Updated .NET metadata to 8.0.100 (by @ncave)
+"""
+                Added =
+                    normalizeNewline """#### All
+
+* Fix #3584: Unit type compiles to undeclared variable (by @ncave)
+
+#### Python
+
+* Support `DateTime(..., DateTimeKind.Utc).ToString("O")` (by @MangelMaxime)
+
+#### Rust
+
+* Added `Guid.TryParse`, `Guid.ToByteArray` (by @ncave)
+"""
+                Fixed =
+                    normalizeNewline """#### Python
+
+* Fixed char to string type regression with binary operator (by @dbrattli)
+* Fix `DateTime(..., DateTimeKind.Local).ToString("O")` (by @MangelMaxime)
+* Fix calling `value.ToString(CultureInfo.InvariantCulture)` (by @MangelMaxime)
+* Fix #3605: Fix record equality comparison to works with optional fields (by @MangelMaxime and @dbrattli)
+* PR #3608: Rewrite `time_span.py` allowing for better precision by using a number representation intead of native `timedelta`. (by @MangelMaxime)
+"""
         }
     ]
 }
@@ -349,58 +367,11 @@ let subSectionTests = testList "subsections" [
     runSuccess "Fable example" Parser.pChangeLogs FableSample FableSampleExpected
 ]
 
-let FableSectionLessSample = """# Changelog
-
-## 4.0.6 - 2023-04-08
-
-* JS Hotfix: Skip compiler generated decls
-* TS: Fixes for unions, pattern matching and interface function getters
-
-## 4.0.5 - 2023-04-08
-
-* Use native JS BigInt for int64/uint64
-* Fix #3402: Rust type mismatch error when compiling F# closure code
-* Improve optional field and argument typing in TypeScript
-* Fix fable-library-ts when used with Vite
-"""
-
-let FableSectionLessSampleExpected : Changelogs = {
-    Unreleased = None
-    Releases = [
-        SemanticVersion.Parse "4.0.6",
-        DateTime(2023, 4, 8),
-        Some {
-            ChangelogData.Default with
-                SectionLessItems = [
-                    "* JS Hotfix: Skip compiler generated decls"
-                    "* TS: Fixes for unions, pattern matching and interface function getters"
-                ]
-        }
-        
-        SemanticVersion.Parse "4.0.5",
-        DateTime(2023, 4, 8),
-        Some {
-            ChangelogData.Default with
-                SectionLessItems = [
-                    "* Use native JS BigInt for int64/uint64"
-                    "* Fix #3402: Rust type mismatch error when compiling F# closure code"
-                    "* Improve optional field and argument typing in TypeScript"
-                    "* Fix fable-library-ts when used with Vite"
-                ] 
-        }
-    ] 
-}
-
-let sectionLessTests = testList "releases without sections" [
-    runSuccess "Fable release wihtout sections" Parser.pChangeLogs FableSectionLessSample FableSectionLessSampleExpected
-]
-
 [<Tests>]
 let tests = testList "All" [
     parsingExamples
     changelogDataTest
     subSectionTests
-    sectionLessTests
 ]
 
 [<EntryPoint>]

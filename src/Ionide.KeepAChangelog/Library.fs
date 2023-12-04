@@ -4,71 +4,40 @@ module Domain =
     open SemVersion
     open System
 
-    type Section =
-        {
-            Items: string list
-            SubSections: Map<string, string list>
-        }
-        static member Default = {
-            Items = List.empty
-            SubSections = Map.empty 
-        }
-    
-    // TODO: a changelog entry may have a description?
     type ChangelogData =
-        { Added: Section
-          Changed: Section
-          Deprecated: Section
-          Removed: Section
-          Fixed: Section
-          Security: Section
-          Custom: Map<string, Section>
-          /// Release entries not tied to a section.
-          /// This should be avoided in real-world scenarios.
-          SectionLessItems: string list }
+        {
+            Added: string
+            Changed: string
+            Deprecated: string
+            Removed: string 
+            Fixed: string
+            Security: string
+            Custom: Map<string, string>
+        }
         static member Default =
-            { Added = Section.Default
-              Changed = Section.Default
-              Deprecated = Section.Default
-              Removed = Section.Default
-              Fixed = Section.Default
-              Security = Section.Default
-              Custom = Map.empty
-              SectionLessItems = List.empty }
+            { Added = String.Empty
+              Changed = String.Empty
+              Deprecated = String.Empty
+              Removed = String.Empty
+              Fixed = String.Empty
+              Security = String.Empty
+              Custom = Map.empty }
 
         member this.ToMarkdown () =
-
-            let renderItems (items : string list) =
-                items
-                |> List.map (fun item ->
-                    "* " + item
-                )
-                |> String.concat Environment.NewLine
-
-            let section name (section: Section) =
-                match section.Items with
-                | [] -> []
-                | items ->
-                    $"### {name}"
-                    + Environment.NewLine
-                    + Environment.NewLine
-                    + (renderItems items)
-                    + Environment.NewLine
-                    |> List.singleton
+            let section name (body: string) =
+                    $"### {name}%s{Environment.NewLine}%s{Environment.NewLine}%s{body}"
 
             String.concat
                 Environment.NewLine
                 [
-                    yield! section "Added" this.Added
-                    yield! section "Changed" this.Changed
-                    yield! section "Deprecated" this.Deprecated
-                    yield! section "Removed" this.Removed
-                    yield! section "Fixed" this.Fixed
-                    yield! section "Security" this.Security
+                    section "Added" this.Added
+                    section "Changed" this.Changed
+                    section "Deprecated" this.Deprecated
+                    section "Removed" this.Removed
+                    section "Fixed" this.Fixed
+                    section "Security" this.Security
                     for KeyValue(heading, lines) in this.Custom do
-                        yield! section heading lines
-                    if not this.SectionLessItems.IsEmpty then
-                        yield renderItems this.SectionLessItems
+                        section heading lines
                 ]
 
     type Changelogs =
@@ -146,54 +115,31 @@ module Parser =
 
         pipe2 bullet content (fun bullet text -> $"{bullet} {text}")
 
-    let pEntriesInASection sectionName =
-        let pSubSection: Parser<string * string list> =
-            let sectionName =
-                skipString "####"
-                 >>. spaces1
-                 >>. restOfLine true
-            
-            sectionName
-            .>> many1 newline
-            .>>. many pEntry
-        
-        let pEntryOrSubSectionOrNewline =
-            choice [
-                pSubSection |>> Choice2Of3
-                pEntry |>> Choice1Of3
-                newline |>> Choice3Of3
-            ]
-        
-        (many pEntryOrSubSectionOrNewline <?> $"{sectionName} entries")
-        |>> (fun entries ->
-                (entries, Section.Default)
-                ||> List.foldBack(fun entry section ->
-                    match entry with
-                    // Ignore blank line
-                    | Choice3Of3 _ -> section
-                    | Choice1Of3 item -> { section with Items = item :: section.Items  }
-                    | Choice2Of3 (subSectionName, subSectionItems) ->
-                        { section with SubSections = Map.add subSectionName subSectionItems section.SubSections  }
-                )
-        )
+    let pSectionBody sectionName : Parser<string> =
+        let nextHeader = (newline >>. regex @"[#]{1,3}\s\S" |>> ignore)
+        let endOfSection = choice [ eof; nextHeader ]
+        manyTill anyChar (lookAhead endOfSection)
+        |>> System.String.Concat
+        <?> $"{sectionName} section body"
     
-    let pCustomSection: Parser<string * Section> =
+    let pCustomSection: Parser<string * string> =
         let sectionName =
             skipString "###"
              >>. spaces1
              >>. restOfLine true // TODO: maybe not the whole line?
              <?> $"custom section header"
         sectionName
-        .>>. (pEntriesInASection sectionName)
+        .>> attempt (opt newline)
+        .>>. (pSectionBody sectionName)
         .>> attempt (opt newline)
 
-    let pSection sectionName : Parser<Section> =
-        (skipString "###"
+    let pSection sectionName : Parser<string> =
+        ((skipString "###"
          >>. spaces1
          >>. skipString sectionName)
-        <?> $"{sectionName} section header"
+        <?> $"{sectionName} section header")
         >>. many1 newline
-        >>. (pEntriesInASection sectionName)
+        >>. pSectionBody sectionName
         .>> attempt (opt newline)
 
     let pAdded = pSection "Added"
@@ -216,7 +162,6 @@ module Parser =
             attempt (pFixed |>> fun x data -> { data with Fixed = x })
             attempt (pSecurity |>> fun x data -> { data with Security = x })
             attempt (many1 pCustomSection |>> fun x data -> { data with Custom = Map.ofList x })
-            attempt (pSectionLessItems |>> fun x data -> { data with SectionLessItems =  x })
         ]
 
     let pData: Parser<ChangelogData, unit> =
@@ -308,7 +253,7 @@ module Parser =
             pHeader
             (attempt (opt unreleased))
             (attempt (many pRelease))
-            (fun header unreleased releases ->
+            (fun _header unreleased releases ->
                 { Unreleased = defaultArg unreleased None
                   Releases = releases })
 
