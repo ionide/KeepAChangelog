@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.0] - 2023.12.05
+
+### Changed
+
+* [Updated the parser to support arbitrary content under each primary section](https://github.com/ionide/KeepAChangelog/pull/22) (thanks @nojaf!)
+
 ## [0.1.8] - 2022.03.31
 
 ### Changed

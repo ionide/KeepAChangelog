@@ -1,10 +1,12 @@
 <Project>
     <PropertyGroup>
-        <Version>0.1.8</Version>
+        <Version>0.2.0</Version>
         <PackageReleaseNotes>
 ### Changed
 
-* Minor packaging fix for non-Core MSBuild versions
+* [Updated the parser to support arbitrary content under each primary section](https://github.com/ionide/KeepAChangelog/pull/22) (thanks @nojaf!)
         </PackageReleaseNotes>
     </PropertyGroup>
+
+   <Import Project="../Directory.Build.props" />
 </Project>
