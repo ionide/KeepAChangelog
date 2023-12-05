@@ -363,15 +363,44 @@ let FableSampleExpected :Changelogs = {
     ]
 }
 
-let subSectionTests = testList "subsections" [
-    runSuccess "Fable example" Parser.pChangeLogs FableSample FableSampleExpected
+let SectionLessSample = normalizeNewlines """# Changelog
+
+## 4.2.1 - 2023-09-29
+
+* Fix package to include Fable libraries folders
+
+## 4.2.0 - 2023-09-29
+
+* Fix #3480: Function decorated with `[<NamedParams>]` without arguments provided should take an empty object
+* Fix #3528: Consider functions hidden by a signature file as private (@nojaf)
+* Improve error message when Fable doesn't find the `fable-library` folder.
+
+    This is especially useful when working on Fable itself, and should save time to others.
+    Each time I got this is error, I needed several minutes to remember the cause of it.
+"""
+
+let SectionLessSampleExpected: Changelogs = {
+    Unreleased = None
+    Releases = [
+        SemanticVersion.Parse "4.2.1",
+        DateTime(2023, 9, 29),
+        Some ChangelogData.Default
+        SemanticVersion.Parse "4.2.0",
+        DateTime(2023, 9, 29),
+        Some ChangelogData.Default
+    ] 
+}
+
+let fableTests = testList "Fable" [
+    runSuccess "Multiple languages" Parser.pChangeLogs FableSample FableSampleExpected
+    runSuccess "SectionLess items" Parser.pChangeLogs SectionLessSample SectionLessSampleExpected
 ]
 
 [<Tests>]
 let tests = testList "All" [
     parsingExamples
     changelogDataTest
-    subSectionTests
+    fableTests
 ]
 
 [<EntryPoint>]

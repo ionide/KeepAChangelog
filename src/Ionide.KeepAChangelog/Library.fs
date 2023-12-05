@@ -168,6 +168,13 @@ module Parser =
         many1 pSections
         |>> List.fold (fun x f -> f x) ChangelogData.Default
 
+    let pNonStructuredData : Parser<ChangelogData, unit> =
+        let nextHeader = (newline >>. regex @"[#]{1,2}\s\S" |>> ignore)
+        let endOfSection = choice [ eof; nextHeader ]
+        (manyTill anyChar (lookAhead endOfSection) .>> attempt (opt newline))
+        |>> (fun _content -> ChangelogData.Default)
+        <?> "release body"
+
     let pHeader: Parser<unit> =
         (skipString "# Changelog" >>. skipNewline
          .>> skipTillStringOrEof "##")
@@ -238,8 +245,9 @@ module Parser =
         let vPart = skipString "##" >>. spaces1 >>. pVersion
         let middle = spaces1 .>> pchar '-' .>> spaces1
         let date = pDate .>> skipRestOfLine true
+        let content = choice [ pData; pNonStructuredData ]
 
-        pipe5 vPart middle date (opt (many newline)) (opt pData) (fun v _ date _ data -> v, date, data)
+        pipe5 vPart middle date (opt (many newline)) (opt content) (fun v _ date _ data -> v, date, data)
 
     let pChangeLogs: Parser<Changelogs, unit> =
         let unreleased =
