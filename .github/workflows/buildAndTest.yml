@@ -5,20 +5,13 @@ on: [push, pull_request]
 jobs:
   build:
     timeout-minutes: 15 # we have a locking issue, so cap the runs at ~15m to account for varying build times, etc
-    strategy:
-      matrix:
-        os: [ubuntu-20.04]
-        dotnet: [6.0.201]
-      fail-fast: false # we have timing issues on some OS, so we want them all to run
 
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-22.04
 
     steps:
     - uses: actions/checkout@v2
     - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: ${{ matrix.dotnet }}
+      uses: actions/setup-dotnet@v4
     - name: Restore
       run: dotnet restore
     - name: Run Build
