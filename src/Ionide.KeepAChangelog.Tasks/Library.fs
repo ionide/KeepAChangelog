@@ -17,18 +17,15 @@ module Util =
         item.ItemSpec <- "Unreleased"
         item
 
-    let stitch items =
-        String.concat System.Environment.NewLine items
-
     let mapChangelogData (data: ChangelogData) (item: ITaskItem) : ITaskItem =
-        item.SetMetadata("Added", stitch data.Added)
-        item.SetMetadata("Changed", stitch data.Changed)
-        item.SetMetadata("Deprecated", stitch data.Deprecated)
-        item.SetMetadata("Removed", stitch data.Removed)
-        item.SetMetadata("Fixed", stitch data.Fixed)
-        item.SetMetadata("Security", stitch data.Security)
+        item.SetMetadata("Added", data.Added)
+        item.SetMetadata("Changed", data.Changed)
+        item.SetMetadata("Deprecated", data.Deprecated)
+        item.SetMetadata("Removed", data.Removed)
+        item.SetMetadata("Fixed", data.Fixed)
+        item.SetMetadata("Security", data.Security)
         for (KeyValue(heading, lines)) in data.Custom do
-            item.SetMetadata(heading, stitch lines)
+            item.SetMetadata(heading, lines)
         item
 
 type ParseChangelogs() =
