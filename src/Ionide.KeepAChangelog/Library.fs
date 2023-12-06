@@ -130,7 +130,7 @@ module Parser =
     let pCustomSection: Parser<string * string> =
         let sectionName =
             skipString "###" >>. spaces1 >>. restOfLine true // TODO: maybe not the whole line?
-            <?> $"custom section header"
+            <?> "custom section header"
 
         sectionName .>> attempt (opt newline) .>>. (pSectionBody sectionName)
         .>> attempt (opt newline)
