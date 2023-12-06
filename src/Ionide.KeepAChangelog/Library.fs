@@ -9,23 +9,26 @@ module Domain =
             Added: string
             Changed: string
             Deprecated: string
-            Removed: string 
+            Removed: string
             Fixed: string
             Security: string
             Custom: Map<string, string>
         }
-        static member Default =
-            { Added = String.Empty
-              Changed = String.Empty
-              Deprecated = String.Empty
-              Removed = String.Empty
-              Fixed = String.Empty
-              Security = String.Empty
-              Custom = Map.empty }
 
-        member this.ToMarkdown () =
+        static member Default =
+            {
+                Added = String.Empty
+                Changed = String.Empty
+                Deprecated = String.Empty
+                Removed = String.Empty
+                Fixed = String.Empty
+                Security = String.Empty
+                Custom = Map.empty
+            }
+
+        member this.ToMarkdown() =
             let section name (body: string) =
-                    $"### {name}%s{Environment.NewLine}%s{Environment.NewLine}%s{body}"
+                $"### {name}%s{Environment.NewLine}%s{Environment.NewLine}%s{body}"
 
             String.concat
                 Environment.NewLine
@@ -41,11 +44,12 @@ module Domain =
                 ]
 
     type Changelogs =
-        { Unreleased: ChangelogData option
-          Releases: (SemanticVersion * DateTime * ChangelogData option) list }
+        {
+            Unreleased: ChangelogData option
+            Releases: (SemanticVersion * DateTime * ChangelogData option) list
+        }
 
 module Parser =
-
 
     open Domain
     open FParsec
@@ -104,10 +108,14 @@ module Parser =
 
             let rest = opt (many1 (attempt followingLine))
 
-            pipe2 firstLine rest (fun f rest ->
-                match rest with
-                | None -> f
-                | Some parts -> String.concat " " (f :: parts))
+            pipe2
+                firstLine
+                rest
+                (fun f rest ->
+                    match rest with
+                    | None -> f
+                    | Some parts -> String.concat " " (f :: parts)
+                )
             <?> "line item"
 
         pipe2 bullet content (fun bullet text -> $"{bullet} {text}")
@@ -115,26 +123,21 @@ module Parser =
     let pSectionBody sectionName : Parser<string> =
         let nextHeader = (newline >>. regex @"[#]{1,3}\s\S" |>> ignore)
         let endOfSection = choice [ eof; nextHeader ]
-        manyTill anyChar (lookAhead endOfSection)
-        |>> System.String.Concat
+
+        manyTill anyChar (lookAhead endOfSection) |>> System.String.Concat
         <?> $"{sectionName} section body"
-    
+
     let pCustomSection: Parser<string * string> =
         let sectionName =
-            skipString "###"
-             >>. spaces1
-             >>. restOfLine true // TODO: maybe not the whole line?
-             <?> $"custom section header"
-        sectionName
-        .>> attempt (opt newline)
-        .>>. (pSectionBody sectionName)
+            skipString "###" >>. spaces1 >>. restOfLine true // TODO: maybe not the whole line?
+            <?> $"custom section header"
+
+        sectionName .>> attempt (opt newline) .>>. (pSectionBody sectionName)
         .>> attempt (opt newline)
 
     let pSection sectionName : Parser<string> =
-        ((skipString "###"
-         >>. spaces1
-         >>. skipString sectionName)
-        <?> $"{sectionName} section header")
+        ((skipString "###" >>. spaces1 >>. skipString sectionName)
+         <?> $"{sectionName} section header")
         >>. many1 newline
         >>. pSectionBody sectionName
         .>> attempt (opt newline)
@@ -146,35 +149,33 @@ module Parser =
     let pFixed = pSection "Fixed"
     let pSecurity = pSection "Security"
     let pOrEmptyList p = opt (attempt p)
-    let pSectionLessItems =
-        many1 pEntry
-        .>> attempt (opt newline)
+    let pSectionLessItems = many1 pEntry .>> attempt (opt newline)
 
     let pSections: Parser<ChangelogData -> ChangelogData> =
-        choice [
-            attempt (pAdded |>> fun x data -> { data with Added = x })
-            attempt (pChanged |>> fun x data -> { data with Changed = x })
-            attempt (pRemoved |>> fun x data -> { data with Removed = x })
-            attempt (pDeprecated |>> fun x data -> { data with Deprecated = x })
-            attempt (pFixed |>> fun x data -> { data with Fixed = x })
-            attempt (pSecurity |>> fun x data -> { data with Security = x })
-            attempt (many1 pCustomSection |>> fun x data -> { data with Custom = Map.ofList x })
-        ]
+        choice
+            [
+                attempt (pAdded |>> fun x data -> { data with Added = x })
+                attempt (pChanged |>> fun x data -> { data with Changed = x })
+                attempt (pRemoved |>> fun x data -> { data with Removed = x })
+                attempt (pDeprecated |>> fun x data -> { data with Deprecated = x })
+                attempt (pFixed |>> fun x data -> { data with Fixed = x })
+                attempt (pSecurity |>> fun x data -> { data with Security = x })
+                attempt (many1 pCustomSection |>> fun x data -> { data with Custom = Map.ofList x })
+            ]
 
     let pData: Parser<ChangelogData, unit> =
-        many1 pSections
-        |>> List.fold (fun x f -> f x) ChangelogData.Default
+        many1 pSections |>> List.fold (fun x f -> f x) ChangelogData.Default
 
-    let pNonStructuredData : Parser<ChangelogData, unit> =
+    let pNonStructuredData: Parser<ChangelogData, unit> =
         let nextHeader = (newline >>. regex @"[#]{1,2}\s\S" |>> ignore)
         let endOfSection = choice [ eof; nextHeader ]
+
         (manyTill anyChar (lookAhead endOfSection) .>> attempt (opt newline))
         |>> (fun _content -> ChangelogData.Default)
         <?> "release body"
 
     let pHeader: Parser<unit> =
-        (skipString "# Changelog" >>. skipNewline
-         .>> skipTillStringOrEof "##")
+        (skipString "# Changelog" >>. skipNewline .>> skipTillStringOrEof "##")
         <?> "Changelog header"
 
     let mdUrl inner =
@@ -186,24 +187,25 @@ module Parser =
 
     let pUnreleased: Parser<ChangelogData option, unit> =
         let unreleased = skipString "Unreleased"
-        let name = attempt (
-            skipString "##"
-            >>. spaces1
-            >>. (mdUrl unreleased <|> unreleased)
-            .>> skipRestOfLine true
-            <?> "Unreleased label"
-        )
 
-        name >>. opt (many newline) >>. opt pData
-        <?> "Unreleased version section"
+        let name =
+            attempt (
+                skipString "##" >>. spaces1 >>. (mdUrl unreleased <|> unreleased)
+                .>> skipRestOfLine true
+                <?> "Unreleased label"
+            )
+
+        name >>. opt (many newline) >>. opt pData <?> "Unreleased version section"
 
     let validSemverChars =
-        [| for c in '0' .. '9' -> c
-           for c in 'A' .. 'Z' -> c
-           for c in 'a' .. 'z' -> c
-           yield '-'
-           yield '.'
-           yield '+' |]
+        [|
+            for c in '0' .. '9' -> c
+            for c in 'A' .. 'Z' -> c
+            for c in 'a' .. 'z' -> c
+            yield '-'
+            yield '.'
+            yield '+'
+        |]
         |> Set.ofArray
 
     let pSemver: Parser<_> =
@@ -211,30 +213,21 @@ module Parser =
         |>> fun text -> SemVersion.SemanticVersion.Parse text
 
     let pDate: Parser<_> =
-        let pYear =
-            pint32
-            |> attempt
+        let pYear = pint32 |> attempt
 
+        let pMonth = pint32 |> attempt
 
-        let pMonth =
-            pint32
-            |> attempt
-
-        let pDay =
-            pint32
-            |> attempt
+        let pDay = pint32 |> attempt
 
         let ymdDashes =
             let dash = pchar '-'
             pipe5 pYear dash pMonth dash pDay (fun y _ m _ d -> System.DateTime(y, m, d))
-
 
         let dmyDots =
             let dot = pchar '.'
             pipe5 pDay dot pMonth dot pYear (fun d _ m _ y -> System.DateTime(y, m, d))
 
         attempt dmyDots <|> ymdDashes
-
 
     let pVersion = mdUrl pSemver <|> pSemver
 
@@ -249,18 +242,22 @@ module Parser =
     let pChangeLogs: Parser<Changelogs, unit> =
         let unreleased =
             pUnreleased
-             |>> fun unreleased ->
-                     match unreleased with
-                     | None -> None
-                     | Some u when u = ChangelogData.Default -> None
-                     | Some unreleased -> Some unreleased
+            |>> fun unreleased ->
+                match unreleased with
+                | None -> None
+                | Some u when u = ChangelogData.Default -> None
+                | Some unreleased -> Some unreleased
+
         pipe3
             pHeader
             (attempt (opt unreleased))
             (attempt (many pRelease))
             (fun _header unreleased releases ->
-                { Unreleased = defaultArg unreleased None
-                  Releases = releases })
+                {
+                    Unreleased = defaultArg unreleased None
+                    Releases = releases
+                }
+            )
 
     let parseChangeLog (file: FileInfo) =
         match
@@ -269,6 +266,6 @@ module Parser =
                 ()
                 file.FullName
                 (System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier = false))
-            with
-        | ParserResult.Success (result, _, _pos) -> Result.Ok result
-        | ParserResult.Failure (msg, structuredError, _pos) -> Result.Error(msg, structuredError)
+        with
+        | ParserResult.Success(result, _, _pos) -> Result.Ok result
+        | ParserResult.Failure(msg, structuredError, _pos) -> Result.Error(msg, structuredError)

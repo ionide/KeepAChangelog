@@ -24,8 +24,10 @@ module Util =
         item.SetMetadata("Removed", data.Removed)
         item.SetMetadata("Fixed", data.Fixed)
         item.SetMetadata("Security", data.Security)
+
         for KeyValue(heading, lines) in data.Custom do
             item.SetMetadata(heading, lines)
+
         item
 
 type ParseChangelogs() =
@@ -41,7 +43,7 @@ type ParseChangelogs() =
     member val CurrentReleaseChangelog: ITaskItem = null with get, set
 
     [<Output>]
-    member val AllReleasedChangelogs: ITaskItem [] = null with get, set
+    member val AllReleasedChangelogs: ITaskItem array = null with get, set
 
     [<Output>]
     member val LatestReleaseNotes: string = null with get, set
@@ -58,9 +60,8 @@ type ParseChangelogs() =
                 changelogs.Unreleased
                 |> Option.iter (fun unreleased ->
                     this.UnreleasedChangelog <-
-                        TaskItem()
-                        |> Util.mapChangelogData unreleased
-                        |> Util.mapUnreleasedInfo)
+                        TaskItem() |> Util.mapChangelogData unreleased |> Util.mapUnreleasedInfo
+                )
 
                 let sortedReleases =
                     // have to use LINQ here because List.sortBy* require IComparable, which
@@ -72,7 +73,10 @@ type ParseChangelogs() =
                     |> Seq.map (fun (version, date, data) ->
                         TaskItem()
                         |> Util.mapReleaseInfo version date
-                        |> fun d -> match data with Some data -> Util.mapChangelogData data d | None -> d
+                        |> fun d ->
+                            match data with
+                            | Some data -> Util.mapChangelogData data d
+                            | None -> d
                     )
                     |> Seq.toArray
 
@@ -82,13 +86,11 @@ type ParseChangelogs() =
                 sortedReleases
                 |> Seq.tryHead
                 |> Option.iter (fun (_version, _date, data) ->
-                    data
-                    |> Option.iter (fun data ->
-                        this.LatestReleaseNotes <- data.ToMarkdown())
-                    )
+                    data |> Option.iter (fun data -> this.LatestReleaseNotes <- data.ToMarkdown())
+                )
 
                 true
-            | Error (formatted, msg) ->
+            | Error(formatted, msg) ->
 
                 this.Log.LogError(
                     $"Error parsing Changelog at {file.FullName}. The error occurred at {msg.Position}.{System.Environment.NewLine}{formatted}"

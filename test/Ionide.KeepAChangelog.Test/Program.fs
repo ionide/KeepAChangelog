@@ -5,10 +5,11 @@ open SemVersion
 open Expecto
 open Ionide.KeepAChangelog.Domain
 
-let normalizeNewline (v:string) = v.Replace("\r", "")
+let normalizeNewline (v: string) = v.Replace("\r", "")
 
 let singleRelease =
-    normalizeNewline """## [1.0.0] - 2017-06-20
+    normalizeNewline
+        """## [1.0.0] - 2017-06-20
 ### Added
 - A
 
@@ -20,15 +21,18 @@ let singleRelease =
 """
 
 let singleReleaseExpected =
-    (SemanticVersion.Parse "1.0.0", DateTime(2017, 06, 20), Some {
-            ChangelogData.Default with
-                Added = "- A\n"
-                Changed = "- B\n"
-                Removed = "- C\n"
-            })
+    (SemanticVersion.Parse "1.0.0",
+     DateTime(2017, 06, 20),
+     Some {
+         ChangelogData.Default with
+             Added = "- A\n"
+             Changed = "- B\n"
+             Removed = "- C\n"
+     })
 
 let keepAChangelog =
-    normalizeNewline """# Changelog
+    normalizeNewline
+        """# Changelog
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
@@ -54,22 +58,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 """
 
-let keepAChangelogExpected: Changelogs =
-    {
-        Unreleased = None
-        Releases = [
-            singleReleaseExpected
-            SemanticVersion.Parse("0.3.0"),
-            DateTime(2015, 12, 03),
-            Some {
-                ChangelogData.Default with
-                    Added = "- A\n- B\n- C\n\n" 
-            }
-        ]
-    }
+let keepAChangelogExpected: Changelogs = {
+    Unreleased = None
+    Releases = [
+        singleReleaseExpected
+        SemanticVersion.Parse("0.3.0"),
+        DateTime(2015, 12, 03),
+        Some {
+            ChangelogData.Default with
+                Added = "- A\n- B\n- C\n\n"
+        }
+    ]
+}
 
 let header =
-    normalizeNewline """# Changelog
+    normalizeNewline
+        """# Changelog
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
@@ -78,7 +82,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 """
 
 let emptyUnreleased =
-    normalizeNewline """## [Unreleased]
+    normalizeNewline
+        """## [Unreleased]
 
 """
 
@@ -87,7 +92,9 @@ let headerAndUnreleased = header + emptyUnreleased
 let headerAndUnreleasedAndRelease = header + emptyUnreleased + singleRelease
 let headerAndUnreleasedAndReleaseExpected = None, singleReleaseExpected
 
-let sample1Release = normalizeNewline """## [0.3.1] - 8.1.2022
+let sample1Release =
+    normalizeNewline
+        """## [0.3.1] - 8.1.2022
 
 ### Added
 
@@ -96,9 +103,16 @@ let sample1Release = normalizeNewline """## [0.3.1] - 8.1.2022
 """
 
 let sample1ReleaseExpected =
-    SemanticVersion.Parse "0.3.1", DateTime(2022, 1, 8), Some { ChangelogData.Default with Added = "- Add XmlDocs to the generated package\n\n" }
+    SemanticVersion.Parse "0.3.1",
+    DateTime(2022, 1, 8),
+    Some {
+        ChangelogData.Default with
+            Added = "- Add XmlDocs to the generated package\n\n"
+    }
 
-let sample = normalizeNewline """# Changelog
+let sample =
+    normalizeNewline
+        """# Changelog
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
@@ -135,7 +149,10 @@ let sampleExpected: Changelogs = {
     Releases = [
         SemanticVersion.Parse "0.3.1",
         DateTime(2022, 1, 8),
-        Some { ChangelogData.Default with Added = "* Add XmlDocs to the generated package\n" }
+        Some {
+            ChangelogData.Default with
+                Added = "* Add XmlDocs to the generated package\n"
+        }
 
         SemanticVersion.Parse "0.3.0",
         DateTime(2021, 11, 23),
@@ -145,78 +162,80 @@ let sampleExpected: Changelogs = {
                     normalizeNewline
                         """* Expose client `CodeAction` caps as CodeActionClientCapabilities. (by @razzmatazz)
 * Map CodeAction.IsPreferred & CodeAction.Disabled props. (by @razzmatazz)
-"""             }
+"""
+        }
         SemanticVersion.Parse "0.2.0",
         DateTime(2021, 11, 17),
-        Some { ChangelogData.Default with Added = "* Add support for `codeAction/resolve` (by @razzmatazz)\n" }
-        
+        Some {
+            ChangelogData.Default with
+                Added = "* Add support for `codeAction/resolve` (by @razzmatazz)\n"
+        }
+
         SemanticVersion.Parse "0.1.1",
         DateTime(2021, 11, 15),
-        Some { ChangelogData.Default with Added = "* Initial implementation\n" }
+        Some {
+            ChangelogData.Default with
+                Added = "* Initial implementation\n"
+        }
     ]
 }
 
 open FParsec
-open FParsec.Primitives
 
 let runSuccess label p text expected =
     test $"parsing {label}" {
-
-        match FParsec.CharParsers.run p text with
-        | FParsec.CharParsers.Success (r, _, _) ->
-            Expect.equal r expected "Should have produced expected value"
-        | FParsec.CharParsers.Failure (m, _, _) ->
-            failwithf "%A" m
+        match CharParsers.run p text with
+        | CharParsers.Success(r, _, _) -> Expect.equal r expected "Should have produced expected value"
+        | CharParsers.Failure(m, _, _) -> failwithf "%A" m
     }
 
-let runSuccessNormalized label (p: Parser<string,unit>) text (expected:string) =
+let runSuccessNormalized label (p: Parser<string, unit>) text (expected: string) =
     test $"parsing {label}" {
-        match FParsec.CharParsers.run p text with
-        | FParsec.CharParsers.Success (r, _, _) ->
+        match CharParsers.run p text with
+        | CharParsers.Success(r, _, _) ->
             let normalizedR = r.Replace("\r", "")
             let normalizedExpected = expected.Replace("\r", "")
             Expect.equal normalizedR normalizedExpected "Should have produced expected value"
-        | FParsec.CharParsers.Failure (m, _, _) ->
-            failwithf "%A" m
+        | CharParsers.Failure(m, _, _) -> failwithf "%A" m
     }
 
-let parsingExamples = testList "parsing examples" [
-    runSuccess "line entry" Parser.pEntry "- A" "- A"
-    runSuccess "header" Parser.pHeader header ()
-    runSuccess "unreleased" Parser.pUnreleased emptyUnreleased None
-    runSuccess "header and unreleased" (Parser.pHeader >>. Parser.pUnreleased) headerAndUnreleased None
-    runSuccess "release" Parser.pRelease singleRelease singleReleaseExpected
-    runSuccess "sample 1 release" Parser.pRelease sample1Release sample1ReleaseExpected
-    runSuccess
-        "header and unreleased and released"
-        (Parser.pHeader >>. Parser.pUnreleased
-         .>>. Parser.pRelease)
-        headerAndUnreleasedAndRelease
-        headerAndUnreleasedAndReleaseExpected
-    runSuccess "keepachangelog" Parser.pChangeLogs keepAChangelog keepAChangelogExpected
-    runSuccess "lsp changelog" Parser.pChangeLogs sample sampleExpected
-]
+let parsingExamples =
+    testList "parsing examples" [
+        runSuccess "line entry" Parser.pEntry "- A" "- A"
+        runSuccess "header" Parser.pHeader header ()
+        runSuccess "unreleased" Parser.pUnreleased emptyUnreleased None
+        runSuccess "header and unreleased" (Parser.pHeader >>. Parser.pUnreleased) headerAndUnreleased None
+        runSuccess "release" Parser.pRelease singleRelease singleReleaseExpected
+        runSuccess "sample 1 release" Parser.pRelease sample1Release sample1ReleaseExpected
+        runSuccess
+            "header and unreleased and released"
+            (Parser.pHeader >>. Parser.pUnreleased .>>. Parser.pRelease)
+            headerAndUnreleasedAndRelease
+            headerAndUnreleasedAndReleaseExpected
+        runSuccess "keepachangelog" Parser.pChangeLogs keepAChangelog keepAChangelogExpected
+        runSuccess "lsp changelog" Parser.pChangeLogs sample sampleExpected
+    ]
 
 let changelogDataTest =
     test "Transform ChangelogData to Markdown" {
-        let changelogData =
-            {
-                Added = "* Added line 1\n* Added line 2\n"
-                Changed = "* Changed line 1\n* Changed line 2\n"
-                Deprecated = "* Deprecated line 1\n* Deprecated line 2\n"
-                Removed = "* Removed line 1\n* Removed line 2\n"
-                Fixed = "* Fixed line 1\n* Fixed line 2\n"
-                Security = "* Security line 1\n* Security line 2\n"
-                Custom =
-                    [
-                        "CustomHeaderA", "* Custom line 1\n* Custom line 2\n"
-                        "CustomHeaderB", "* Custom line 3\n* Custom line 4\n"
-                    ]
-                    |> Map.ofList
-            }
+        let changelogData = {
+            Added = "* Added line 1\n* Added line 2\n"
+            Changed = "* Changed line 1\n* Changed line 2\n"
+            Deprecated = "* Deprecated line 1\n* Deprecated line 2\n"
+            Removed = "* Removed line 1\n* Removed line 2\n"
+            Fixed = "* Fixed line 1\n* Fixed line 2\n"
+            Security = "* Security line 1\n* Security line 2\n"
+            Custom =
+                [
+                    "CustomHeaderA", "* Custom line 1\n* Custom line 2\n"
+                    "CustomHeaderB", "* Custom line 3\n* Custom line 4\n"
+                ]
+                |> Map.ofList
+        }
 
         let expected =
-            normalizeNewline """### Added
+            normalizeNewline
+                """### Added
 
 * Added line 1
 * Added line 2
@@ -258,9 +277,10 @@ let changelogDataTest =
 """
 
         Expect.equal (normalizeNewline (changelogData.ToMarkdown())) expected "Should have produced expected value"
-}
+    }
 
-let FableSample = """# Changelog
+let FableSample =
+    """# Changelog
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
@@ -312,12 +332,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * PR #3608: Rewrite `time_span.py` allowing for better precision by using a number representation intead of native `timedelta`. (by @MangelMaxime)
 """
 
-let FableSampleExpected :Changelogs = {
-    Unreleased = Some {
-        ChangelogData.Default with
-            Fixed =
-                normalizeNewline
-                    """#### Python
+let FableSampleExpected: Changelogs = {
+    Unreleased =
+        Some {
+            ChangelogData.Default with
+                Fixed =
+                    normalizeNewline
+                        """#### Python
 
 * Fix #3617: Fix comparaison between list option when one is None
 * Fix #3615: Fix remove from dictionary with tuple as key
@@ -326,19 +347,21 @@ let FableSampleExpected :Changelogs = {
 * Fix #3610: Cleanup Python regex handling
 * Fix #3628: System.DateTime.Substract not correctly transpiled
 """
-    }
+        }
     Releases = [
         SemanticVersion.Parse "4.6.0",
         DateTime(2023, 11, 27),
         Some {
             ChangelogData.Default with
                 Changed =
-                    normalizeNewline """#### All
+                    normalizeNewline
+                        """#### All
 
 * Updated .NET metadata to 8.0.100 (by @ncave)
 """
                 Added =
-                    normalizeNewline """#### All
+                    normalizeNewline
+                        """#### All
 
 * Fix #3584: Unit type compiles to undeclared variable (by @ncave)
 
@@ -351,7 +374,8 @@ let FableSampleExpected :Changelogs = {
 * Added `Guid.TryParse`, `Guid.ToByteArray` (by @ncave)
 """
                 Fixed =
-                    normalizeNewline """#### Python
+                    normalizeNewline
+                        """#### Python
 
 * Fixed char to string type regression with binary operator (by @dbrattli)
 * Fix `DateTime(..., DateTimeKind.Local).ToString("O")` (by @MangelMaxime)
@@ -363,7 +387,9 @@ let FableSampleExpected :Changelogs = {
     ]
 }
 
-let SectionLessSample = normalizeNewlines """# Changelog
+let SectionLessSample =
+    normalizeNewlines
+        """# Changelog
 
 ## 4.2.1 - 2023-09-29
 
@@ -382,26 +408,19 @@ let SectionLessSample = normalizeNewlines """# Changelog
 let SectionLessSampleExpected: Changelogs = {
     Unreleased = None
     Releases = [
-        SemanticVersion.Parse "4.2.1",
-        DateTime(2023, 9, 29),
-        Some ChangelogData.Default
-        SemanticVersion.Parse "4.2.0",
-        DateTime(2023, 9, 29),
-        Some ChangelogData.Default
-    ] 
+        SemanticVersion.Parse "4.2.1", DateTime(2023, 9, 29), Some ChangelogData.Default
+        SemanticVersion.Parse "4.2.0", DateTime(2023, 9, 29), Some ChangelogData.Default
+    ]
 }
 
-let fableTests = testList "Fable" [
-    runSuccess "Multiple languages" Parser.pChangeLogs FableSample FableSampleExpected
-    runSuccess "SectionLess items" Parser.pChangeLogs SectionLessSample SectionLessSampleExpected
-]
+let fableTests =
+    testList "Fable" [
+        runSuccess "Multiple languages" Parser.pChangeLogs FableSample FableSampleExpected
+        runSuccess "SectionLess items" Parser.pChangeLogs SectionLessSample SectionLessSampleExpected
+    ]
 
 [<Tests>]
-let tests = testList "All" [
-    parsingExamples
-    changelogDataTest
-    fableTests
-]
+let tests = testList "All" [ parsingExamples; changelogDataTest; fableTests ]
 
 [<EntryPoint>]
 let main argv =
