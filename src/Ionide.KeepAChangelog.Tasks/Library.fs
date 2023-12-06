@@ -24,7 +24,7 @@ module Util =
         item.SetMetadata("Removed", data.Removed)
         item.SetMetadata("Fixed", data.Fixed)
         item.SetMetadata("Security", data.Security)
-        for (KeyValue(heading, lines)) in data.Custom do
+        for KeyValue(heading, lines) in data.Custom do
             item.SetMetadata(heading, lines)
         item
 
@@ -81,7 +81,7 @@ type ParseChangelogs() =
 
                 sortedReleases
                 |> Seq.tryHead
-                |> Option.iter (fun (version, date, data) ->
+                |> Option.iter (fun (_version, _date, data) ->
                     data
                     |> Option.iter (fun data ->
                         this.LatestReleaseNotes <- data.ToMarkdown())

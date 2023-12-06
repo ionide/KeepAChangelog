@@ -6,6 +6,11 @@
         <PackageTags>version;changelog;keepachangelog</PackageTags>
         <GeneratePathProperty>true</GeneratePathProperty>
         <PackageIcon>ionide.png</PackageIcon>
+        <NoWarn>$(NoWarn);3186,0042</NoWarn><!-- circumvent an error with the fake dependencymanager for paket: https://github.com/dotnet/fsharp/issues/8678 -->
+        <NoWarn>$(NoWarn);NU1902</NoWarn><!-- NU1902 - package vulnerability detected -->
+        <WarnOn>$(WarnOn);1182</WarnOn> <!-- Unused variables,https://learn.microsoft.com/en-us/dotnet/fsharp/language-reference/compiler-options#opt-in-warnings -->
+        <WarnOn>$(WarnOn);3390</WarnOn><!-- Malformed XML doc comments -->
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Dotnet.ReproducibleBuilds" Version="1.1.1" PrivateAssets="All" />

@@ -49,10 +49,7 @@ module Parser =
 
     open Domain
     open FParsec
-    open FParsec.CharParsers
-    open FParsec.Primitives
     open System.IO
-    open System.Collections.Generic
 
     type Parser<'t> = Parser<'t, unit>
 
@@ -98,12 +95,12 @@ module Parser =
             // but we also need to keep parsing next lines until
             // * we find a bullet, or
             // * we get an empty line
-            let firstLine = FParsec.CharParsers.restOfLine true
+            let firstLine = CharParsers.restOfLine true
 
             let followingLine =
                 nextCharSatisfiesNot (fun c -> c = '\n' || c = '-' || c = '*')
                 >>. spaces1
-                >>. FParsec.CharParsers.restOfLine true
+                >>. CharParsers.restOfLine true
 
             let rest = opt (many1 (attempt followingLine))
 
@@ -273,5 +270,5 @@ module Parser =
                 file.FullName
                 (System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier = false))
             with
-        | ParserResult.Success (result, _, pos) -> Result.Ok result
-        | ParserResult.Failure (msg, structuredError, pos) -> Result.Error(msg, structuredError)
+        | ParserResult.Success (result, _, _pos) -> Result.Ok result
+        | ParserResult.Failure (msg, structuredError, _pos) -> Result.Error(msg, structuredError)
