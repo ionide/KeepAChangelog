@@ -29,6 +29,7 @@ let singleReleaseExpected =
                 Changed = "- B\n"
                 Removed = "- C\n"
         }
+        IsYanked = false
     }
 
 let keepAChangelog =
@@ -70,6 +71,7 @@ let keepAChangelogExpected: Changelogs =
                     ChangelogData.Default with
                         Added = "- A\n- B\n- C\n\n"
                 }
+                IsYanked = false
             }
         ]
     }
@@ -106,8 +108,25 @@ let sample1ReleaseExpected =
         Version = SemanticVersion.Parse "0.3.1"
         Date = DateTime(2022, 1, 8)
         Data = Some { ChangelogData.Default with Added = "- Add XmlDocs to the generated package\n\n" }
+        IsYanked = false
     }
-    
+
+let yankedRelease = normalizeNewline """## [0.3.1] - 8.1.2022 [YANKED]
+
+### Added
+
+- Add XmlDocs to the generated package
+
+"""
+
+let yankedReleaseExpected =
+    {
+        Version = SemanticVersion.Parse "0.3.1"
+        Date = DateTime(2022, 1, 8)
+        Data = Some { ChangelogData.Default with Added = "- Add XmlDocs to the generated package\n\n" }
+        IsYanked = true
+    }  
+
 let sample = normalizeNewline """# Changelog
 All notable changes to this project will be documented in this file.
 
@@ -147,6 +166,7 @@ let sampleExpected: Changelogs = {
             Version = SemanticVersion.Parse "0.3.1"
             Date = DateTime(2022, 1, 8)
             Data = Some { ChangelogData.Default with Added = "* Add XmlDocs to the generated package\n" }
+            IsYanked = false
         }
         {
             Version = SemanticVersion.Parse "0.3.0"
@@ -158,16 +178,19 @@ let sampleExpected: Changelogs = {
                         """* Expose client `CodeAction` caps as CodeActionClientCapabilities. (by @razzmatazz)
 * Map CodeAction.IsPreferred & CodeAction.Disabled props. (by @razzmatazz)
 """             }
+            IsYanked = false
         }
         {
             Version = SemanticVersion.Parse "0.2.0"
             Date = DateTime(2021, 11, 17)
             Data = Some { ChangelogData.Default with Added = "* Add support for `codeAction/resolve` (by @razzmatazz)\n" }
+            IsYanked = false
         }
         {
             Version = SemanticVersion.Parse "0.1.1"
             Date = DateTime(2021, 11, 15)
             Data = Some { ChangelogData.Default with Added = "* Initial implementation\n" }
+            IsYanked = false
         }
     ]
 }
@@ -203,6 +226,7 @@ let parsingExamples = testList "parsing examples" [
     runSuccess "header and unreleased" (Parser.pHeader >>. Parser.pUnreleased) headerAndUnreleased None
     runSuccess "release" Parser.pRelease singleRelease singleReleaseExpected
     runSuccess "sample 1 release" Parser.pRelease sample1Release sample1ReleaseExpected
+    runSuccess "yanked release" Parser.pRelease yankedRelease yankedReleaseExpected
     runSuccess
         "header and unreleased and released"
         (Parser.pHeader >>. Parser.pUnreleased
@@ -347,6 +371,7 @@ let FableSampleExpected :Changelogs = {
         {
             Version = SemanticVersion.Parse "4.6.0"
             Date = DateTime(2023, 11, 27)
+            IsYanked = false
             Data = Some {
             ChangelogData.Default with
                 Changed =
@@ -404,11 +429,13 @@ let SectionLessSampleExpected: Changelogs = {
             Version = SemanticVersion.Parse "4.2.1"
             Date = DateTime(2023, 9, 29)
             Data = Some ChangelogData.Default
+            IsYanked = false
         }
         {
             Version = SemanticVersion.Parse "4.2.0"
             Date = DateTime(2023, 9, 29)
             Data = Some ChangelogData.Default
+            IsYanked = false
         }
     ] 
 }

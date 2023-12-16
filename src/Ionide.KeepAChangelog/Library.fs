@@ -45,6 +45,7 @@ module Domain =
             Version : SemanticVersion
             Date : DateTime
             Data : ChangelogData option
+            IsYanked : bool
         }
 
     type Changelogs =
@@ -244,20 +245,27 @@ module Parser =
             pipe5 pDay dot pMonth dot pYear (fun d _ m _ y -> System.DateTime(y, m, d))
 
         attempt dmyDots <|> ymdDashes
-
+    
+    let pYanked: Parser<_> =
+        opt (pstring "[YANKED]")
+        |>> function
+            | None -> false
+            | Some _ -> true
 
     let pVersion = mdUrl pSemver <|> pSemver
 
     let pRelease: Parser<Release> =
         let vPart = skipString "##" >>. spaces1 >>. pVersion
         let middle = spaces1 .>> pchar '-' .>> spaces1
-        let date = pDate .>> skipRestOfLine true
+        let date = pDate
+        let yanked = opt spaces1 >>. pYanked
         let content = choice [ pData; pNonStructuredData ]
 
-        pipe5 vPart middle date (opt (many newline)) (opt content) (fun v _ date _ data -> 
+        pipe6 vPart middle date yanked (opt (many newline)) (opt content) (fun v _ date isYanked _ data -> 
             { Version = v
               Date = date
-              Data = data }
+              Data = data 
+              IsYanked = isYanked }
         )
 
     let pChangeLogs: Parser<Changelogs, unit> =
