@@ -1,7 +1,4 @@
 {
-    "[fsharp]": {
-        "editor.formatOnSave": true
-    },
     "files.associations": {
         "**/build*/*[props|targets]": "msbuild"
     }
