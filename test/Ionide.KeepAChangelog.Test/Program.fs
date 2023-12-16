@@ -20,12 +20,16 @@ let singleRelease =
 """
 
 let singleReleaseExpected =
-    (SemanticVersion.Parse "1.0.0", DateTime(2017, 06, 20), Some {
+    {
+        Version = SemanticVersion.Parse "1.0.0"
+        Date = DateTime(2017, 06, 20)
+        Data = Some {
             ChangelogData.Default with
                 Added = "- A\n"
                 Changed = "- B\n"
                 Removed = "- C\n"
-            })
+        }
+    }
 
 let keepAChangelog =
     normalizeNewline """# Changelog
@@ -59,11 +63,13 @@ let keepAChangelogExpected: Changelogs =
         Unreleased = None
         Releases = [
             singleReleaseExpected
-            SemanticVersion.Parse("0.3.0"),
-            DateTime(2015, 12, 03),
-            Some {
-                ChangelogData.Default with
-                    Added = "- A\n- B\n- C\n\n" 
+            {
+                Version = SemanticVersion.Parse "0.3.0"
+                Date = DateTime(2015, 12, 03)
+                Data = Some {
+                    ChangelogData.Default with
+                        Added = "- A\n- B\n- C\n\n"
+                }
             }
         ]
     }
@@ -96,8 +102,12 @@ let sample1Release = normalizeNewline """## [0.3.1] - 8.1.2022
 """
 
 let sample1ReleaseExpected =
-    SemanticVersion.Parse "0.3.1", DateTime(2022, 1, 8), Some { ChangelogData.Default with Added = "- Add XmlDocs to the generated package\n\n" }
-
+    {
+        Version = SemanticVersion.Parse "0.3.1"
+        Date = DateTime(2022, 1, 8)
+        Data = Some { ChangelogData.Default with Added = "- Add XmlDocs to the generated package\n\n" }
+    }
+    
 let sample = normalizeNewline """# Changelog
 All notable changes to this project will be documented in this file.
 
@@ -133,26 +143,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 let sampleExpected: Changelogs = {
     Unreleased = None
     Releases = [
-        SemanticVersion.Parse "0.3.1",
-        DateTime(2022, 1, 8),
-        Some { ChangelogData.Default with Added = "* Add XmlDocs to the generated package\n" }
-
-        SemanticVersion.Parse "0.3.0",
-        DateTime(2021, 11, 23),
-        Some {
+        {
+            Version = SemanticVersion.Parse "0.3.1"
+            Date = DateTime(2022, 1, 8)
+            Data = Some { ChangelogData.Default with Added = "* Add XmlDocs to the generated package\n" }
+        }
+        {
+            Version = SemanticVersion.Parse "0.3.0"
+            Date = DateTime(2021, 11, 23)
+            Data = Some {
             ChangelogData.Default with
                 Added =
                     normalizeNewline
                         """* Expose client `CodeAction` caps as CodeActionClientCapabilities. (by @razzmatazz)
 * Map CodeAction.IsPreferred & CodeAction.Disabled props. (by @razzmatazz)
 """             }
-        SemanticVersion.Parse "0.2.0",
-        DateTime(2021, 11, 17),
-        Some { ChangelogData.Default with Added = "* Add support for `codeAction/resolve` (by @razzmatazz)\n" }
-        
-        SemanticVersion.Parse "0.1.1",
-        DateTime(2021, 11, 15),
-        Some { ChangelogData.Default with Added = "* Initial implementation\n" }
+        }
+        {
+            Version = SemanticVersion.Parse "0.2.0"
+            Date = DateTime(2021, 11, 17)
+            Data = Some { ChangelogData.Default with Added = "* Add support for `codeAction/resolve` (by @razzmatazz)\n" }
+        }
+        {
+            Version = SemanticVersion.Parse "0.1.1"
+            Date = DateTime(2021, 11, 15)
+            Data = Some { ChangelogData.Default with Added = "* Initial implementation\n" }
+        }
     ]
 }
 
@@ -328,9 +344,10 @@ let FableSampleExpected :Changelogs = {
 """
     }
     Releases = [
-        SemanticVersion.Parse "4.6.0",
-        DateTime(2023, 11, 27),
-        Some {
+        {
+            Version = SemanticVersion.Parse "4.6.0"
+            Date = DateTime(2023, 11, 27)
+            Data = Some {
             ChangelogData.Default with
                 Changed =
                     normalizeNewline """#### All
@@ -360,6 +377,7 @@ let FableSampleExpected :Changelogs = {
 * PR #3608: Rewrite `time_span.py` allowing for better precision by using a number representation intead of native `timedelta`. (by @MangelMaxime)
 """
         }
+        }
     ]
 }
 
@@ -382,12 +400,16 @@ let SectionLessSample = normalizeNewlines """# Changelog
 let SectionLessSampleExpected: Changelogs = {
     Unreleased = None
     Releases = [
-        SemanticVersion.Parse "4.2.1",
-        DateTime(2023, 9, 29),
-        Some ChangelogData.Default
-        SemanticVersion.Parse "4.2.0",
-        DateTime(2023, 9, 29),
-        Some ChangelogData.Default
+        {
+            Version = SemanticVersion.Parse "4.2.1"
+            Date = DateTime(2023, 9, 29)
+            Data = Some ChangelogData.Default
+        }
+        {
+            Version = SemanticVersion.Parse "4.2.0"
+            Date = DateTime(2023, 9, 29)
+            Data = Some ChangelogData.Default
+        }
     ] 
 }
 

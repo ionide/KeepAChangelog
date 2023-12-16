@@ -40,9 +40,16 @@ module Domain =
                         section heading lines
                 ]
 
+    type Release =
+        {
+            Version : SemanticVersion
+            Date : DateTime
+            Data : ChangelogData option
+        }
+
     type Changelogs =
         { Unreleased: ChangelogData option
-          Releases: (SemanticVersion * DateTime * ChangelogData option) list }
+          Releases: Release list }
 
 module Parser =
 
@@ -241,13 +248,17 @@ module Parser =
 
     let pVersion = mdUrl pSemver <|> pSemver
 
-    let pRelease: Parser<SemVersion.SemanticVersion * System.DateTime * ChangelogData option> =
+    let pRelease: Parser<Release> =
         let vPart = skipString "##" >>. spaces1 >>. pVersion
         let middle = spaces1 .>> pchar '-' .>> spaces1
         let date = pDate .>> skipRestOfLine true
         let content = choice [ pData; pNonStructuredData ]
 
-        pipe5 vPart middle date (opt (many newline)) (opt content) (fun v _ date _ data -> v, date, data)
+        pipe5 vPart middle date (opt (many newline)) (opt content) (fun v _ date _ data -> 
+            { Version = v
+              Date = date
+              Data = data }
+        )
 
     let pChangeLogs: Parser<Changelogs, unit> =
         let unreleased =
@@ -275,3 +286,4 @@ module Parser =
             with
         | ParserResult.Success (result, _, pos) -> Result.Ok result
         | ParserResult.Failure (msg, structuredError, pos) -> Result.Error(msg, structuredError)
+ 

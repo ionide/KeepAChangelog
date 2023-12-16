@@ -65,14 +65,14 @@ type ParseChangelogs() =
                 let sortedReleases =
                     // have to use LINQ here because List.sortBy* require IComparable, which
                     // semver doesn't implement
-                    changelogs.Releases.OrderByDescending(fun (v, _, _) -> v)
+                    changelogs.Releases.OrderByDescending(fun release -> release.Version)
 
                 let items =
                     sortedReleases
-                    |> Seq.map (fun (version, date, data) ->
+                    |> Seq.map (fun release ->
                         TaskItem()
-                        |> Util.mapReleaseInfo version date
-                        |> fun d -> match data with Some data -> Util.mapChangelogData data d | None -> d
+                        |> Util.mapReleaseInfo release.Version release.Date
+                        |> fun d -> match release.Data with Some data -> Util.mapChangelogData data d | None -> d
                     )
                     |> Seq.toArray
 
@@ -81,8 +81,8 @@ type ParseChangelogs() =
 
                 sortedReleases
                 |> Seq.tryHead
-                |> Option.iter (fun (version, date, data) ->
-                    data
+                |> Option.iter (fun release ->
+                    release.Data
                     |> Option.iter (fun data ->
                         this.LatestReleaseNotes <- data.ToMarkdown())
                     )
