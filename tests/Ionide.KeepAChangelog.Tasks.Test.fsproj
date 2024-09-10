@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="Workspace.fs" />
+        <Compile Include="Setup.fs" />
+        <Compile Include="UnitTests.fs" />
+        <Compile Include="IntegrationTests.fs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="EasyBuild.FileSystemProvider" />
+      <PackageReference Include="Fixie.TestAdapter" />
+      <PackageReference Include="FSharp.Core" />
+      <PackageReference Include="Microsoft.Build.Utilities.Core" />
+      <PackageReference Include="Moq" />
+      <PackageReference Include="Shouldly" />
+      <PackageReference Include="SimpleExec" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\src\Ionide.KeepAChangelog.Tasks.fsproj" />
+    </ItemGroup>
+
+</Project>

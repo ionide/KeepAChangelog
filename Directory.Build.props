@@ -1,6 +1,23 @@
 <Project>
+    <!-- Make F# support Central Package Management -->
     <PropertyGroup>
-        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <DisableImplicitSystemValueTupleReference>true</DisableImplicitSystemValueTupleReference>
+        <DisableImplicitFSharpCoreReference>true</DisableImplicitFSharpCoreReference>
+    </PropertyGroup>
+    <!-- Use lock files -->
+    <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+        <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    </PropertyGroup>
+    <PropertyGroup>
+        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+        <RestoreLockedMode Condition="'$(ContinuousIntegrationBuild)' == 'true'">true</RestoreLockedMode>
+    </PropertyGroup>
+    <PropertyGroup>
+        <PackageProjectUrl>https://github.com/ionide/KeepAChangelog</PackageProjectUrl>
+        <Packagelicense>
+            https://github.com/ionide/KeepAChangelog/blob/master/LICENSE</Packagelicense>
+        <RepositoryUrl>https://github.com/ionide/KeepAChangelog</RepositoryUrl>
+        <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <Authors>Chet Husk</Authors>
         <PackageTags>version;changelog;keepachangelog</PackageTags>
@@ -8,11 +25,9 @@
         <PackageIcon>ionide.png</PackageIcon>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Dotnet.ReproducibleBuilds" Version="1.1.1" PrivateAssets="All" />
-        <PackageReference Update="FSharp.Core" Version=""/>
-    </ItemGroup>
-    <ItemGroup Condition="'$(IsPackable)' == 'true'">
-        <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="\" />
-        <None Include="$(MSBuildThisFileDirectory)ionide.png" Pack="true" PackagePath="\" />
+        <None Include="$(MSBuildThisFileDirectory)/LICENSE.txt" Pack="true"
+            PackagePath="$(PackageLicenseFile)" />
+        <None Include="$(MSBuildThisFileDirectory)/README.md" Pack="true" PackagePath="\" />
+        <None Include="$(MSBuildThisFileDirectory)/ionide.png" Pack="true" PackagePath="\" />
     </ItemGroup>
 </Project>

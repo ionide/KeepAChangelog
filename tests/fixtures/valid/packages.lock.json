@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "dependencies": {
+    "net6.0": {
+      "Ionide.KeepAChangelog.Tasks": {
+        "type": "Direct",
+        "requested": "[1.0.0-test-002, )",
+        "resolved": "1.0.0-test-002",
+        "contentHash": "FOf+ufy7DdFURwhkS/d2c51C0CGtBk5zikGnyfoSf+tWvukJeD3xl2I5cXKeX8F1l/bzz8GA1y0FoGT+6pNMAg=="
+      }
+    }
+  }
+}

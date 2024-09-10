@@ -1,0 +1,17 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="EasyBuild.FileSystemProvider" Version="0.3.0" />
+    <PackageVersion Include="Fixie.TestAdapter" Version="3.4.0" />
+    <PackageVersion Include="FSharp.Core" Version="6.0.0" />
+    <PackageVersion Include="Ionide.KeepAChangelog.Tasks" Version="1.0.0-test-002" />
+    <PackageVersion Include="KeepAChangelogParser" Version="1.2.4" />
+    <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="17.11.4" />
+    <PackageVersion Include="Moq" Version="4.20.72" />
+    <PackageVersion Include="Semver" Version="2.3.0" />
+    <PackageVersion Include="Shouldly" Version="4.2.1" />
+    <PackageVersion Include="SimpleExec" Version="12.0.0" />
+  </ItemGroup>
+</Project>

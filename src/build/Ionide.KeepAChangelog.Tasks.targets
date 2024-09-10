@@ -20,7 +20,7 @@
     <UsingTask
             AssemblyFile="$(MSBuildThisFileDirectory)../tasks/$(_Ionide_KeepAChangelog_Tasks_TFM)/Ionide.KeepAChangelog.Tasks.dll"
             TaskName="Ionide.KeepAChangelog.Tasks.ParseChangeLogs" />
-
+            
     <Target
             Name="GetChangelogVersion"
             Condition="'$(ChangelogFile)' != '' and Exists('$(ChangelogFile)')"
