@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+* Fix bundled dependencies into the package for net6.0
+
 ## [0.2.0] - 2023.12.05
 
 ### Changed
