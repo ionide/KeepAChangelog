@@ -1,35 +1,88 @@
-﻿namespace KeepAChangelog.Tasks
+﻿module KeepAChangelog.Tasks
 
 open Microsoft.Build.Utilities
 open Microsoft.Build.Framework
 open System.IO
 open KeepAChangelogParser
 open KeepAChangelogParser.Models
+open KeepAChangelog
+open FsToolkit.ErrorHandling
 
-// type ParseChangelogs() =
-//     inherit Task()
+module Result =
 
-//     [<Required>]
-//     member val ChangelogFile: string = null with get, set
+    let toBool =
+        function
+        | Ok _ -> true
+        | Error _ -> false
 
-//     [<Output>]
-//     member val UnreleasedChangelog: ITaskItem = null with get, set
+type ParseChangelog() =
+    inherit Task()
 
-//     [<Output>]
-//     member val CurrentReleaseChangelog: ITaskItem = null with get, set
+    [<Required>]
+    member val ChangelogFile: string = null with get, set
 
-//     [<Output>]
-//     member val AllReleasedChangelogs: ITaskItem [] = null with get, set
+    [<Output>]
+    member val UnreleasedChangelog: ITaskItem = null with get, set
 
-//     [<Output>]
-//     member val LatestReleaseNotes: string = null with get, set
+    [<Output>]
+    member val CurrentReleaseChangelog: ITaskItem = null with get, set
 
-//     override this.Execute() : bool =
-//         let file = this.ChangelogFile |> FileInfo
+    [<Output>]
+    member val AllReleasedChangelogs: ITaskItem[] = null with get, set
 
-//         if not file.Exists then
-//             this.Log.LogError($"The file {file.FullName} could not be found.")
-//             false
+    [<Output>]
+    member val LatestReleaseNotes: string = null with get, set
+
+    override this.Execute() : bool =
+        let file = this.ChangelogFile |> FileInfo
+
+        // Using result CE to make code easier to read by avoiding nested if statements
+        result {
+            do! this.CheckFileExists file
+            let! changelog = this.ParseChangelog file
+
+            // changelog.
+
+            // Done
+            return true
+        }
+        |> Result.toBool
+
+    member this.CheckFileExists(fileInfo: FileInfo) =
+        if fileInfo.Exists then
+            Ok()
+        else
+            this.LogError(Log.changelogFileNotFound fileInfo.FullName)
+            Error()
+
+    member this.ParseChangelog(fileInfo: FileInfo) : Result<Changelog, unit> =
+        let changelogContent = File.ReadAllText(fileInfo.FullName)
+        let parserResult = ChangelogParser().Parse(changelogContent)
+
+        if parserResult.IsSuccess then
+            Ok parserResult.Value
+        else
+            this.LogError(Log.invalidChangelog fileInfo.FullName parserResult.Error)
+            Error()
+
+    /// <summary>
+    /// Helper method to log an error with the given log data.
+    /// </summary>
+    /// <param name="logData"></param>
+    member this.LogError(logData: Log.LogData) =
+        this.Log.LogError(
+            "CHANGELOG",
+            logData.ErrorCode,
+            logData.HelpKeyword,
+            this.BuildEngine.ProjectFileOfTaskNode,
+            this.BuildEngine.LineNumberOfTaskNode,
+            this.BuildEngine.ColumnNumberOfTaskNode,
+            this.BuildEngine.LineNumberOfTaskNode,
+            this.BuildEngine.ColumnNumberOfTaskNode,
+            logData.Message,
+            logData.MessageArgs
+        )
+
 //         else
 //             // match Parser.parseChangeLog file with
 //             // | Ok changelogs ->
@@ -73,18 +126,3 @@ open KeepAChangelogParser.Models
 //             //     )
 
 //             //     false
-
-
-type ParseChangelogs() =
-    inherit Task()
-
-    [<Required>]
-    member val ChangelogFile: string = null with get, set
-
-    [<Output>]
-    member val MaximeTest : string = null with get, set
-
-    override this.Execute() : bool =
-        this.Log.LogError("The file could not be found.")
-        this.MaximeTest <- "test"
-        true

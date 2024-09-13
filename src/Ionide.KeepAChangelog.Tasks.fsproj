@@ -5,7 +5,7 @@
     <DebugType>embedded</DebugType>
     <IsPackable>true</IsPackable>
     <Description>MSBuild Tasks and Targets that set your Assembly Version, Package Version, and Package Release Notes from your KeepAChangelog-compatible Changelogs.</Description>
-    
+
     <!-- we need the assemblies bundled, so set this so we don't expose any dependencies to the outside world -->
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
     <NoWarn>NU5128;NU5100</NoWarn><!-- NU5100 is because we pack to tasks/, not lib/ -->
@@ -17,6 +17,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+      <Compile Include="Log.fs" />
     <Compile Include="Library.fs" />
     <!-- these lines pack the single-TFM build props/targets files to the `build` folder in the generated package.
          By convention, the .NET SDK will look for `build\<Package Id>.props` and `build\<Package Id>.targets`
@@ -30,6 +31,7 @@
   <ItemGroup>
     <!-- All dependencies need PrivateAssets="all" not flow as a nuget-dependency to consumers -->
     <!-- MSBUC specifically-->
+    <PackageReference Include="FsToolkit.ErrorHandling" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" ExcludeAssets="Runtime" PrivateAssets="all" />
     <PackageReference Include="KeepAChangelogParser" PrivateAssets="all" />
     <PackageReference Include="Semver" PrivateAssets="all" />

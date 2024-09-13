@@ -16,6 +16,7 @@
       <PackageReference Include="EasyBuild.FileSystemProvider" />
       <PackageReference Include="Fixie.TestAdapter" />
       <PackageReference Include="FSharp.Core" />
+      <PackageReference Include="KeepAChangelogParser" />
       <PackageReference Include="Microsoft.Build.Utilities.Core" />
       <PackageReference Include="Moq" />
       <PackageReference Include="Shouldly" />
