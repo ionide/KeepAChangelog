@@ -1,7 +1,6 @@
-﻿module KeepAChangelog.Tasks
+﻿namespace Ionide.KeepAChangelog.Tasks
 
 open System
-open System.Collections.Generic
 open System.Globalization
 open System.Runtime.CompilerServices
 open System.Text
@@ -30,83 +29,84 @@ module Result =
     //     }
     //     return metadata;
     // }
+[<AutoOpen>]
+module Utils =
+    let toTaskItemMetadata (sections: ChangelogSubSectionCollection) =
+        sections
+        |> Seq.map (fun section ->
+            (string section.Type,
+             section.ItemCollection |> Seq.map _.MarkdownText |> String.concat (System.Environment.NewLine))
+        )
 
-let toTaskItemMetadata (sections: ChangelogSubSectionCollection) =
-    sections
-    |> Seq.map (fun section ->
-        (string section.Type,
-         section.ItemCollection |> Seq.map _.MarkdownText |> String.concat (System.Environment.NewLine))
-    )
-
-let toTaskItem (unreleased : ChangelogSectionUnreleased) =
-    let taskItem = TaskItem("unreleased")
-    for (key, value) in toTaskItemMetadata unreleased.SubSectionCollection do
-        taskItem.SetMetadata(key, value)
-    taskItem
-    // public static Result<SemVersion.SemanticVersion> SemanticVersion(this ChangelogSection section)
-    // {
-    //     var success = SemVersion.SemanticVersion.TryParse(section.MarkdownVersion, out var version);
-    //     if (success)
-    //     {
-    //         return Result.Success(version);
-    //     }
-    //     else
-    //     {
-    //         return Result.Failure<SemVersion.SemanticVersion>($"Unable to parse '{section.MarkdownVersion}' as a Semantic Version.");
-    //     }
-    // }
+    let toTaskItem (unreleased : ChangelogSectionUnreleased) =
+        let taskItem = TaskItem("unreleased")
+        for (key, value) in toTaskItemMetadata unreleased.SubSectionCollection do
+            taskItem.SetMetadata(key, value)
+        taskItem
+        // public static Result<SemVersion.SemanticVersion> SemanticVersion(this ChangelogSection section)
+        // {
+        //     var success = SemVersion.SemanticVersion.TryParse(section.MarkdownVersion, out var version);
+        //     if (success)
+        //     {
+        //         return Result.Success(version);
+        //     }
+        //     else
+        //     {
+        //         return Result.Failure<SemVersion.SemanticVersion>($"Unable to parse '{section.MarkdownVersion}' as a Semantic Version.");
+        //     }
+        // }
 
 
-[<Extension>]
-type Extensions =
     [<Extension>]
-    static member inline ToDateTime(section: ChangelogSection) = DateTime.ParseExact(section.MarkdownDate, "yyyy-MM-dd", CultureInfo.InvariantCulture)
+    type Extensions =
+        [<Extension>]
+        static member inline ToDateTime(section: ChangelogSection) = DateTime.ParseExact(section.MarkdownDate, "yyyy-MM-dd", CultureInfo.InvariantCulture)
 
-    // public static DateTime ToDateTime(this ChangelogSection section) => DateTime.ParseExact(section.MarkdownDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
-let unwrapped (sections: ChangelogSectionCollection) =
-    sections |> Seq.choose (fun section ->
-        match SemVersion.TryParse section.MarkdownVersion with
-        | false, _ -> None
-        | true, version ->
-            Some {| version = version; dateTime = section.ToDateTime(); collection = section.SubSectionCollection|}
-    )
-    //
-    // public static IEnumerable<(SemVersion.SemanticVersion version, DateTime date, ChangelogSubSectionCollection subsections)> Unwrapped(this ChangelogSectionCollection sections)
-    // {
-    //     foreach (var section in sections)
-    //     {
-    //         var validated =
-    //             section.SemanticVersion().Map(v => (v, section.ToDateTime(), section.SubSectionCollection));
-    //         if (validated.IsSuccess)
-    //         {
-    //             yield return validated.Value;
-    //         }
-    //     }
+        // public static DateTime ToDateTime(this ChangelogSection section) => DateTime.ParseExact(section.MarkdownDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+    let unwrapped (sections: ChangelogSectionCollection) =
+        sections |> Seq.choose (fun section ->
+            match SemVersion.TryParse section.MarkdownVersion with
+            | false, _ -> None
+            | true, version ->
+                Some {| version = version; dateTime = section.ToDateTime(); collection = section.SubSectionCollection|}
+        )
+        //
+        // public static IEnumerable<(SemVersion.SemanticVersion version, DateTime date, ChangelogSubSectionCollection subsections)> Unwrapped(this ChangelogSectionCollection sections)
+        // {
+        //     foreach (var section in sections)
+        //     {
+        //         var validated =
+        //             section.SemanticVersion().Map(v => (v, section.ToDateTime(), section.SubSectionCollection));
+        //         if (validated.IsSuccess)
+        //         {
+        //             yield return validated.Value;
+        //         }
+        //     }
+        // }
+        //    public static string ToMarkdown(this ChangelogSubSectionCollection subsections)
+        // {
+        //     var builder = new StringBuilder();
+        //     foreach (var subsection in subsections)
+        //     {
+        //         builder.AppendLine($"### {subsection.Type.EnumName()}");
+        //         foreach (var line in subsection.ItemCollection)
+        //         {
+        //             builder.AppendLine(line.MarkdownText);
+        //         }
+        //     }
+        //     return builder.ToString();
+        // }
     // }
-    //    public static string ToMarkdown(this ChangelogSubSectionCollection subsections)
-    // {
-    //     var builder = new StringBuilder();
-    //     foreach (var subsection in subsections)
-    //     {
-    //         builder.AppendLine($"### {subsection.Type.EnumName()}");
-    //         foreach (var line in subsection.ItemCollection)
-    //         {
-    //             builder.AppendLine(line.MarkdownText);
-    //         }
-    //     }
-    //     return builder.ToString();
-    // }
-// }
-let toMarkdown (subsections: ChangelogSubSectionCollection) =
-    let builder = StringBuilder()
-    subsections |> Seq.fold (fun (builder : StringBuilder) subsection ->
-        let state = builder.AppendLine $"### {subsection.Type}"
-        subsection.ItemCollection
-        |> Seq.fold (fun (builder : StringBuilder) line -> builder.AppendLine line.MarkdownText) state
-    ) builder
-    |> _.ToString()
+    let toMarkdown (subsections: ChangelogSubSectionCollection) =
+        let builder = StringBuilder()
+        subsections |> Seq.fold (fun (builder : StringBuilder) subsection ->
+            let state = builder.AppendLine $"### {subsection.Type}"
+            subsection.ItemCollection
+            |> Seq.fold (fun (builder : StringBuilder) line -> builder.AppendLine line.MarkdownText) state
+        ) builder
+        |> _.ToString()
 
-type ParseChangelog() =
+type ParseChangeLogs() =
     inherit Task()
 
     [<Required>]
