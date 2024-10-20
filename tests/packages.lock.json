@@ -215,19 +215,7 @@
         "contentHash": "+TUFINV2q2ifyXauQXRwy4CiBhqvDEDZeVJU7qfxya4aRYOKzVBpN+4acx25VcPB9ywUN6C0n8drWl110PhZEg=="
       },
       "ionide.keepachangelog.tasks": {
-        "type": "Project",
-        "dependencies": {
-          "FsToolkit.ErrorHandling": "[4.16.0, )"
-        }
-      },
-      "FsToolkit.ErrorHandling": {
-        "type": "CentralTransitive",
-        "requested": "[4.16.0, )",
-        "resolved": "4.16.0",
-        "contentHash": "GG4LtvJ/UkdyjGQUd+uPYN/g1GNlHyzMPDmwcnYvBn0V1dD4xJiiRE5N8UCgq+TSRQP11NNQUbzpU0zdxkrNbw==",
-        "dependencies": {
-          "FSharp.Core": "7.0.300"
-        }
+        "type": "Project"
       }
     }
   }
