@@ -19,7 +19,8 @@
       <PackageReference Include="KeepAChangelogParser" />
       <PackageReference Include="Microsoft.Build.Utilities.Core" />
       <PackageReference Include="Moq" />
-      <PackageReference Include="Shouldly" />
+      <PackageReference Include="Semver" />
+        <PackageReference Include="Shouldly" />
       <PackageReference Include="SimpleExec" />
     </ItemGroup>
 

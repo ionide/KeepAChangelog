@@ -85,3 +85,21 @@ let ``task fails when changelog file is invalid`` () =
     success.ShouldBeFalse()
     context.Errors.Count.ShouldBe(1)
     context.Errors.[0].Code.ShouldBe("IKC0002")
+
+
+[<Test>]
+let ``task correctly parses detailes from changelog file`` () =
+    let context = setupBuildEngine ()
+    let myTask =
+        ParseChangelog(ChangelogFile = Workspace.fixtures.``CHANGELOG_detailed.md``)
+
+    myTask.BuildEngine <- context.BuildEngine.Object
+
+    let success = myTask.Execute()
+    success.ShouldBeTrue "Should have successfully parsed the changelog data"
+    myTask.AllReleasedChangelogs.Length.ShouldBe(9, "Should have 9 versions")
+    myTask.CurrentReleaseChangelog.ItemSpec.ShouldBe("0.1.8", "Should have the most recent version")
+    myTask.CurrentReleaseChangelog.GetMetadata("Date").ShouldBe("2022-03-31", "Should have the most recent version's date")
+    myTask.CurrentReleaseChangelog.MetadataNames |> Seq.cast |> _.ShouldContain("Changed", "Should have changed metadata")
+    myTask.CurrentReleaseChangelog.MetadataNames |> Seq.cast |> _.ShouldContain("Date", "Should have date metadata")
+

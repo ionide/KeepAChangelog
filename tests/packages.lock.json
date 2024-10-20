@@ -56,6 +56,12 @@
           "Castle.Core": "5.1.1"
         }
       },
+      "Semver": {
+        "type": "Direct",
+        "requested": "[2.3.0, )",
+        "resolved": "2.3.0",
+        "contentHash": "4vYo1zqn6pJ1YrhjuhuOSbIIm0CpM47grbpTJ5ABjOlfGt/EhMEM9ed4MRK5Jr6gVnntWDqOUzGeUJp68PZGjw=="
+      },
       "Shouldly": {
         "type": "Direct",
         "requested": "[4.2.1, )",
