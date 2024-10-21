@@ -43,26 +43,12 @@ module Utils =
         for (key, value) in toTaskItemMetadata unreleased.SubSectionCollection do
             taskItem.SetMetadata(key, value)
         taskItem
-        // public static Result<SemVersion.SemanticVersion> SemanticVersion(this ChangelogSection section)
-        // {
-        //     var success = SemVersion.SemanticVersion.TryParse(section.MarkdownVersion, out var version);
-        //     if (success)
-        //     {
-        //         return Result.Success(version);
-        //     }
-        //     else
-        //     {
-        //         return Result.Failure<SemVersion.SemanticVersion>($"Unable to parse '{section.MarkdownVersion}' as a Semantic Version.");
-        //     }
-        // }
-
 
     [<Extension>]
     type Extensions =
         [<Extension>]
         static member inline ToDateTime(section: ChangelogSection) = DateTime.ParseExact(section.MarkdownDate, "yyyy-MM-dd", CultureInfo.InvariantCulture)
 
-        // public static DateTime ToDateTime(this ChangelogSection section) => DateTime.ParseExact(section.MarkdownDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
     let unwrapped (sections: ChangelogSectionCollection) =
         sections |> Seq.choose (fun section ->
             match SemVersion.TryParse section.MarkdownVersion with
@@ -70,33 +56,6 @@ module Utils =
             | true, version ->
                 Some {| version = version; dateTime = section.ToDateTime(); collection = section.SubSectionCollection|}
         )
-        //
-        // public static IEnumerable<(SemVersion.SemanticVersion version, DateTime date, ChangelogSubSectionCollection subsections)> Unwrapped(this ChangelogSectionCollection sections)
-        // {
-        //     foreach (var section in sections)
-        //     {
-        //         var validated =
-        //             section.SemanticVersion().Map(v => (v, section.ToDateTime(), section.SubSectionCollection));
-        //         if (validated.IsSuccess)
-        //         {
-        //             yield return validated.Value;
-        //         }
-        //     }
-        // }
-        //    public static string ToMarkdown(this ChangelogSubSectionCollection subsections)
-        // {
-        //     var builder = new StringBuilder();
-        //     foreach (var subsection in subsections)
-        //     {
-        //         builder.AppendLine($"### {subsection.Type.EnumName()}");
-        //         foreach (var line in subsection.ItemCollection)
-        //         {
-        //             builder.AppendLine(line.MarkdownText);
-        //         }
-        //     }
-        //     return builder.ToString();
-        // }
-    // }
     let toMarkdown (subsections: ChangelogSubSectionCollection) =
         let builder = StringBuilder()
         subsections |> Seq.fold (fun (builder : StringBuilder) subsection ->
@@ -201,47 +160,3 @@ type ParseChangeLogs() =
             logData.Message,
             logData.MessageArgs
         )
-
-//         else
-//             // match Parser.parseChangeLog file with
-//             // | Ok changelogs ->
-//             //     changelogs.Unreleased
-//             //     |> Option.iter (fun unreleased ->
-//             //         this.UnreleasedChangelog <-
-//             //             TaskItem()
-//             //             |> Util.mapChangelogData unreleased
-//             //             |> Util.mapUnreleasedInfo)
-
-//             //     let sortedReleases =
-//             //         // have to use LINQ here because List.sortBy* require IComparable, which
-//             //         // semver doesn't implement
-//             //         changelogs.Releases.OrderByDescending(fun (v, _, _) -> v)
-
-//             //     let items =
-//             //         sortedReleases
-//             //         |> Seq.map (fun (version, date, data) ->
-//             //             TaskItem()
-//             //             |> Util.mapReleaseInfo version date
-//             //             |> fun d -> match data with Some data -> Util.mapChangelogData data d | None -> d
-//             //         )
-//             //         |> Seq.toArray
-
-//             //     this.AllReleasedChangelogs <- items
-//             //     this.CurrentReleaseChangelog <- items.FirstOrDefault()
-
-//             //     sortedReleases
-//             //     |> Seq.tryHead
-//             //     |> Option.iter (fun (version, date, data) ->
-//             //         data
-//             //         |> Option.iter (fun data ->
-//             //             this.LatestReleaseNotes <- data.ToMarkdown())
-//             //         )
-
-//                 true
-//             // | Error (formatted, msg) ->
-
-//             //     this.Log.LogError(
-//             //         $"Error parsing Changelog at {file.FullName}. The error occurred at {msg.Position}.{System.Environment.NewLine}{formatted}"
-//             //     )
-
-//             //     false
