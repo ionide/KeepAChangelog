@@ -20,31 +20,31 @@ module Result =
         | Ok _ -> true
         | Error _ -> false
 
-[<AutoOpen>]
-module Utils =
-    let toTaskItemMetadata (sections: ChangelogSubSectionCollection) =
+type ChangelogExtensions =
+    [<Extension>]
+    static member inline ToDateTime(section: ChangelogSection) =
+        DateTime.ParseExact(section.MarkdownDate, "yyyy-MM-dd", CultureInfo.InvariantCulture)
+
+    [<Extension>]
+    static member ToTaskItemMetadata(sections: ChangelogSubSectionCollection) =
         sections
         |> Seq.map (fun section ->
             (string section.Type,
              section.ItemCollection
              |> Seq.map _.MarkdownText
-             |> String.concat (System.Environment.NewLine)))
+             |> String.concat Environment.NewLine))
 
-    let toTaskItem (unreleased: ChangelogSectionUnreleased) =
+    [<Extension>]
+    static member ToTaskItem(unreleased: ChangelogSectionUnreleased) =
         let taskItem = TaskItem("unreleased")
 
-        for (key, value) in toTaskItemMetadata unreleased.SubSectionCollection do
+        for (key, value) in unreleased.SubSectionCollection.ToTaskItemMetadata() do
             taskItem.SetMetadata(key, value)
 
         taskItem
 
     [<Extension>]
-    type Extensions =
-        [<Extension>]
-        static member inline ToDateTime(section: ChangelogSection) =
-            DateTime.ParseExact(section.MarkdownDate, "yyyy-MM-dd", CultureInfo.InvariantCulture)
-
-    let unwrapped (sections: ChangelogSectionCollection) =
+    static member Unwrapped(sections: ChangelogSectionCollection) =
         sections
         |> Seq.choose (fun section ->
             match SemVersion.TryParse section.MarkdownVersion with
@@ -52,10 +52,11 @@ module Utils =
             | true, version ->
                 Some
                     {| version = version
-                       dateTime = section.ToDateTime()
+                       date = section.ToDateTime()
                        collection = section.SubSectionCollection |})
 
-    let toMarkdown (subsections: ChangelogSubSectionCollection) =
+    [<Extension>]
+    static member ToMarkdown(subsections: ChangelogSubSectionCollection) =
         let builder = StringBuilder()
 
         subsections
@@ -97,9 +98,6 @@ type ParseChangeLogs() =
             do! this.ReadUnreleasedSection changelog
             do! this.ProcessReleases changelog
 
-            // changelog.
-
-            // Done
             return true
         }
         |> Result.toBool
@@ -125,13 +123,12 @@ type ParseChangeLogs() =
         match changelog.SectionUnreleased with
         | null -> Ok()
         | unreleased ->
-            this.UnreleasedChangelog <- unreleased |> toTaskItem
+            this.UnreleasedChangelog <- unreleased.ToTaskItem()
             Ok()
 
     member this.ProcessReleases(changelog: Changelog) =
         let releases =
-            changelog.SectionCollection
-            |> unwrapped
+            changelog.SectionCollection.Unwrapped()
             |> Seq.sortByDescending _.version
             |> Seq.toArray
 
@@ -141,16 +138,16 @@ type ParseChangeLogs() =
             releases
             |> Array.map (fun x ->
                 let taskItem = TaskItem(x.version.ToString())
-                taskItem.SetMetadata("Date", x.dateTime.ToString("yyyy-MM-dd"))
+                taskItem.SetMetadata("Date", x.date.ToString("yyyy-MM-dd"))
 
-                for (key, value) in x.collection |> toTaskItemMetadata do
+                for (key, value) in x.collection.ToTaskItemMetadata() do
                     taskItem.SetMetadata(key, value)
 
                 taskItem :> ITaskItem)
 
         this.CurrentReleaseChangelog <- mapped[0]
         this.AllReleasedChangelogs <- mapped
-        this.LatestReleaseNotes <- latestRelease.collection |> toMarkdown
+        this.LatestReleaseNotes <- latestRelease.collection.ToMarkdown()
         Ok()
 
     /// <summary>
