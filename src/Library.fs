@@ -19,50 +19,53 @@ module Result =
         function
         | Ok _ -> true
         | Error _ -> false
-    // public static Dictionary<string, string> ToTaskItemMetadata(this ChangelogSubSectionCollection sections)
-    // {
-    //     var metadata = new Dictionary<string, string>();
-    //     foreach (var section in sections)
-    //     {
-    //         var sectionText = System.String.Join(System.Environment.NewLine, section.ItemCollection.Select(item => item.MarkdownText));
-    //         metadata.Add(section.Type.EnumName(), sectionText);
-    //     }
-    //     return metadata;
-    // }
+
 [<AutoOpen>]
 module Utils =
     let toTaskItemMetadata (sections: ChangelogSubSectionCollection) =
         sections
         |> Seq.map (fun section ->
             (string section.Type,
-             section.ItemCollection |> Seq.map _.MarkdownText |> String.concat (System.Environment.NewLine))
-        )
+             section.ItemCollection
+             |> Seq.map _.MarkdownText
+             |> String.concat (System.Environment.NewLine)))
 
-    let toTaskItem (unreleased : ChangelogSectionUnreleased) =
+    let toTaskItem (unreleased: ChangelogSectionUnreleased) =
         let taskItem = TaskItem("unreleased")
+
         for (key, value) in toTaskItemMetadata unreleased.SubSectionCollection do
             taskItem.SetMetadata(key, value)
+
         taskItem
 
     [<Extension>]
     type Extensions =
         [<Extension>]
-        static member inline ToDateTime(section: ChangelogSection) = DateTime.ParseExact(section.MarkdownDate, "yyyy-MM-dd", CultureInfo.InvariantCulture)
+        static member inline ToDateTime(section: ChangelogSection) =
+            DateTime.ParseExact(section.MarkdownDate, "yyyy-MM-dd", CultureInfo.InvariantCulture)
 
     let unwrapped (sections: ChangelogSectionCollection) =
-        sections |> Seq.choose (fun section ->
+        sections
+        |> Seq.choose (fun section ->
             match SemVersion.TryParse section.MarkdownVersion with
             | false, _ -> None
             | true, version ->
-                Some {| version = version; dateTime = section.ToDateTime(); collection = section.SubSectionCollection|}
-        )
+                Some
+                    {| version = version
+                       dateTime = section.ToDateTime()
+                       collection = section.SubSectionCollection |})
+
     let toMarkdown (subsections: ChangelogSubSectionCollection) =
         let builder = StringBuilder()
-        subsections |> Seq.fold (fun (builder : StringBuilder) subsection ->
-            let state = builder.AppendLine $"### {subsection.Type}"
-            subsection.ItemCollection
-            |> Seq.fold (fun (builder : StringBuilder) line -> builder.AppendLine line.MarkdownText) state
-        ) builder
+
+        subsections
+        |> Seq.fold
+            (fun (builder: StringBuilder) subsection ->
+                let state = builder.AppendLine $"### {subsection.Type}"
+
+                subsection.ItemCollection
+                |> Seq.fold (fun (builder: StringBuilder) line -> builder.AppendLine line.MarkdownText) state)
+            builder
         |> _.ToString()
 
 type ParseChangeLogs() =
@@ -126,17 +129,24 @@ type ParseChangeLogs() =
             Ok()
 
     member this.ProcessReleases(changelog: Changelog) =
-        let releases = changelog.SectionCollection |> unwrapped |> Seq.sortByDescending _.version |> Seq.toArray
+        let releases =
+            changelog.SectionCollection
+            |> unwrapped
+            |> Seq.sortByDescending _.version
+            |> Seq.toArray
 
         let latestRelease = releases |> (fun x -> x[0])
 
-        let mapped = releases |> Array.map (fun x ->
-            let taskItem = TaskItem(x.version.ToString())
-            taskItem.SetMetadata("Date", x.dateTime.ToString("yyyy-MM-dd"))
-            for (key, value) in x.collection |> toTaskItemMetadata do
-                taskItem.SetMetadata(key, value)
-            taskItem :> ITaskItem
-        )
+        let mapped =
+            releases
+            |> Array.map (fun x ->
+                let taskItem = TaskItem(x.version.ToString())
+                taskItem.SetMetadata("Date", x.dateTime.ToString("yyyy-MM-dd"))
+
+                for (key, value) in x.collection |> toTaskItemMetadata do
+                    taskItem.SetMetadata(key, value)
+
+                taskItem :> ITaskItem)
 
         this.CurrentReleaseChangelog <- mapped[0]
         this.AllReleasedChangelogs <- mapped
