@@ -3,7 +3,7 @@ module Tests.IntegrationTests
 open Tests.Setup
 open Moq
 open Microsoft.Build.Framework
-open KeepAChangelog.Tasks
+open Ionide.KeepAChangelog.Tasks
 open Shouldly
 
 // [<Test>]

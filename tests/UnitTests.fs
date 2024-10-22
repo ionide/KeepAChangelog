@@ -3,7 +3,7 @@ module Tests.UnitTests
 open Tests.Setup
 open Moq
 open Microsoft.Build.Framework
-open KeepAChangelog.Tasks
+open Ionide.KeepAChangelog.Tasks
 open Shouldly
 open Workspace
 
@@ -34,7 +34,7 @@ let private setupBuildEngine () =
 let ``task fails when changelog file does not exist`` () =
     let context = setupBuildEngine ()
 
-    let myTask = ParseChangelog(ChangelogFile = "ThisFileDoesNotExist.md")
+    let myTask = ParseChangeLogs(ChangelogFile = "ThisFileDoesNotExist.md")
     myTask.BuildEngine <- context.BuildEngine.Object
 
     let success = myTask.Execute()
@@ -48,7 +48,7 @@ let ``task succeeds when changelog file exists (relative path)`` () =
     let context = setupBuildEngine ()
 
     // When running tests, the working directory is where the dll is located
-    let myTask = ParseChangelog(ChangelogFile = "../../../fixtures/CHANGELOG.md")
+    let myTask = ParseChangeLogs(ChangelogFile = "../../../fixtures/CHANGELOG.md")
 
     myTask.BuildEngine <- context.BuildEngine.Object
 
@@ -63,7 +63,7 @@ let ``task succeeds when changelog file exists (relative path)`` () =
 let ``task succeeds when changelog file exists (absolute path)`` () =
     let context = setupBuildEngine ()
 
-    let myTask = ParseChangelog(ChangelogFile = Workspace.fixtures.``CHANGELOG.md``)
+    let myTask = ParseChangeLogs(ChangelogFile = Workspace.fixtures.``CHANGELOG.md``)
     myTask.BuildEngine <- context.BuildEngine.Object
 
     let success = myTask.Execute()
@@ -76,7 +76,7 @@ let ``task fails when changelog file is invalid`` () =
     let context = setupBuildEngine ()
 
     let myTask =
-        ParseChangelog(ChangelogFile = Workspace.fixtures.``CHANGELOG_invalid.md``)
+        ParseChangeLogs(ChangelogFile = Workspace.fixtures.``CHANGELOG_invalid.md``)
 
     myTask.BuildEngine <- context.BuildEngine.Object
 
@@ -91,7 +91,7 @@ let ``task fails when changelog file is invalid`` () =
 let ``task correctly parses detailes from changelog file`` () =
     let context = setupBuildEngine ()
     let myTask =
-        ParseChangelog(ChangelogFile = Workspace.fixtures.``CHANGELOG_detailed.md``)
+        ParseChangeLogs(ChangelogFile = Workspace.fixtures.``CHANGELOG_detailed.md``)
 
     myTask.BuildEngine <- context.BuildEngine.Object
 
