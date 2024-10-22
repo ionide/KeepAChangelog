@@ -35,7 +35,7 @@
       },
       "Microsoft.Build.Utilities.Core": {
         "type": "Direct",
-        "requested": "[17.8.0, )",
+        "requested": "[17.8.*, )",
         "resolved": "17.8.3",
         "contentHash": "ex8Sjx02q0FmForLRFItB82sJx5s2JRWIpJgYDW1g7xLUoFlKLoNp67UwS5xN8YcYBkT7vRxXeYx/dQ96KaWtg==",
         "dependencies": {
@@ -196,7 +196,7 @@
       },
       "Microsoft.Build.Utilities.Core": {
         "type": "Direct",
-        "requested": "[17.8.0, )",
+        "requested": "[17.8.*, )",
         "resolved": "17.8.3",
         "contentHash": "ex8Sjx02q0FmForLRFItB82sJx5s2JRWIpJgYDW1g7xLUoFlKLoNp67UwS5xN8YcYBkT7vRxXeYx/dQ96KaWtg==",
         "dependencies": {
