@@ -15,6 +15,10 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <!-- remove FSharp.Core localisations -->
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <!-- Setting this sets the `developmentDependency` flag on our generated package,
+        which means that consumers don't need to set PrivateAssets="all" and IncludeAssets="build, buildMultitargeting"
+        to make use of this project without impacting their own dependency trees. -->
+    <DevelopmentDependency>true</DevelopmentDependency>
   </PropertyGroup>
 
   <ItemGroup>
