@@ -1,7 +1,6 @@
 <Project>
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-    <CentralPackageFloatingVersionsEnabled>true</CentralPackageFloatingVersionsEnabled>
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
     <CentralPackagePackageVersionOverride>false</CentralPackagePackageVersionOverride>
   </PropertyGroup>
@@ -12,7 +11,7 @@
     <PackageVersion Include="FsToolkit.ErrorHandling" Version="4.17.0" />
     <PackageVersion Include="KeepAChangelogParser" Version="1.2.4" />
     <!-- 17.8.* aligns with .NET 8 SDK -->
-    <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="17.8.*" />
+    <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="17.8.3" />
     <PackageVersion Include="Moq" Version="4.20.72" />
     <PackageVersion Include="Semver" Version="2.3.0" />
     <PackageVersion Include="Shouldly" Version="4.2.1" />
