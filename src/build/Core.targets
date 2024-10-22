@@ -1,0 +1,41 @@
+<Project>
+    <PropertyGroup>
+        <_Ionide_KeepAChangelog_Tasks_TFM Condition=" '$(MSBuildRuntimeType)' != 'Core' ">net472</_Ionide_KeepAChangelog_Tasks_TFM>
+        <_Ionide_KeepAChangelog_Tasks_TFM Condition=" '$(MSBuildRuntimeType)' == 'Core' ">net8.0</_Ionide_KeepAChangelog_Tasks_TFM>
+    </PropertyGroup>
+
+    <UsingTask AssemblyFile="$(MSBuildThisFileDirectory)../tasks/$(_Ionide_KeepAChangelog_Tasks_TFM)/Ionide.KeepAChangelog.Tasks.dll" TaskName="Ionide.KeepAChangelog.Tasks.ParseChangeLogs"/>
+
+    <Target Name="WarnOnNoChangelogFileSet" Condition="$(ChangelogFile) == ''">
+        <Warning Code="CNG0001" Text="No $ChangelogFile was set. Please set this property to the path to your KeepAChangelog-formatted changelog file."/>
+    </Target>
+    <Target Name="WarnOnNoChangelogFileExists" Condition="$(ChangelogFile) != '' and Exists('$(ChangelogFile)') == 'false'">
+        <Warning Code="CNG0002" Text="No Changelog File was was found at the specified location '$(ChangelogFile)'. Please set this property to the path to your KeepAChangelog-formatted changelog file."/>
+    </Target>
+
+    <Target Name="ValidateChangelog" DependsOnTargets="WarnOnNoChangelogFileSet;WarnOnNoChangelogFileExists"/>
+
+    <Target Name="GetChangelogVersion" Condition="'$(ChangelogFile)' != '' and Exists('$(ChangelogFile)')" DependsOnTargets="ValidateChangelog" Inputs="$(ChangelogFile)" Outputs="UnreleasedChangelog;CurrentReleaseChangelog;AllReleasedChangelogslLatestReleaseNotes">
+        <Ionide.KeepAChangelog.Tasks.ParseChangeLogs ChangelogFile="$(ChangelogFile)">
+            <Output TaskParameter="UnreleasedChangelog" ItemName="UnreleasedChangelog"/>
+            <Output TaskParameter="CurrentReleaseChangelog" ItemName="CurrentReleaseChangelog"/>
+            <Output TaskParameter="AllReleasedChangelogs" ItemName="AllReleasedChangelogs"/>
+            <Output TaskParameter="LatestReleaseNotes" ItemName="LatestReleaseNotes"/>
+        </Ionide.KeepAChangelog.Tasks.ParseChangeLogs>
+    </Target>
+
+    <Target Name="SetVersionFromChangelog" DependsOnTargets="GetChangelogVersion">
+        <PropertyGroup Condition="'@(CurrentReleaseChangelog)' != ''">
+            <Version>%(CurrentReleaseChangelog.Identity)</Version>
+            <PackageVersion>%(CurrentReleaseChangelog.Identity)</PackageVersion>
+            <PackageReleaseNotes>@(LatestReleaseNotes)</PackageReleaseNotes>
+        </PropertyGroup>
+
+        <ItemGroup Condition="'@(CurrentReleaseChangelog)' != '' and '$(GenerateAssemblyInfo)' == 'true'">
+            <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute" Condition="'$(GenerateRepositoryUrlAttribute)' == 'true' and ('$(RepositoryUrl)' != '' or '$(PublishRepositoryUrl)' == 'true')">
+                <_Parameter1>BuildDate</_Parameter1>
+                <_Parameter2>%(CurrentReleaseChangelog.Date)</_Parameter2>
+            </AssemblyAttribute>
+        </ItemGroup>
+    </Target>
+</Project>

@@ -1,0 +1,19 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <!-- For multitargeting builds, the 'outer' build is used for things like packing, and so never hits the `PrepareForBuildDependsOn` condition group
+             That works for 'inner', TFM-specific builds. Therefore we need another hook. Luckily, for packaging we can be much less restrictive on
+             _when_ the versioning information is collected, because assemblies don't need to be stamped, so this can just happen sometime before
+             the GenerateNuspec task. -->
+        <GenerateNuspecDependsOn>
+            SetVersionFromChangelog;
+            $(GenerateNuspecDependsOn)
+        </GenerateNuspecDependsOn>
+        <GetPackageVersionDependsOn>
+            SetVersionFromChangelog
+            $(GetPackageVersionDependsOn);
+        </GetPackageVersionDependsOn>
+
+    </PropertyGroup>
+
+    <Import Project="../build/Core.targets"/>
+</Project>

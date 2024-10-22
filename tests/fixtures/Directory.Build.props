@@ -1,0 +1,3 @@
+<Project>
+    <!-- Fixtures projects don't inherit from top level Directory.Build.props -->
+</Project>

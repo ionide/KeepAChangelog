@@ -1,0 +1,63 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net472;net8.0</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <Description>MSBuild Tasks and Targets that set your Assembly Version, Package Version, and Package Release Notes from your KeepAChangelog-compatible Changelogs.</Description>
+
+    <!-- we need the assemblies bundled, so set this so we don't expose any dependencies to the outside world -->
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
+    <NoWarn>NU5128;NU5100</NoWarn><!-- NU5100 is because we pack to tasks/, not lib/ -->
+    <BuildOutputTargetFolder>tasks</BuildOutputTargetFolder>
+
+    <!-- deps.json generation -->
+    <GenerateDependencyFile>true</GenerateDependencyFile>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <!-- remove FSharp.Core localisations -->
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <!-- Setting this sets the `developmentDependency` flag on our generated package,
+        which means that consumers don't need to set PrivateAssets="all" and IncludeAssets="build, buildMultitargeting"
+        to make use of this project without impacting their own dependency trees. -->
+    <DevelopmentDependency>true</DevelopmentDependency>
+  </PropertyGroup>
+
+  <ItemGroup>
+      <Compile Include="Log.fs" />
+    <Compile Include="Library.fs" />
+    <!-- these lines pack the single-TFM build props/targets files to the `build` folder in the generated package.
+         By convention, the .NET SDK will look for `build\<Package Id>.props` and `build\<Package Id>.targets`
+         for automatic inclusion in a single-TFM build. -->
+    <Content Include="build\*" PackagePath="build\" />
+    <!-- these lines pack the multi-target TFM build props/targets files to the `buildMultiTargeting` folder in the generated package.
+         By convention, the .NET SDK will look for `buildMultiTargeting\<Package Id>.props` and `buildMultiTargeting\<Package Id>.targets`
+         for automatic inclusion in a multi-TFM build. -->
+    <Content Include="buildMultiTargeting\*" PackagePath="buildMultiTargeting\" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- All dependencies need PrivateAssets="all" not flow as a nuget-dependency to consumers -->
+    <!-- MS.B.U.C specifically-->
+    <PackageReference Include="FsToolkit.ErrorHandling" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" ExcludeAssets="Runtime" PrivateAssets="all" />
+    <PackageReference Include="KeepAChangelogParser" PrivateAssets="all" />
+    <PackageReference Include="Semver" PrivateAssets="all" />
+    <PackageReference Include="FSharp.Core" PrivateAssets="all" />
+  </ItemGroup>
+
+  <!-- This target adds the deps.json file to the TFM-specific subfolder of runtime dependencies of the app. -->
+  <Target Name="AddBuildDependencyFileToBuiltProjectOutputGroupOutput" BeforeTargets="BuiltProjectOutputGroup" Condition=" '$(GenerateDependencyFile)' == 'true'">
+
+    <ItemGroup>
+      <BuiltProjectOutputGroupOutput Include="$(ProjectDepsFilePath)" TargetPath="$(ProjectDepsFileName)" FinalOutputPath="$(ProjectDepsFilePath)" />
+    </ItemGroup>
+  </Target>
+
+  <!-- This target copies the runtime dependencies of this project (all PackageReferences without ExcludeAssets="runtime") to the package
+     without having to manually specify the correct sub-paths. -->
+  <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="ResolveReferences">
+    <ItemGroup>
+      <!-- the dependencies of your MSBuild task must be packaged inside the package, they cannot be expressed as normal PackageReferences -->
+      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths)" TargetPath="%(ReferenceCopyLocalPaths.DestinationSubPath)" />
+    </ItemGroup>
+  </Target>
+
+</Project>

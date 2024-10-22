@@ -1,0 +1,17 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <!-- For single-target builds (or inner builds of a multi-targeted build) we must run before any of the normal versioning-related targets are run.
+            This is surprisingly hard to time correctly. PrepareForBuild is the best location I've been able to find, and Rainer agrees this is a logical spot. -->
+        <PrepareForBuildDependsOn>
+                SetVersionFromChangelog;
+                $(PrepareForBuildDependsOn)
+            </PrepareForBuildDependsOn>
+        <!-- For project-to-project dependencies, GetPackageVersionDependsOn can be used as a well-known hook to ensure the project's versioning properties are run. -->
+        <GetPackageVersionDependsOn>
+                SetVersionFromChangelog
+                $(GetPackageVersionDependsOn);
+            </GetPackageVersionDependsOn>
+
+    </PropertyGroup>
+    <Import Project="Core.targets"/>
+</Project>
