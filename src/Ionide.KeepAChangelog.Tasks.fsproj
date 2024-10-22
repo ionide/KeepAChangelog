@@ -35,7 +35,7 @@
   </ItemGroup>
   <ItemGroup>
     <!-- All dependencies need PrivateAssets="all" not flow as a nuget-dependency to consumers -->
-    <!-- MSBUC specifically-->
+    <!-- MS.B.U.C specifically-->
     <PackageReference Include="FsToolkit.ErrorHandling" PrivateAssets="all" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" ExcludeAssets="Runtime" PrivateAssets="all" />
     <PackageReference Include="KeepAChangelogParser" PrivateAssets="all" />
@@ -43,6 +43,7 @@
     <PackageReference Include="FSharp.Core" PrivateAssets="all" />
   </ItemGroup>
 
+  <!-- This target adds the deps.json file to the TFM-specific subfolder of runtime dependencies of the app. -->
   <Target Name="AddBuildDependencyFileToBuiltProjectOutputGroupOutput" BeforeTargets="BuiltProjectOutputGroup" Condition=" '$(GenerateDependencyFile)' == 'true'">
 
     <ItemGroup>
@@ -50,6 +51,8 @@
     </ItemGroup>
   </Target>
 
+  <!-- This target copies the runtime dependencies of this project (all PackageReferences without ExcludeAssets="runtime") to the package
+     without having to manually specify the correct sub-paths. -->
   <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="ResolveReferences">
     <ItemGroup>
       <!-- the dependencies of your MSBuild task must be packaged inside the package, they cannot be expressed as normal PackageReferences -->
