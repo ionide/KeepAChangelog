@@ -5,20 +5,19 @@
         <DisableImplicitFSharpCoreReference>true</DisableImplicitFSharpCoreReference>
     </PropertyGroup>
     <!-- Use lock files -->
-    <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
-        <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
-    </PropertyGroup>
     <PropertyGroup>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <RestoreLockedMode Condition="'$(ContinuousIntegrationBuild)' == 'true'">true</RestoreLockedMode>
     </PropertyGroup>
+    <ItemGroup>
+        <!-- Automatically set RepositoryUrl, DebugType embedded, ContinuousIntegrationBuild -->
+        <PackageReference Include="DotNet.ReproducibleBuilds" PrivateAssets="All"/>
+    </ItemGroup>
     <PropertyGroup>
         <Authors>Chet Husk</Authors>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageTags>version;changelog;keepachangelog</PackageTags>
         <GeneratePathProperty>true</GeneratePathProperty>
-        <!-- Currently not automatic https://github.com/dotnet/sourcelink/issues/1203 -->
-        <PublishRepositoryUrl>true</PublishRepositoryUrl>
         <!-- Currently not automatic https://github.com/dotnet/sourcelink/issues/712 -->
         <PackageProjectUrl>https://github.com/ionide/KeepAChangelog</PackageProjectUrl>
         <PackageIcon>ionide.png</PackageIcon>
