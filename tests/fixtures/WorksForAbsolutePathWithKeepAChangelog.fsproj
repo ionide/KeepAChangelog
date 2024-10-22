@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <ChangelogFile>$(MSBuildThisFileDirectory)CHANGELOG_KeepAChangelog.md</ChangelogFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Ionide.KeepAChangelog.Tasks" Version="[0.0.1-test-WorksForAbsolutePathWithKeepAChangelog]">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+    </ItemGroup>
+
+</Project>
