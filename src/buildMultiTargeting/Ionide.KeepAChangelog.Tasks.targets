@@ -1,7 +1,7 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
         <!-- For multitargeting builds, the 'outer' build is used for things like packing, and so never hits the `PrepareForBuildDependsOn` condition group
-             That works for 'inner', TFM-specific builds. Therefore we need another hook. Luckily, for packaging we can be much less restrictive on 
+             That works for 'inner', TFM-specific builds. Therefore we need another hook. Luckily, for packaging we can be much less restrictive on
              _when_ the versioning information is collected, because assemblies don't need to be stamped, so this can just happen sometime before
              the GenerateNuspec task. -->
         <GenerateNuspecDependsOn>
@@ -13,52 +13,7 @@
             $(GetPackageVersionDependsOn);
         </GetPackageVersionDependsOn>
 
-        <_Ionide_KeepAChangelog_Tasks_TFM Condition=" '$(MSBuildRuntimeType)' != 'Core' ">net472</_Ionide_KeepAChangelog_Tasks_TFM>
-        <_Ionide_KeepAChangelog_Tasks_TFM Condition=" '$(MSBuildRuntimeType)' == 'Core' ">net6.0</_Ionide_KeepAChangelog_Tasks_TFM>
     </PropertyGroup>
 
-    <UsingTask
-            AssemblyFile="$(MSBuildThisFileDirectory)../tasks/$(_Ionide_KeepAChangelog_Tasks_TFM)/Ionide.KeepAChangelog.Tasks.dll"
-            TaskName="Ionide.KeepAChangelog.Tasks.ParseChangeLogs" />
-
-    <Target
-            Name="GetChangelogVersion"
-            Condition="'$(ChangelogFile)' != '' and Exists('$(ChangelogFile)')"
-            Inputs="$(ChangelogFile)"
-            Outputs="UnreleasedChangelog;CurrentReleaseChangelog;AllReleasedChangelogslLatestReleaseNotes">
-        <Ionide.KeepAChangelog.Tasks.ParseChangeLogs ChangelogFile="$(ChangelogFile)">
-            <Output
-                    TaskParameter="UnreleasedChangelog"
-                    ItemName="UnreleasedChangelog" />
-            <Output
-                    TaskParameter="CurrentReleaseChangelog"
-                    ItemName="CurrentReleaseChangelog" />
-            <Output
-                    TaskParameter="AllReleasedChangelogs"
-                    ItemName="AllReleasedChangelogs" />
-            <Output
-                    TaskParameter="LatestReleaseNotes"
-                    ItemName="LatestReleaseNotes" />
-        </Ionide.KeepAChangelog.Tasks.ParseChangeLogs>
-    </Target>
-
-    <Target
-            Name="SetVersionFromChangelog"
-            DependsOnTargets="GetChangelogVersion">
-        <PropertyGroup Condition="'@(CurrentReleaseChangelog)' != ''">
-            <Version>%(CurrentReleaseChangelog.Identity)</Version>
-            <PackageVersion>%(CurrentReleaseChangelog.Identity)</PackageVersion>
-            <PackageReleaseNotes>@(LatestReleaseNotes)</PackageReleaseNotes>
-        </PropertyGroup>
-
-        <ItemGroup Condition="'@(CurrentReleaseChangelog)' != '' and '$(GenerateAssemblyInfo)' == 'true'">
-            <AssemblyAttribute
-                    Include="System.Reflection.AssemblyMetadataAttribute"
-                    Condition="'$(GenerateRepositoryUrlAttribute)' == 'true' and ('$(RepositoryUrl)' != '' or '$(PublishRepositoryUrl)' == 'true')">
-                <_Parameter1>BuildDate</_Parameter1>
-                <_Parameter2>%(CurrentReleaseChangelog.Date)</_Parameter2>
-            </AssemblyAttribute>
-        </ItemGroup>
-    </Target>
-
+    <Import Project="../build/Core.targets"/>
 </Project>

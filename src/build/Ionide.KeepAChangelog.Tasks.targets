@@ -1,5 +1,4 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-
     <PropertyGroup>
         <!-- For single-target builds (or inner builds of a multi-targeted build) we must run before any of the normal versioning-related targets are run.
             This is surprisingly hard to time correctly. PrepareForBuild is the best location I've been able to find, and Rainer agrees this is a logical spot. -->
@@ -13,52 +12,6 @@
                 $(GetPackageVersionDependsOn);
             </GetPackageVersionDependsOn>
 
-        <_Ionide_KeepAChangelog_Tasks_TFM Condition=" '$(MSBuildRuntimeType)' != 'Core' ">net472</_Ionide_KeepAChangelog_Tasks_TFM>
-        <_Ionide_KeepAChangelog_Tasks_TFM Condition=" '$(MSBuildRuntimeType)' == 'Core' ">net6.0</_Ionide_KeepAChangelog_Tasks_TFM>
     </PropertyGroup>
-
-    <UsingTask
-            AssemblyFile="$(MSBuildThisFileDirectory)../tasks/$(_Ionide_KeepAChangelog_Tasks_TFM)/Ionide.KeepAChangelog.Tasks.dll"
-            TaskName="Ionide.KeepAChangelog.Tasks.ParseChangeLogs" />
-            
-    <Target
-            Name="GetChangelogVersion"
-            Condition="'$(ChangelogFile)' != '' and Exists('$(ChangelogFile)')"
-            Inputs="$(ChangelogFile)"
-            Outputs="UnreleasedChangelog;CurrentReleaseChangelog;AllReleasedChangelogslLatestReleaseNotes">
-        <Ionide.KeepAChangelog.Tasks.ParseChangeLogs ChangelogFile="$(ChangelogFile)">
-            <Output
-                    TaskParameter="UnreleasedChangelog"
-                    ItemName="UnreleasedChangelog" />
-            <Output
-                    TaskParameter="CurrentReleaseChangelog"
-                    ItemName="CurrentReleaseChangelog" />
-            <Output
-                    TaskParameter="AllReleasedChangelogs"
-                    ItemName="AllReleasedChangelogs" />
-            <Output
-                    TaskParameter="LatestReleaseNotes"
-                    ItemName="LatestReleaseNotes" />
-        </Ionide.KeepAChangelog.Tasks.ParseChangeLogs>
-    </Target>
-
-    <Target
-            Name="SetVersionFromChangelog"
-            DependsOnTargets="GetChangelogVersion">
-        <PropertyGroup Condition="'@(CurrentReleaseChangelog)' != ''">
-            <Version>%(CurrentReleaseChangelog.Identity)</Version>
-            <PackageVersion>%(CurrentReleaseChangelog.Identity)</PackageVersion>
-            <PackageReleaseNotes>@(LatestReleaseNotes)</PackageReleaseNotes>
-        </PropertyGroup>
-
-        <ItemGroup Condition="'@(CurrentReleaseChangelog)' != '' and '$(GenerateAssemblyInfo)' == 'true'">
-            <AssemblyAttribute
-                    Include="System.Reflection.AssemblyMetadataAttribute"
-                    Condition="'$(GenerateRepositoryUrlAttribute)' == 'true' and ('$(RepositoryUrl)' != '' or '$(PublishRepositoryUrl)' == 'true')">
-                <_Parameter1>BuildDate</_Parameter1>
-                <_Parameter2>%(CurrentReleaseChangelog.Date)</_Parameter2>
-            </AssemblyAttribute>
-        </ItemGroup>
-    </Target>
-
+    <Import Project="Core.targets"/>
 </Project>
