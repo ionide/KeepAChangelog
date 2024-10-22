@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net472;net6.0</TargetFrameworks>
+    <TargetFrameworks>net472;net8.0</TargetFrameworks>
     <IsPackable>true</IsPackable>
     <Description>MSBuild Tasks and Targets that set your Assembly Version, Package Version, and Package Release Notes from your KeepAChangelog-compatible Changelogs.</Description>
 
