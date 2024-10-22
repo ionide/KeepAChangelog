@@ -13,20 +13,18 @@
         <RestoreLockedMode Condition="'$(ContinuousIntegrationBuild)' == 'true'">true</RestoreLockedMode>
     </PropertyGroup>
     <PropertyGroup>
-        <PackageProjectUrl>https://github.com/ionide/KeepAChangelog</PackageProjectUrl>
-        <Packagelicense>
-            https://github.com/ionide/KeepAChangelog/blob/master/LICENSE</Packagelicense>
-        <RepositoryUrl>https://github.com/ionide/KeepAChangelog</RepositoryUrl>
-        <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
-        <PackageReadmeFile>README.md</PackageReadmeFile>
         <Authors>Chet Husk</Authors>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageTags>version;changelog;keepachangelog</PackageTags>
         <GeneratePathProperty>true</GeneratePathProperty>
+        <!-- Currently not automatic https://github.com/dotnet/sourcelink/issues/1203 -->
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <!-- Currently not automatic https://github.com/dotnet/sourcelink/issues/712 -->
+        <PackageProjectUrl>https://github.com/ionide/KeepAChangelog</PackageProjectUrl>
         <PackageIcon>ionide.png</PackageIcon>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
     <ItemGroup>
-        <None Include="$(MSBuildThisFileDirectory)/LICENSE.txt" Pack="true"
-            PackagePath="$(PackageLicenseFile)" />
         <None Include="$(MSBuildThisFileDirectory)/README.md" Pack="true" PackagePath="\" />
         <None Include="$(MSBuildThisFileDirectory)/ionide.png" Pack="true" PackagePath="\" />
     </ItemGroup>
