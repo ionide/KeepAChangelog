@@ -8,6 +8,7 @@ type VirtualWorkspace =
     VirtualFileSystem<
         ".",
         """
-packages/
+test-nupkgs/
+test-package-cache/
 """
      >

@@ -6,6 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="DotNet.ReproducibleBuilds.Isolated" Version="1.2.25"/>
         <PackageReference Include="Ionide.KeepAChangelog.Tasks" Version="[0.0.1-test-DefaultToChangelogIfNotSpecified]" >
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>

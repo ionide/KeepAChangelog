@@ -47,7 +47,7 @@ type UnitTests() =
     [<TestMethod>]
     member this.``task succeeds when changelog file exists (relative path)`` () =
         // When running tests, the working directory is where the dll is located
-        let myTask = ParseChangeLogs(ChangelogFile = "../../../fixtures/CHANGELOG.md")
+        let myTask = ParseChangeLogs(ChangelogFile = "../../../changelogs/CHANGELOG.md")
 
         myTask.BuildEngine <- this.context.BuildEngine.Object
 
@@ -60,7 +60,7 @@ type UnitTests() =
 
     [<TestMethod>]
     member this.``task succeeds when changelog file exists (absolute path)`` () =
-        let myTask = ParseChangeLogs(ChangelogFile = Workspace.fixtures.``CHANGELOG.md``)
+        let myTask = ParseChangeLogs(ChangelogFile = Workspace.changelogs.``CHANGELOG.md``)
         myTask.BuildEngine <- this.context.BuildEngine.Object
 
         let success = myTask.Execute()
@@ -71,7 +71,7 @@ type UnitTests() =
     [<TestMethod>]
     member this.``task fails when changelog file is invalid`` () =
         let myTask =
-            ParseChangeLogs(ChangelogFile = Workspace.fixtures.``CHANGELOG_invalid.md``)
+            ParseChangeLogs(ChangelogFile = Workspace.changelogs.``CHANGELOG_invalid.md``)
 
         myTask.BuildEngine <- this.context.BuildEngine.Object
 
@@ -85,7 +85,7 @@ type UnitTests() =
     [<TestMethod>]
     member this.``task correctly parses detailes from changelog file`` () =
         let myTask =
-            ParseChangeLogs(ChangelogFile = Workspace.fixtures.``CHANGELOG_detailed.md``)
+            ParseChangeLogs(ChangelogFile = Workspace.changelogs.``CHANGELOG_detailed.md``)
 
         myTask.BuildEngine <- this.context.BuildEngine.Object
 

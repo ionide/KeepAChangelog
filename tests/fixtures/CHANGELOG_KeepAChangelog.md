@@ -7,6 +7,7 @@
 ### Added
 
 - Created the package
+- Added a second line
 
 ### Changed
 
