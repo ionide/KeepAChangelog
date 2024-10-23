@@ -13,7 +13,7 @@
         <Warning Code="CNG0002" Text="No Changelog File was was found at the specified location '$(ChangelogFile)'. Please set this property to the path to your KeepAChangelog-formatted changelog file."/>
     </Target>
 
-    <Target Name="ValidateChangelog" DependsOnTargets="WarnOnNoChangelogFileSet;WarnOnNoChangelogFileExists"/>
+    <Target Name="ValidateChangelog" BeforeTargets="GetChangelogVersion" DependsOnTargets="WarnOnNoChangelogFileSet;WarnOnNoChangelogFileExists"/>
 
     <Target Name="GetChangelogVersion" Condition="'$(ChangelogFile)' != '' and Exists('$(ChangelogFile)')" DependsOnTargets="ValidateChangelog" Inputs="$(ChangelogFile)" Outputs="UnreleasedChangelog;CurrentReleaseChangelog;AllReleasedChangelogslLatestReleaseNotes">
         <Ionide.KeepAChangelog.Tasks.ParseChangeLogs ChangelogFile="$(ChangelogFile)">
