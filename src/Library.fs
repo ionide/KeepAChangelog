@@ -32,7 +32,8 @@ type ChangelogExtensions =
             (string section.Type,
              section.ItemCollection
              |> Seq.map _.MarkdownText
-             |> String.concat Environment.NewLine))
+             |> String.concat Environment.NewLine)
+        )
 
     [<Extension>]
     static member ToTaskItem(unreleased: ChangelogSectionUnreleased) =
@@ -51,9 +52,12 @@ type ChangelogExtensions =
             | false, _ -> None
             | true, version ->
                 Some
-                    {| version = version
-                       date = section.ToDateTime()
-                       collection = section.SubSectionCollection |})
+                    {|
+                        version = version
+                        date = section.ToDateTime()
+                        collection = section.SubSectionCollection
+                    |}
+        )
 
     [<Extension>]
     static member ToMarkdown(subsections: ChangelogSubSectionCollection) =
@@ -62,12 +66,13 @@ type ChangelogExtensions =
         subsections
         |> Seq.fold
             (fun (builder: StringBuilder) subsection ->
-                let state = builder.AppendLine $"### {subsection.Type}"
-                            |> (fun x -> x.AppendLine "")
+                let state =
+                    builder.AppendLine $"### {subsection.Type}" |> (fun x -> x.AppendLine "")
 
                 subsection.ItemCollection
                 |> Seq.fold (fun (builder: StringBuilder) line -> builder.AppendLine $"- {line.MarkdownText}") state
-                |> (fun x -> x.AppendLine ""))
+                |> (fun x -> x.AppendLine "")
+            )
             builder
         |> _.ToString()
         |> _.Trim()
@@ -146,7 +151,8 @@ type ParseChangeLogs() =
                 for (key, value) in x.collection.ToTaskItemMetadata() do
                     taskItem.SetMetadata(key, value)
 
-                taskItem :> ITaskItem)
+                taskItem :> ITaskItem
+            )
 
         this.CurrentReleaseChangelog <- mapped[0]
         this.AllReleasedChangelogs <- mapped

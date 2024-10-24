@@ -9,13 +9,15 @@ open Faqt
 open SimpleExec
 open Workspace
 
-
 module Utils =
     let packAndGetPackageProperties projectName =
         let packageCache = VirtualWorkspace.``test-package-cache``.``.``
+
         if Directory.Exists packageCache then
             Directory.Delete(packageCache, true)
+
         Directory.CreateDirectory packageCache |> ignore
+
         Command.Run(
             "dotnet",
             CmdLine.empty
@@ -24,6 +26,7 @@ module Utils =
             |> CmdLine.toString,
             workingDirectory = Workspace.fixtures.``.``
         )
+
         Command.ReadAsync(
             "dotnet",
             CmdLine.empty
@@ -39,8 +42,8 @@ module Utils =
 
 type StringHelper =
     [<Extension>]
-    static member ReplaceEscapedNewLines (s: string) =
-        s.ReplaceLineEndings().Replace("\\r\\n","\\n")
+    static member ReplaceEscapedNewLines(s: string) =
+        s.ReplaceLineEndings().Replace("\\r\\n", "\\n")
 
 [<TestClass>]
 type IntegrationTests() =
@@ -51,7 +54,6 @@ type IntegrationTests() =
         let suffix = projectName.Replace(".fsproj", "")
 
         this.testPackageVersion <- $"0.0.1-test-{suffix}"
-
 
         // Create a package to be used in the tests
         // I didn't find a way to test the MSBuild tasks execution using MSBuild only
@@ -77,7 +79,6 @@ type IntegrationTests() =
             |> CmdLine.toString,
             workingDirectory = Workspace.fixtures.``.``
         )
-
 
     [<TestMethod>]
     member this.``works for absolute path with keep a changelog``() : Task =
