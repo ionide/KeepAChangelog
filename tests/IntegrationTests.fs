@@ -11,7 +11,6 @@ open Workspace
 
 
 module Utils =
-
     let packAndGetPackageProperties projectName =
         let packageCache = VirtualWorkspace.``test-package-cache``.``.``
         if Directory.Exists packageCache then
@@ -38,7 +37,6 @@ module Utils =
             workingDirectory = Workspace.fixtures.``.``
         )
 
-[<Extension>]
 type StringHelper =
     [<Extension>]
     static member ReplaceEscapedNewLines (s: string) =
