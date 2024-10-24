@@ -7,25 +7,31 @@
 
     <ItemGroup>
         <Compile Include="Workspace.fs" />
-        <Compile Include="Setup.fs" />
         <Compile Include="UnitTests.fs" />
         <Compile Include="IntegrationTests.fs" />
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="BlackFox.CommandLine" />
       <PackageReference Include="EasyBuild.FileSystemProvider" />
-      <PackageReference Include="Fixie.TestAdapter" />
+      <PackageReference Include="Faqt" />
       <PackageReference Include="FSharp.Core" />
       <PackageReference Include="KeepAChangelogParser" />
-      <PackageReference Include="Microsoft.Build.Utilities.Core" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" />
+        <PackageReference Include="Microsoft.Build.Utilities.Core" />
       <PackageReference Include="Moq" />
+      <PackageReference Include="MSTest.TestAdapter" />
+      <PackageReference Include="MSTest.TestFramework" />
       <PackageReference Include="Semver" />
-        <PackageReference Include="Shouldly" />
       <PackageReference Include="SimpleExec" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\src\Ionide.KeepAChangelog.Tasks.fsproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="changelogs\*.md" />
     </ItemGroup>
 
 </Project>

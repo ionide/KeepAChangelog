@@ -1,10 +1,11 @@
 module Tests.UnitTests
 
-open Tests.Setup
 open Moq
 open Microsoft.Build.Framework
 open Ionide.KeepAChangelog.Tasks
-open Shouldly
+open Faqt
+open Faqt.Operators
+open Microsoft.VisualStudio.TestTools.UnitTesting
 open Workspace
 
 type TestContext =
@@ -15,91 +16,103 @@ type TestContext =
 
     member this.PrintErrors() =
         this.Errors |> Seq.iter (fun error -> printfn "Error: %s" error.Message)
+[<TestClass>]
+type UnitTests() =
 
-let private setupBuildEngine () =
-    let context =
-        {
-            BuildEngine = Mock<IBuildEngine>()
-            Errors = ResizeArray<BuildErrorEventArgs>()
-        }
+    member val context = Unchecked.defaultof<TestContext> with get, set
+    [<TestInitialize>]
+    member this.Initialize() =
+        this.context <-
+            {
+                BuildEngine = Mock<IBuildEngine>()
+                Errors = ResizeArray<BuildErrorEventArgs>()
+            }
 
-    context.BuildEngine
-        .Setup(fun engine -> engine.LogErrorEvent(It.IsAny<BuildErrorEventArgs>()))
-        .Callback(fun (args: BuildErrorEventArgs) -> context.Errors.Add(args))
-    |> ignore
+        this.context.BuildEngine
+            .Setup(fun engine -> engine.LogErrorEvent(It.IsAny<BuildErrorEventArgs>()))
+            .Callback(fun (args: BuildErrorEventArgs) -> this.context.Errors.Add(args))
+        |> ignore
 
-    context
+    [<TestMethod>]
+    member this.``task fails when changelog file does not exist`` () =
 
-[<Test>]
-let ``task fails when changelog file does not exist`` () =
-    let context = setupBuildEngine ()
+        let myTask = ParseChangeLogs(ChangelogFile = "ThisFileDoesNotExist.md")
+        myTask.BuildEngine <- this.context.BuildEngine.Object
 
-    let myTask = ParseChangeLogs(ChangelogFile = "ThisFileDoesNotExist.md")
-    myTask.BuildEngine <- context.BuildEngine.Object
+        let success = myTask.Execute()
 
-    let success = myTask.Execute()
+        %success.Should().BeFalse()
+        %this.context.Errors.Count.Should().Be(1)
+        %this.context.Errors.[0].Code.Should().Be("IKC0001")
 
-    success.ShouldBeFalse()
-    context.Errors.Count.ShouldBe(1)
-    context.Errors.[0].Code.ShouldBe("IKC0001")
+    [<TestMethod>]
+    member this.``task succeeds when changelog file exists (relative path)`` () =
+        // When running tests, the working directory is where the dll is located
+        let myTask = ParseChangeLogs(ChangelogFile = "../../../changelogs/CHANGELOG.md")
 
-[<Test>]
-let ``task succeeds when changelog file exists (relative path)`` () =
-    let context = setupBuildEngine ()
+        myTask.BuildEngine <- this.context.BuildEngine.Object
 
-    // When running tests, the working directory is where the dll is located
-    let myTask = ParseChangeLogs(ChangelogFile = "../../../fixtures/CHANGELOG.md")
+        let success = myTask.Execute()
 
-    myTask.BuildEngine <- context.BuildEngine.Object
+        this.context.PrintErrors()
 
-    let success = myTask.Execute()
+        %success.Should().BeTrue()
+        %this.context.Errors.Count.Should().Be(0)
 
-    context.PrintErrors()
+    [<TestMethod>]
+    member this.``task succeeds when changelog file exists (absolute path)`` () =
+        let myTask = ParseChangeLogs(ChangelogFile = Workspace.changelogs.``CHANGELOG.md``)
+        myTask.BuildEngine <- this.context.BuildEngine.Object
 
-    success.ShouldBeTrue()
-    context.Errors.Count.ShouldBe(0)
+        let success = myTask.Execute()
 
-[<Test>]
-let ``task succeeds when changelog file exists (absolute path)`` () =
-    let context = setupBuildEngine ()
+        %success.Should().BeTrue()
+        %this.context.Errors.Count.Should().Be(0)
 
-    let myTask = ParseChangeLogs(ChangelogFile = Workspace.fixtures.``CHANGELOG.md``)
-    myTask.BuildEngine <- context.BuildEngine.Object
+    [<TestMethod>]
+    member this.``task fails when changelog file is invalid`` () =
+        let myTask =
+            ParseChangeLogs(ChangelogFile = Workspace.changelogs.``CHANGELOG_invalid.md``)
 
-    let success = myTask.Execute()
+        myTask.BuildEngine <- this.context.BuildEngine.Object
 
-    success.ShouldBeTrue()
-    context.Errors.Count.ShouldBe(0)
+        let success = myTask.Execute()
 
-[<Test>]
-let ``task fails when changelog file is invalid`` () =
-    let context = setupBuildEngine ()
-
-    let myTask =
-        ParseChangeLogs(ChangelogFile = Workspace.fixtures.``CHANGELOG_invalid.md``)
-
-    myTask.BuildEngine <- context.BuildEngine.Object
-
-    let success = myTask.Execute()
-
-    success.ShouldBeFalse()
-    context.Errors.Count.ShouldBe(1)
-    context.Errors.[0].Code.ShouldBe("IKC0002")
+        %success.Should().BeFalse()
+        %this.context.Errors.Count.Should().Be(1)
+        %this.context.Errors.[0].Code.Should().Be("IKC0002")
 
 
-[<Test>]
-let ``task correctly parses detailes from changelog file`` () =
-    let context = setupBuildEngine ()
-    let myTask =
-        ParseChangeLogs(ChangelogFile = Workspace.fixtures.``CHANGELOG_detailed.md``)
+    [<TestMethod>]
+    member this.``task correctly parses details from changelog file`` () =
+        let myTask =
+            ParseChangeLogs(ChangelogFile = Workspace.changelogs.``CHANGELOG_detailed.md``)
 
-    myTask.BuildEngine <- context.BuildEngine.Object
+        myTask.BuildEngine <- this.context.BuildEngine.Object
 
-    let success = myTask.Execute()
-    success.ShouldBeTrue "Should have successfully parsed the changelog data"
-    myTask.AllReleasedChangelogs.Length.ShouldBe(9, "Should have 9 versions")
-    myTask.CurrentReleaseChangelog.ItemSpec.ShouldBe("0.1.8", "Should have the most recent version")
-    myTask.CurrentReleaseChangelog.GetMetadata("Date").ShouldBe("2022-03-31", "Should have the most recent version's date")
-    myTask.CurrentReleaseChangelog.MetadataNames |> Seq.cast |> _.ShouldContain("Changed", "Should have changed metadata")
-    myTask.CurrentReleaseChangelog.MetadataNames |> Seq.cast |> _.ShouldContain("Date", "Should have date metadata")
+        let success = myTask.Execute()
+        %success.Should().BeTrue "Should have successfully parsed the changelog data"
+        %myTask.AllReleasedChangelogs.Length.Should().Be(9, "Should have 9 versions")
+        %myTask.CurrentReleaseChangelog.ItemSpec.Should().Be("0.1.8", "Should have the most recent version")
+        %myTask.CurrentReleaseChangelog.GetMetadata("Date").Should().Be("2022-03-31", "Should have the most recent version's date")
+        %(myTask.CurrentReleaseChangelog.MetadataNames |> Seq.cast |> _.Should().Contain("Changed", "Should have changed metadata"))
+        %(myTask.CurrentReleaseChangelog.MetadataNames |> Seq.cast |> _.Should().Contain("Date", "Should have date metadata"))
+
+    [<TestMethod>]
+    member this.``task produces expected markdown`` () =
+        let myTask =
+            ParseChangeLogs(ChangelogFile = Workspace.changelogs.``CHANGELOG.md``)
+
+        myTask.BuildEngine <- this.context.BuildEngine.Object
+
+        let success = myTask.Execute()
+        %success.Should().BeTrue "Should have successfully parsed the changelog data"
+        %myTask.LatestReleaseNotes.Should().Be("""### Added
+
+- Created the package
+
+### Changed
+
+- Changed something in the package
+- Updated the target framework""")
 

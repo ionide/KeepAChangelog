@@ -47,7 +47,7 @@ type ChangelogExtensions =
     static member Unwrapped(sections: ChangelogSectionCollection) =
         sections
         |> Seq.choose (fun section ->
-            match SemVersion.TryParse section.MarkdownVersion with
+            match SemVersion.TryParse(section.MarkdownVersion, SemVersionStyles.Any) with
             | false, _ -> None
             | true, version ->
                 Some
@@ -63,11 +63,14 @@ type ChangelogExtensions =
         |> Seq.fold
             (fun (builder: StringBuilder) subsection ->
                 let state = builder.AppendLine $"### {subsection.Type}"
+                            |> (fun x -> x.AppendLine "")
 
                 subsection.ItemCollection
-                |> Seq.fold (fun (builder: StringBuilder) line -> builder.AppendLine line.MarkdownText) state)
+                |> Seq.fold (fun (builder: StringBuilder) line -> builder.AppendLine $"- {line.MarkdownText}") state
+                |> (fun x -> x.AppendLine ""))
             builder
         |> _.ToString()
+        |> _.Trim()
 
 type ParseChangeLogs() =
     inherit Task()
