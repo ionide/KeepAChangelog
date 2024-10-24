@@ -15,7 +15,10 @@ jobs:
     - name: Tool restore
       run: dotnet tool restore
     - name: Format Check
-      run: dotnet fantomas . --check || echo "The code was not formatted, run `dotnet fantomas .` to format all code."
+      run: dotnet fantomas . --check
+    - name: log format failure
+      if: failure()
+      run: echo "The code was not formatted, run `dotnet fantomas .` to format all code."
     - name: Restore
       run: dotnet restore
     - name: Run Build
