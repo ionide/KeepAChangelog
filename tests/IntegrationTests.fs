@@ -72,7 +72,7 @@ type IntegrationTests() =
             CmdLine.empty
             |> CmdLine.appendPrefix "add" projectName
             |> CmdLine.appendPrefix "package" "Ionide.KeepAChangelog.Tasks"
-            |> CmdLine.appendPrefix "--source" VirtualWorkspace.``test-nupkgs``.``.``
+            // |> CmdLine.appendPrefix "--source" VirtualWorkspace.``test-nupkgs``.``.``
             |> CmdLine.appendPrefix "--version" $"[{this.testPackageVersion}]"
             |> CmdLine.toString,
             workingDirectory = Workspace.fixtures.``.``
