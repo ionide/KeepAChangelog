@@ -47,7 +47,7 @@ type ChangelogExtensions =
     static member Unwrapped(sections: ChangelogSectionCollection) =
         sections
         |> Seq.choose (fun section ->
-            match SemVersion.TryParse section.MarkdownVersion with
+            match SemVersion.TryParse(section.MarkdownVersion, SemVersionStyles.Any) with
             | false, _ -> None
             | true, version ->
                 Some
