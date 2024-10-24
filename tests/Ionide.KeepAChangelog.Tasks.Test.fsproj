@@ -32,11 +32,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="test-package-cache\" />
-      <Content Include=".gitignore" />
-      <Content Include="changelogs\CHANGELOG.md" />
-      <Content Include="changelogs\CHANGELOG_detailed.md" />
-      <Content Include="changelogs\CHANGELOG_invalid.md" />
+      <Content Include="changelogs\*.md" />
     </ItemGroup>
 
 </Project>
