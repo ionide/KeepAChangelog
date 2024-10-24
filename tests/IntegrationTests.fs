@@ -130,9 +130,9 @@ type IntegrationTests() =
         }
 
     [<TestMethod>]
-    member this.``fails with default CHANGELOG.md if no changelog is specified``() : Task =
+    member this.``fails if no changelog is specified``() : Task =
         task {
-            let projectName = "DefaultToChangelogIfNotSpecified.fsproj"
+            let projectName = "FailIfChangelogNotSpecified.fsproj"
 
             this.AddPackageReference projectName
 
@@ -150,7 +150,31 @@ type IntegrationTests() =
   }
 }
 """
+                )
+            |> ignore
+        }
 
+    [<TestMethod>]
+    member this.``fails if changelog specified doesn't exist``() : Task =
+        task {
+            let projectName = "FailIfChangelogDoesNotExist.fsproj"
+
+            this.AddPackageReference projectName
+
+            let! struct (stdout, _) = Utils.packAndGetPackageProperties projectName
+
+            stdout
+                .ReplaceEscapedNewLines()
+                .Should()
+                .Be(
+                    """{
+  "Properties": {
+    "Version": "1.0.0",
+    "PackageVersion": "1.0.0",
+    "PackageReleaseNotes": ""
+  }
+}
+"""
                 )
             |> ignore
         }
