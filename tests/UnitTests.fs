@@ -1,5 +1,6 @@
 module Tests.UnitTests
 
+open Ionide.KeepAChangelog.Tasks.Test
 open Moq
 open Microsoft.Build.Framework
 open Ionide.KeepAChangelog.Tasks
@@ -7,6 +8,7 @@ open Faqt
 open Faqt.Operators
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Workspace
+open Helpers
 
 type TestContext = {
     BuildEngine: Mock<IBuildEngine>
@@ -121,7 +123,7 @@ type UnitTests() =
 
         %myTask.LatestReleaseNotes
             .Should()
-            .Be(
+            .BeLineEndingEquivalent(
                 """### Added
 
 - Created the package

@@ -1,13 +1,14 @@
 module Tests.IntegrationTests
 
 open System.IO
-open System.Runtime.CompilerServices
 open System.Threading.Tasks
+open Ionide.KeepAChangelog.Tasks.Test
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open BlackFox.CommandLine
 open Faqt
 open SimpleExec
 open Workspace
+open Helpers
 
 module Utils =
     let packAndGetPackageProperties projectName =
@@ -39,11 +40,6 @@ module Utils =
             |> CmdLine.toString,
             workingDirectory = Workspace.fixtures.``.``
         )
-
-type StringHelper =
-    [<Extension>]
-    static member ReplaceEscapedNewLines(s: string) =
-        s.ReplaceLineEndings().Replace("\\r\\n", "\\n")
 
 [<TestClass>]
 type IntegrationTests() =
@@ -90,9 +86,8 @@ type IntegrationTests() =
             let! struct (stdout, _) = Utils.packAndGetPackageProperties projectName
 
             stdout
-                .ReplaceEscapedNewLines()
                 .Should()
-                .Be(
+                .BeLineEndingEquivalent(
                     """{
   "Properties": {
     "Version": "0.1.0",
@@ -115,9 +110,8 @@ type IntegrationTests() =
             let! struct (stdout, _) = Utils.packAndGetPackageProperties projectName
 
             stdout
-                .ReplaceEscapedNewLines()
                 .Should()
-                .Be(
+                .BeLineEndingEquivalent(
                     """{
   "Properties": {
     "Version": "0.1.0",
@@ -140,9 +134,8 @@ type IntegrationTests() =
             let! struct (stdout, _) = Utils.packAndGetPackageProperties projectName
 
             stdout
-                .ReplaceEscapedNewLines()
                 .Should()
-                .Be(
+                .BeLineEndingEquivalent(
                     """{
   "Properties": {
     "Version": "1.0.0",
@@ -165,9 +158,8 @@ type IntegrationTests() =
             let! struct (stdout, _) = Utils.packAndGetPackageProperties projectName
 
             stdout
-                .ReplaceEscapedNewLines()
                 .Should()
-                .Be(
+                .BeLineEndingEquivalent(
                     """{
   "Properties": {
     "Version": "1.0.0",
