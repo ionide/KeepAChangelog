@@ -134,26 +134,23 @@ type UnitTests() =
 - Updated the target framework"""
             )
             
+        %myTask.UnreleasedReleaseNotes
+            .Should()
+            .BeLineEndingEquivalent(
+                """### Removed
+
+- A test removal line
+- And another removal""")
     [<TestMethod>]
-    member this.``task adds pre-release when an unreleased section is present``() =
+    member this.``task produces correct versions``() =
         let myTask = ParseChangeLogs(ChangelogFile = Workspace.changelogs.``CHANGELOG.md``)
 
         myTask.BuildEngine <- this.context.BuildEngine.Object
 
         let success = myTask.Execute()
         %success.Should().BeTrue "Should have successfully parsed the changelog data"
+
+        %myTask.CurrentReleaseChangelog.ItemSpec.Should().Be("0.1.0")
+        %myTask.UnreleasedChangelog.ItemSpec.Should().Be("0.1.1-alpha")
         
-        %myTask.CurrentReleaseChangelog
-
-        %myTask.LatestReleaseNotes
-            .Should()
-            .Be(
-                """### Added
-
-- Created the package
-
-### Changed
-
-- Changed something in the package
-- Updated the target framework"""
-            )
+       

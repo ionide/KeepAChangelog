@@ -137,6 +137,13 @@ type ParseChangeLogs() =
             this.UnreleasedChangelog <- unreleased.ToTaskItem()
             this.UnreleasedReleaseNotes <- unreleased.SubSectionCollection.ToMarkdown()
             Ok()
+    
+    member this.UpdateUnreleasedVersion(latestVersion : SemVersion) =
+        match this.UnreleasedChangelog with
+        | null -> ()
+        | _ ->
+            let newUnreleased = latestVersion.WithPrereleaseParsedFrom "alpha" |> _.WithPatch(latestVersion.Patch + 1)
+            this.UnreleasedChangelog.ItemSpec <- newUnreleased.ToString()
 
     member this.ProcessReleases(changelog: Changelog) =
         let releases =
@@ -161,7 +168,11 @@ type ParseChangeLogs() =
         this.CurrentReleaseChangelog <- mapped[0]
         this.AllReleasedChangelogs <- mapped
         this.LatestReleaseNotes <- latestRelease.collection.ToMarkdown()
+        
+        this.UpdateUnreleasedVersion(latestRelease.version)
+        
         Ok()
+    
 
     /// <summary>
     /// Helper method to log an error with the given log data.
