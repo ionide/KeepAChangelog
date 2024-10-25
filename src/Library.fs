@@ -85,6 +85,9 @@ type ParseChangeLogs() =
 
     [<Output>]
     member val UnreleasedChangelog: ITaskItem = null with get, set
+    
+    [<Output>]
+    member val UnreleasedReleaseNotes: string = null with get, set 
 
     [<Output>]
     member val CurrentReleaseChangelog: ITaskItem = null with get, set
@@ -132,6 +135,7 @@ type ParseChangeLogs() =
         | null -> Ok()
         | unreleased ->
             this.UnreleasedChangelog <- unreleased.ToTaskItem()
+            this.UnreleasedReleaseNotes <- unreleased.SubSectionCollection.ToMarkdown()
             Ok()
 
     member this.ProcessReleases(changelog: Changelog) =

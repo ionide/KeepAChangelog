@@ -133,3 +133,27 @@ type UnitTests() =
 - Changed something in the package
 - Updated the target framework"""
             )
+            
+    [<TestMethod>]
+    member this.``task adds pre-release when an unreleased section is present``() =
+        let myTask = ParseChangeLogs(ChangelogFile = Workspace.changelogs.``CHANGELOG.md``)
+
+        myTask.BuildEngine <- this.context.BuildEngine.Object
+
+        let success = myTask.Execute()
+        %success.Should().BeTrue "Should have successfully parsed the changelog data"
+        
+        %myTask.CurrentReleaseChangelog
+
+        %myTask.LatestReleaseNotes
+            .Should()
+            .Be(
+                """### Added
+
+- Created the package
+
+### Changed
+
+- Changed something in the package
+- Updated the target framework"""
+            )
