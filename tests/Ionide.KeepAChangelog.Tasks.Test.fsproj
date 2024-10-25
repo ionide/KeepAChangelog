@@ -7,6 +7,7 @@
 
     <ItemGroup>
         <Compile Include="Workspace.fs" />
+        <Compile Include="Helpers.fs" />
         <Compile Include="UnitTests.fs" />
         <Compile Include="IntegrationTests.fs" />
     </ItemGroup>

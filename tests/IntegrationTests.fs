@@ -1,21 +1,24 @@
 module Tests.IntegrationTests
 
 open System.IO
-open System.Runtime.CompilerServices
 open System.Threading.Tasks
+open Ionide.KeepAChangelog.Tasks.Test
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open BlackFox.CommandLine
 open Faqt
 open SimpleExec
 open Workspace
-
+open Helpers
 
 module Utils =
     let packAndGetPackageProperties projectName =
         let packageCache = VirtualWorkspace.``test-package-cache``.``.``
+
         if Directory.Exists packageCache then
             Directory.Delete(packageCache, true)
+
         Directory.CreateDirectory packageCache |> ignore
+
         Command.Run(
             "dotnet",
             CmdLine.empty
@@ -24,6 +27,7 @@ module Utils =
             |> CmdLine.toString,
             workingDirectory = Workspace.fixtures.``.``
         )
+
         Command.ReadAsync(
             "dotnet",
             CmdLine.empty
@@ -37,11 +41,6 @@ module Utils =
             workingDirectory = Workspace.fixtures.``.``
         )
 
-type StringHelper =
-    [<Extension>]
-    static member ReplaceEscapedNewLines (s: string) =
-        s.ReplaceLineEndings().Replace("\\r\\n","\\n")
-
 [<TestClass>]
 type IntegrationTests() =
 
@@ -51,7 +50,6 @@ type IntegrationTests() =
         let suffix = projectName.Replace(".fsproj", "")
 
         this.testPackageVersion <- $"0.0.1-test-{suffix}"
-
 
         // Create a package to be used in the tests
         // I didn't find a way to test the MSBuild tasks execution using MSBuild only
@@ -78,7 +76,6 @@ type IntegrationTests() =
             workingDirectory = Workspace.fixtures.``.``
         )
 
-
     [<TestMethod>]
     member this.``works for absolute path with keep a changelog``() : Task =
         task {
@@ -89,9 +86,8 @@ type IntegrationTests() =
             let! struct (stdout, _) = Utils.packAndGetPackageProperties projectName
 
             stdout
-                .ReplaceEscapedNewLines()
                 .Should()
-                .Be(
+                .BeLineEndingEquivalent(
                     """{
   "Properties": {
     "Version": "0.1.0",
@@ -114,9 +110,8 @@ type IntegrationTests() =
             let! struct (stdout, _) = Utils.packAndGetPackageProperties projectName
 
             stdout
-                .ReplaceEscapedNewLines()
                 .Should()
-                .Be(
+                .BeLineEndingEquivalent(
                     """{
   "Properties": {
     "Version": "0.1.0",
@@ -139,9 +134,8 @@ type IntegrationTests() =
             let! struct (stdout, _) = Utils.packAndGetPackageProperties projectName
 
             stdout
-                .ReplaceEscapedNewLines()
                 .Should()
-                .Be(
+                .BeLineEndingEquivalent(
                     """{
   "Properties": {
     "Version": "1.0.0",
@@ -164,9 +158,8 @@ type IntegrationTests() =
             let! struct (stdout, _) = Utils.packAndGetPackageProperties projectName
 
             stdout
-                .ReplaceEscapedNewLines()
                 .Should()
-                .Be(
+                .BeLineEndingEquivalent(
                     """{
   "Properties": {
     "Version": "1.0.0",

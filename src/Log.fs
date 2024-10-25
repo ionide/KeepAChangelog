@@ -19,10 +19,7 @@ let changelogFileNotFound (filePath: string) =
         ErrorCode = "IKC0001"
         HelpKeyword = "Missing Changelog file"
         Message = "The Changelog file {0} was not found."
-        MessageArgs =
-            [|
-                box filePath
-            |]
+        MessageArgs = [| box filePath |]
     }
 
 let invalidChangelog (filePath: string) (error: string) =
@@ -30,9 +27,5 @@ let invalidChangelog (filePath: string) (error: string) =
         ErrorCode = "IKC0002"
         HelpKeyword = "Invalid Changelog file"
         Message = "The Changelog file {0} is invalid. The error was: {1}"
-        MessageArgs =
-            [|
-                box filePath
-                box error
-            |]
+        MessageArgs = [| box filePath; box error |]
     }
