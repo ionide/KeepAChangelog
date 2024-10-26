@@ -33,6 +33,7 @@
 
     <ItemGroup>
       <Content Include="changelogs\*.md" />
+        <None Include="fixtures\*"/>
     </ItemGroup>
 
 </Project>

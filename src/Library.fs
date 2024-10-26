@@ -85,9 +85,9 @@ type ParseChangeLogs() =
 
     [<Output>]
     member val UnreleasedChangelog: ITaskItem = null with get, set
-    
+
     [<Output>]
-    member val UnreleasedReleaseNotes: string = null with get, set 
+    member val UnreleasedReleaseNotes: string = null with get, set
 
     [<Output>]
     member val CurrentReleaseChangelog: ITaskItem = null with get, set
@@ -131,48 +131,53 @@ type ParseChangeLogs() =
             Error()
 
     member this.ReadUnreleasedSection(changelog: Changelog) =
-        match changelog.SectionUnreleased with
-        | null -> Ok()
-        | unreleased ->
+        match changelog.SectionUnreleased, changelog.SectionUnreleased.MarkdownTitle with
+        | null, _
+        | _, "" -> Ok()
+        | unreleased, _ ->
             this.UnreleasedChangelog <- unreleased.ToTaskItem()
             this.UnreleasedReleaseNotes <- unreleased.SubSectionCollection.ToMarkdown()
             Ok()
-    
-    member this.UpdateUnreleasedVersion(latestVersion : SemVersion) =
+
+    member this.UpdateUnreleasedVersion(latestVersion: SemVersion) =
         match this.UnreleasedChangelog with
         | null -> ()
         | _ ->
-            let newUnreleased = latestVersion.WithPrereleaseParsedFrom "alpha" |> _.WithPatch(latestVersion.Patch + 1)
+            let newUnreleased =
+                latestVersion.WithPrereleaseParsedFrom "alpha"
+                |> _.WithPatch(latestVersion.Patch + 1)
+
             this.UnreleasedChangelog.ItemSpec <- newUnreleased.ToString()
 
     member this.ProcessReleases(changelog: Changelog) =
         let releases =
             changelog.SectionCollection.Unwrapped()
             |> Seq.sortByDescending _.version
-            |> Seq.toArray
-
-        let latestRelease = releases |> (fun x -> x[0])
+            |> Seq.toList
 
         let mapped =
             releases
-            |> Array.map (fun x ->
+            |> List.map (fun x ->
                 let taskItem = TaskItem(x.version.ToString())
                 taskItem.SetMetadata("Date", x.date.ToString("yyyy-MM-dd"))
 
                 for (key, value) in x.collection.ToTaskItemMetadata() do
                     taskItem.SetMetadata(key, value)
 
-                taskItem :> ITaskItem
+                (x, taskItem :> ITaskItem)
             )
 
-        this.CurrentReleaseChangelog <- mapped[0]
-        this.AllReleasedChangelogs <- mapped
-        this.LatestReleaseNotes <- latestRelease.collection.ToMarkdown()
-        
-        this.UpdateUnreleasedVersion(latestRelease.version)
-        
+        match mapped with
+        | (latestRelease, latestTaskItem) :: _ ->
+            this.CurrentReleaseChangelog <- latestTaskItem
+            this.AllReleasedChangelogs <- mapped |> List.map snd |> Array.ofList
+            this.LatestReleaseNotes <- latestRelease.collection.ToMarkdown()
+            this.UpdateUnreleasedVersion(latestRelease.version)
+        | _ ->
+            this.AllReleasedChangelogs <- [||]
+            this.UpdateUnreleasedVersion(SemVersion(0, 0, 0))
+
         Ok()
-    
 
     /// <summary>
     /// Helper method to log an error with the given log data.

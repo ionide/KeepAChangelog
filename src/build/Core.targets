@@ -18,6 +18,7 @@
     <Target Name="GetChangelogVersion" Condition="'$(ChangelogFile)' != '' and Exists('$(ChangelogFile)')" DependsOnTargets="ValidateChangelog" Inputs="$(ChangelogFile)" Outputs="UnreleasedChangelog;CurrentReleaseChangelog;AllReleasedChangelogslLatestReleaseNotes">
         <Ionide.KeepAChangelog.Tasks.ParseChangeLogs ChangelogFile="$(ChangelogFile)">
             <Output TaskParameter="UnreleasedChangelog" ItemName="UnreleasedChangelog"/>
+            <Output TaskParameter="UnreleasedReleaseNotes" ItemName="UnreleasedReleaseNotes"/>
             <Output TaskParameter="CurrentReleaseChangelog" ItemName="CurrentReleaseChangelog"/>
             <Output TaskParameter="AllReleasedChangelogs" ItemName="AllReleasedChangelogs"/>
             <Output TaskParameter="LatestReleaseNotes" ItemName="LatestReleaseNotes"/>
@@ -26,15 +27,25 @@
 
     <Target Name="SetVersionFromChangelog" DependsOnTargets="GetChangelogVersion">
         <PropertyGroup Condition="'@(CurrentReleaseChangelog)' != ''">
+            <!-- Set the version to the version of the latest release -->
             <Version>%(CurrentReleaseChangelog.Identity)</Version>
             <PackageVersion>%(CurrentReleaseChangelog.Identity)</PackageVersion>
             <PackageReleaseNotes>@(LatestReleaseNotes)</PackageReleaseNotes>
+            <_ReleaseDate>%(CurrentReleaseChangelog.Date)</_ReleaseDate>
         </PropertyGroup>
+        
+        <PropertyGroup Condition="'@(UnreleasedChangelog)' != '' and '$(GenerateVersionForUnreleasedChanges)' == 'true'">
+            <!-- Set the version to the derived version of the unreleased changelog -->
+            <Version>%(UnreleasedChangelog.Identity)</Version>
+            <PackageVersion>%(UnreleasedChangelog.Identity)</PackageVersion>
+            <PackageReleaseNotes>@(UnreleasedReleaseNotes)</PackageReleaseNotes>
+            <_ReleaseDate>%(UnreleasedChangelog.Date)</_ReleaseDate>
+        </PropertyGroup> 
 
-        <ItemGroup Condition="'@(CurrentReleaseChangelog)' != '' and '$(GenerateAssemblyInfo)' == 'true'">
+        <ItemGroup Condition="'@(_ReleaseDate)' != '' and '$(GenerateAssemblyInfo)' == 'true'">
             <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute" Condition="'$(GenerateRepositoryUrlAttribute)' == 'true' and ('$(RepositoryUrl)' != '' or '$(PublishRepositoryUrl)' == 'true')">
                 <_Parameter1>BuildDate</_Parameter1>
-                <_Parameter2>%(CurrentReleaseChangelog.Date)</_Parameter2>
+                <_Parameter2>%(_ReleaseDate)</_Parameter2>
             </AssemblyAttribute>
         </ItemGroup>
     </Target>

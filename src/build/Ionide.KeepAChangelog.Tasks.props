@@ -1,0 +1,6 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <!-- If set, the assembly/package version and release notes will be set from Unreleased changes, if any are present -->
+        <GenerateVersionForUnreleasedChanges Condition="'$(GenerateVersionForUnreleasedChanges)' == ''">true</GenerateVersionForUnreleasedChanges>
+    </PropertyGroup>
+</Project>

@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+### Removed
+
+- A test removal line
+- And another removal
+
 ## [0.1.0] - 2022-01-13
 
 ### Added
