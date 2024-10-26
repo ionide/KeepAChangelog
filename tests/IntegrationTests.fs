@@ -32,7 +32,7 @@ module Utils =
                     |> CmdLine.toString,
                     workingDirectory = Workspace.fixtures.``.``
                 )
-            
+
             let extraArg = extraArg |> Option.defaultValue ""
 
             return!
@@ -50,8 +50,9 @@ module Utils =
                     workingDirectory = Workspace.fixtures.``.``
                 )
         }
-        
-    let packAndGetPackageProperties projectName = packAndGetPackagePropertiesWithExtraArg projectName None
+
+    let packAndGetPackageProperties projectName =
+        packAndGetPackagePropertiesWithExtraArg projectName None
 
 [<TestClass>]
 type IntegrationTests() =
@@ -205,7 +206,7 @@ type IntegrationTests() =
                 )
             |> ignore
         }
-        
+
     [<TestMethod>]
     member this.``ignores a pre-release version if changelog has unreleased section but disabled``() : Task =
         task {
@@ -213,7 +214,10 @@ type IntegrationTests() =
 
             this.AddPackageReference projectName
 
-            let! struct (stdout, _) = Utils.packAndGetPackagePropertiesWithExtraArg projectName (Some "-p:GenerateVersionForUnreleasedChanges=false")
+            let! struct (stdout, _) =
+                Utils.packAndGetPackagePropertiesWithExtraArg
+                    projectName
+                    (Some "-p:GenerateVersionForUnreleasedChanges=false")
 
             stdout
                 .Should()
