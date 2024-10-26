@@ -4,6 +4,7 @@ open System
 open System.Globalization
 open System.Runtime.CompilerServices
 open System.Text
+open FsToolkit.ErrorHandling.Operator.Result
 open Microsoft.Build.Utilities
 open Microsoft.Build.Framework
 open System.IO
@@ -107,7 +108,8 @@ type ParseChangeLogs() =
             let! changelog = this.ParseChangelog file
 
             do! this.ReadUnreleasedSection changelog
-            do! this.ProcessReleases changelog
+            let latestRelease = this.ProcessReleases changelog
+            do! this.UpdateUnreleasedVersion latestRelease
 
             return true
         }
@@ -131,23 +133,14 @@ type ParseChangeLogs() =
             Error()
 
     member this.ReadUnreleasedSection(changelog: Changelog) =
-        match changelog.SectionUnreleased, changelog.SectionUnreleased.MarkdownTitle with
-        | null, _
-        | _, "" -> Ok()
-        | unreleased, _ ->
-            this.UnreleasedChangelog <- unreleased.ToTaskItem()
-            this.UnreleasedReleaseNotes <- unreleased.SubSectionCollection.ToMarkdown()
-            Ok()
+        let unreleasedSection = changelog.SectionUnreleased
 
-    member this.UpdateUnreleasedVersion(latestVersion: SemVersion) =
-        match this.UnreleasedChangelog with
-        | null -> ()
+        match unreleasedSection.MarkdownTitle with
+        | "" -> Ok()
         | _ ->
-            let newUnreleased =
-                latestVersion.WithPrereleaseParsedFrom "alpha"
-                |> _.WithPatch(latestVersion.Patch + 1)
-
-            this.UnreleasedChangelog.ItemSpec <- newUnreleased.ToString()
+            this.UnreleasedChangelog <- unreleasedSection.ToTaskItem()
+            this.UnreleasedReleaseNotes <- unreleasedSection.SubSectionCollection.ToMarkdown()
+            Ok()
 
     member this.ProcessReleases(changelog: Changelog) =
         let releases =
@@ -155,29 +148,39 @@ type ParseChangeLogs() =
             |> Seq.sortByDescending _.version
             |> Seq.toList
 
-        let mapped =
-            releases
-            |> List.map (fun x ->
-                let taskItem = TaskItem(x.version.ToString())
-                taskItem.SetMetadata("Date", x.date.ToString("yyyy-MM-dd"))
+        match releases with
+        | [] -> None
+        | latestRelease :: _ ->
+            let mapped =
+                releases
+                |> List.map (fun x ->
+                    let taskItem = TaskItem(x.version.ToString())
+                    taskItem.SetMetadata("Date", x.date.ToString("yyyy-MM-dd"))
 
-                for (key, value) in x.collection.ToTaskItemMetadata() do
-                    taskItem.SetMetadata(key, value)
+                    for (key, value) in x.collection.ToTaskItemMetadata() do
+                        taskItem.SetMetadata(key, value)
 
-                (x, taskItem :> ITaskItem)
-            )
+                    taskItem :> ITaskItem
+                )
+                |> Array.ofList
 
-        match mapped with
-        | (latestRelease, latestTaskItem) :: _ ->
-            this.CurrentReleaseChangelog <- latestTaskItem
-            this.AllReleasedChangelogs <- mapped |> List.map snd |> Array.ofList
+            this.CurrentReleaseChangelog <- mapped[0]
+            this.AllReleasedChangelogs <- mapped
             this.LatestReleaseNotes <- latestRelease.collection.ToMarkdown()
-            this.UpdateUnreleasedVersion(latestRelease.version)
-        | _ ->
-            this.AllReleasedChangelogs <- [||]
-            this.UpdateUnreleasedVersion(SemVersion(0, 0, 0))
+            Some(latestRelease.version)
 
-        Ok()
+    member this.UpdateUnreleasedVersion(latestVersion: SemVersion option) =
+        let latestVersion = latestVersion |> Option.defaultValue (SemVersion(0, 0, 0))
+
+        match this.UnreleasedChangelog with
+        | null -> Ok()
+        | _ ->
+            let newUnreleased =
+                latestVersion.WithPrereleaseParsedFrom "alpha"
+                |> _.WithPatch(latestVersion.Patch + 1)
+
+            this.UnreleasedChangelog.ItemSpec <- newUnreleased.ToString()
+            Ok()
 
     /// <summary>
     /// Helper method to log an error with the given log data.

@@ -180,7 +180,7 @@ type UnitTests() =
         %success.Should().BeTrue("Should have successfully parsed the changelog data")
         %myTask.CurrentReleaseChangelog.Should().BeNull("There are no released sections")
         %myTask.LatestReleaseNotes.Should().BeNull("There are no released sections")
-        %myTask.AllReleasedChangelogs.Should().BeEmpty("There are no released sections")
+        %myTask.AllReleasedChangelogs.Should().BeNull("There are no released sections")
 
         %myTask.UnreleasedChangelog.ItemSpec
             .Should()
@@ -199,6 +199,6 @@ type UnitTests() =
         %success.Should().BeTrue("Should have successfully parsed the changelog data")
         %myTask.CurrentReleaseChangelog.Should().BeNull("There are no released sections")
         %myTask.LatestReleaseNotes.Should().BeNull("There are no released sections")
-        %myTask.AllReleasedChangelogs.Should().BeEmpty("There are no released sections")
+        %myTask.AllReleasedChangelogs.Should().BeNull("There are no released sections")
         %myTask.UnreleasedChangelog.Should().BeNull("There is no unreleased section")
         %myTask.UnreleasedReleaseNotes.Should().BeNull("There is no unreleased section")
