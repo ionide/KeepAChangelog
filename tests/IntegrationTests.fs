@@ -12,45 +12,47 @@ open Helpers
 
 module Utils =
     let packAndGetPackageProperties projectName =
-        let packageCache = VirtualWorkspace.``test-package-cache``.``.``
+        task {
 
-        if Directory.Exists packageCache then
-            Directory.Delete(packageCache, true)
+            let packageCache = VirtualWorkspace.``test-package-cache``.``.``
 
-        Directory.CreateDirectory packageCache |> ignore
+            // Force restoring of the latest package by clearing the local packages directory
+            if Directory.Exists packageCache then
+                Directory.Delete(packageCache, true)
 
-        Command.Run(
-            "dotnet",
-            CmdLine.empty
-            |> CmdLine.appendPrefix "restore" projectName
-            |> CmdLine.appendPrefix "--packages" VirtualWorkspace.``test-package-cache``.``.``
-            |> CmdLine.toString,
-            workingDirectory = Workspace.fixtures.``.``
-        )
+            Directory.CreateDirectory packageCache |> ignore
 
-        Command.ReadAsync(
-            "dotnet",
-            CmdLine.empty
-            |> CmdLine.appendPrefix "pack" projectName
-            |> CmdLine.appendPrefix "-c" "Release"
-            |> CmdLine.append "--no-restore"
-            |> CmdLine.appendRaw "--getProperty:Version"
-            |> CmdLine.appendRaw "--getProperty:PackageVersion"
-            |> CmdLine.appendRaw "--getProperty:PackageReleaseNotes"
-            |> CmdLine.toString,
-            workingDirectory = Workspace.fixtures.``.``
-        )
+            // Read improves the error logging when the command fails
+            let! (_, _) =
+                Command.ReadAsync(
+                    "dotnet",
+                    CmdLine.empty
+                    |> CmdLine.appendPrefix "restore" projectName
+                    |> CmdLine.appendPrefix "--packages" VirtualWorkspace.``test-package-cache``.``.``
+                    |> CmdLine.toString,
+                    workingDirectory = Workspace.fixtures.``.``
+                )
+
+            return!
+                Command.ReadAsync(
+                    "dotnet",
+                    CmdLine.empty
+                    |> CmdLine.appendPrefix "pack" projectName
+                    |> CmdLine.appendPrefix "-c" "Release"
+                    |> CmdLine.append "--no-restore"
+                    |> CmdLine.appendRaw "--getProperty:Version"
+                    |> CmdLine.appendRaw "--getProperty:PackageVersion"
+                    |> CmdLine.appendRaw "--getProperty:PackageReleaseNotes"
+                    |> CmdLine.toString,
+                    workingDirectory = Workspace.fixtures.``.``
+                )
+        }
 
 [<TestClass>]
 type IntegrationTests() =
-
-    member val testPackageVersion = null with get, set
-
-    member this.AddPackageReference(projectName: string) =
-        let suffix = projectName.Replace(".fsproj", "")
-
-        this.testPackageVersion <- $"0.0.1-test-{suffix}"
-
+    [<TestInitialize>]
+    member this.Initialize() =
+        this.testPackageVersion <- $"0.0.1-test"
         // Create a package to be used in the tests
         // I didn't find a way to test the MSBuild tasks execution using MSBuild only
         // So each fsproj, will use a package reference to the package created here
@@ -65,6 +67,9 @@ type IntegrationTests() =
             workingDirectory = Workspace.``..``.``.``
         )
 
+    member val testPackageVersion = null with get, set
+
+    member this.AddPackageReference(projectName: string) =
         Command.Run(
             "dotnet",
             CmdLine.empty
@@ -171,6 +176,7 @@ type IntegrationTests() =
                 )
             |> ignore
         }
+
     [<TestMethod>]
     member this.``generates a pre-release version if changelog has unreleased section``() : Task =
         task {
