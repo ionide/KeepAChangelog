@@ -11,7 +11,7 @@ open Workspace
 open Helpers
 
 module Utils =
-    let packAndGetPackageProperties projectName =
+    let packAndGetPackagePropertiesWithExtraArg projectName (extraArg: string option) =
         task {
 
             let packageCache = VirtualWorkspace.``test-package-cache``.``.``
@@ -32,6 +32,8 @@ module Utils =
                     |> CmdLine.toString,
                     workingDirectory = Workspace.fixtures.``.``
                 )
+            
+            let extraArg = extraArg |> Option.defaultValue ""
 
             return!
                 Command.ReadAsync(
@@ -40,6 +42,7 @@ module Utils =
                     |> CmdLine.appendPrefix "pack" projectName
                     |> CmdLine.appendPrefix "-c" "Release"
                     |> CmdLine.append "--no-restore"
+                    |> CmdLine.appendIfNotNullOrEmpty extraArg
                     |> CmdLine.appendRaw "--getProperty:Version"
                     |> CmdLine.appendRaw "--getProperty:PackageVersion"
                     |> CmdLine.appendRaw "--getProperty:PackageReleaseNotes"
@@ -47,6 +50,8 @@ module Utils =
                     workingDirectory = Workspace.fixtures.``.``
                 )
         }
+        
+    let packAndGetPackageProperties projectName = packAndGetPackagePropertiesWithExtraArg projectName None
 
 [<TestClass>]
 type IntegrationTests() =
@@ -194,6 +199,30 @@ type IntegrationTests() =
     "Version": "0.1.1-alpha",
     "PackageVersion": "0.1.1-alpha",
     "PackageReleaseNotes": "### Removed\n\n- A test removal line\n- And another removal"
+  }
+}
+"""
+                )
+            |> ignore
+        }
+        
+    [<TestMethod>]
+    member this.``ignores a pre-release version if changelog has unreleased section but disabled``() : Task =
+        task {
+            let projectName = "WorksForUnreleased.fsproj"
+
+            this.AddPackageReference projectName
+
+            let! struct (stdout, _) = Utils.packAndGetPackagePropertiesWithExtraArg projectName (Some "-p:GenerateVersionForUnreleasedChanges=false")
+
+            stdout
+                .Should()
+                .BeLineEndingEquivalent(
+                    """{
+  "Properties": {
+    "Version": "0.1.0",
+    "PackageVersion": "0.1.0",
+    "PackageReleaseNotes": "### Added\n\n- Created the package\n\n### Changed\n\n- Changed something in the package\n- Updated the target framework"
   }
 }
 """
