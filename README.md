@@ -1,8 +1,8 @@
-# Ionide.KeepAChangelog
+# Ionide.KeepAChangelog.Tasks
 
-This project implements a Changelog parser according to the spec at KeepAChangelog. It also provides MSBuild tasks and targets to automate the setting of **Versions** and **Package Release Notes** for your NuGet packages, so that the Changelogs are your source of truth.
+This project provides MSBuild tasks and targets to automate the setting of **Versions** and **Package Release Notes** for your NuGet packages from changelogs meeting the spec at [KeepAChangelog](https://keepachangelog.com), so that the Changelogs are your source of truth.
 
-When configured, this package will set the `Version`, `PackageVersion`, and `PackageReleaseNotes` of your packable project with the matching data from the latest Changelog release, as well as adding AssemblyMetadata for the `BuildDate` in the `YYYY-mm-dd` format.
+When configured, this package will set the `Version`, `PackageVersion`, and `PackageReleaseNotes` of your packable project with the matching data from the latest Changelog release, or calculated from the unreleased section, as well as adding AssemblyMetadata for the `BuildDate` in the `YYYY-mm-dd` format.
 
 ## Installation
 
@@ -69,13 +69,13 @@ If your changelog has multiple versions, the latest one will be used.
 
 ## Customization
 
-There's really only one property that matters for these targets, and that's `ChangelogFile`. This needs to point to the Changelog file you want to read, but it defaults to `CHANGELOG.md` in the root of a given project in case you want to adhere to defaults.
+There's really only one property that matters for these targets, and that's `ChangelogFile`. This needs to point to the Changelog file you want to read, and a warning will be emitted if you try to package your project without having set this.
 
 
-| Property | Type | Default Value | Description |
-| - | - | - | - |
-| ChangelogFile | string | CHANGELOG.md | Points to the changelog file to parse. Note that the default value is set to the _project_ root by default, so a repository-wide changelog would require this property be set to a different value, for example in a Directory.Build.props file |
-| GenerateVersionForUnreleasedChanges | boolean | true | If set, the assembly/package version and release notes will be set from Unreleased changes, if any are present. |
+| Property | Type | Default Value | Description                                                                                                                                                                                                                                  |
+| - | - |---------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ChangelogFile | string | -             | Points to the changelog file to parse. Note that the value is relative to the _project_ root by default, so a repository-wide changelog would require this property be set to a different value, for example in a Directory.Build.props file |
+| GenerateVersionForUnreleasedChanges | boolean | true          | If set, the assembly/package version and release notes will be set from Unreleased changes, if any are present.                                                                                                                              |
 
 ## API
 
@@ -86,7 +86,7 @@ When the task runs, it writes several output items and properties:
 | UnreleasedChangelog | ReleaseChangelogData option | If present, there was an 'Unreleased' section in the Changelog. This structure will contain the sections present, as well as an auto-incremented version number for this release. |
 | UnreleasedReleaseNotes | string option | If present, contains the concatenated list of all Changelog sections for the Unreleased section of the Changelog. This is a convenience property so that you don't have to String.Join all the lines in the `ReleaseChangelogData` structure yourself! |
 | CurrentReleaseChangelog | ReleaseChangelogData option | If present, there was at least one released logged in the Changelog. This structure will contain the details of each one. |
-| AllReleasedChangelogs | ReleaseChangelogData list | Contains the ordered list of all released in the ChangelogFile, descending. |
+| AllReleasedChangelogs | ReleaseChangelogData list | Contains the ordered list of all releases in the ChangelogFile, descending. |
 | LatestReleaseNotes | string option | If present, contains the concatenated list of all Changelog sections for the latest release. This is a convenience property so that you don't have to String.Join all the lines in the `ReleaseChangelogData` yourself! |
 
 ### ReleaseChangelogData
