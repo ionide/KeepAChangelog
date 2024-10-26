@@ -171,3 +171,26 @@ type IntegrationTests() =
                 )
             |> ignore
         }
+    [<TestMethod>]
+    member this.``generates a pre-release version if changelog has unreleased section``() : Task =
+        task {
+            let projectName = "WorksForUnreleased.fsproj"
+
+            this.AddPackageReference projectName
+
+            let! struct (stdout, _) = Utils.packAndGetPackageProperties projectName
+
+            stdout
+                .Should()
+                .BeLineEndingEquivalent(
+                    """{
+  "Properties": {
+    "Version": "0.1.1-alpha",
+    "PackageVersion": "0.1.1-alpha",
+    "PackageReleaseNotes": "### Removed\n\n- A test removal line\n- And another removal"
+  }
+}
+"""
+                )
+            |> ignore
+        }
