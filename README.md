@@ -71,18 +71,25 @@ If your changelog has multiple versions, the latest one will be used.
 
 There's really only one property that matters for these targets, and that's `ChangelogFile`. This needs to point to the Changelog file you want to read, but it defaults to `CHANGELOG.md` in the root of a given project in case you want to adhere to defaults.
 
+
+| Property | Type | Default Value | Description |
+| - | - | - | - |
+| ChangelogFile | string | CHANGELOG.md | Points to the changelog file to parse. Note that the default value is set to the _project_ root by default, so a repository-wide changelog would require this property be set to a different value, for example in a Directory.Build.props file |
+| GenerateVersionForUnreleasedChanges | boolean | true | If set, the assembly/package version and release notes will be set from Unreleased changes, if any are present. |
+
 ## API
 
 When the task runs, it writes several output items and properties:
 
 |Name|Type|Description|
 |----|----|-----------|
-| UnreleasedChangelog | UnreleasedChangelogData option | If present, there was an 'Unreleased' section in the Changelog. This structure will contain the sections present. |
+| UnreleasedChangelog | ReleaseChangelogData option | If present, there was an 'Unreleased' section in the Changelog. This structure will contain the sections present, as well as an auto-incremented version number for this release. |
+| UnreleasedReleaseNotes | string option | If present, contains the concatenated list of all Changelog sections for the Unreleased section of the Changelog. This is a convenience property so that you don't have to String.Join all the lines in the `ReleaseChangelogData` structure yourself! |
 | CurrentReleaseChangelog | ReleaseChangelogData option | If present, there was at least one released logged in the Changelog. This structure will contain the details of each one. |
 | AllReleasedChangelogs | ReleaseChangelogData list | Contains the ordered list of all released in the ChangelogFile, descending. |
 | LatestReleaseNotes | string option | If present, contains the concatenated list of all Changelog sections for the latest release. This is a convenience property so that you don't have to String.Join all the lines in the `ReleaseChangelogData` yourself! |
 
-### ChangelogData
+### ReleaseChangelogData
 
 This TaskItem has metadata for each of the known sections of a Changelog:
 
@@ -95,14 +102,7 @@ This TaskItem has metadata for each of the known sections of a Changelog:
 
 In each case, the value of the metadata is the newline-concatenated list of all of the Changelog Entries for that section.
 
-### UnreleasedChangelogData
-
-This structure is a `ChangelogData` with an `Identity` of `"Unreleased"`.
-
-### ReleaseChangelogData
-
-This structure is the same as `ChangelogData`, but it contains two more items of metadata:
-
+In addition,
 * the `Identity` of the `TaskItem` is the Semantic Version of the release
 * the `Date` of the `TaskItem` is the `YYYY-MM-DD`-formatted date of the release
 
