@@ -8,6 +8,7 @@
 * Automatic pre-release version bumping when an `Unreleased` section is found, which increments the patch version of the latest release and adds the "-alpha" suffix
 * Added a property `<GenerateVersionForUnreleasedChanges>` which can be set to `false` to prevent automatic version bumping
 * Added an output property `UnreleasedReleaseNotes` containing the contents of the `Unreleased` section
+* Added a property `<GenerateAssemblyBuildDateAttribute>` which controls whether the `BuildDate` `AssemblyAttribute` is written to the assembly, default `true`
 
 ### Changed
 
