@@ -75,24 +75,29 @@ type IntegrationTests() =
 
     member val testPackageVersion = null with get, set
 
-    member this.AddPackageReference(projectName: string) =
-        Command.Run(
-            "dotnet",
-            CmdLine.empty
-            |> CmdLine.appendPrefix "add" projectName
-            |> CmdLine.appendPrefix "package" "Ionide.KeepAChangelog.Tasks"
-            // |> CmdLine.appendPrefix "--source" VirtualWorkspace.``test-nupkgs``.``.``
-            |> CmdLine.appendPrefix "--version" $"[{this.testPackageVersion}]"
-            |> CmdLine.toString,
-            workingDirectory = Workspace.fixtures.``.``
-        )
+    member this.AddPackageReference(projectName: string) : Task =
+        task {
+            let! struct (_, _) =
+                Command.ReadAsync(
+                    "dotnet",
+                    CmdLine.empty
+                    |> CmdLine.appendPrefix "add" projectName
+                    |> CmdLine.appendPrefix "package" "Ionide.KeepAChangelog.Tasks"
+                    // |> CmdLine.appendPrefix "--source" VirtualWorkspace.``test-nupkgs``.``.``
+                    |> CmdLine.appendPrefix "--version" $"[{this.testPackageVersion}]"
+                    |> CmdLine.toString,
+                    workingDirectory = Workspace.fixtures.``.``
+                )
+
+            ()
+        }
 
     [<TestMethod>]
     member this.``works for absolute path with keep a changelog``() : Task =
         task {
             let projectName = "WorksForAbsolutePathWithKeepAChangelog.fsproj"
 
-            this.AddPackageReference projectName
+            // this.AddPackageReference projectName
 
             let! struct (stdout, _) = Utils.packAndGetPackageProperties projectName
 
@@ -116,7 +121,7 @@ type IntegrationTests() =
         task {
             let projectName = "WorksForRelativePathWithKeepAChangelog.fsproj"
 
-            this.AddPackageReference projectName
+            do! this.AddPackageReference projectName
 
             let! struct (stdout, _) = Utils.packAndGetPackageProperties projectName
 
@@ -140,7 +145,7 @@ type IntegrationTests() =
         task {
             let projectName = "FailIfChangelogNotSpecified.fsproj"
 
-            this.AddPackageReference projectName
+            do! this.AddPackageReference projectName
 
             let! struct (stdout, _) = Utils.packAndGetPackageProperties projectName
 
@@ -164,7 +169,7 @@ type IntegrationTests() =
         task {
             let projectName = "FailIfChangelogDoesNotExist.fsproj"
 
-            this.AddPackageReference projectName
+            do! this.AddPackageReference projectName
 
             let! struct (stdout, _) = Utils.packAndGetPackageProperties projectName
 
@@ -188,7 +193,7 @@ type IntegrationTests() =
         task {
             let projectName = "WorksForUnreleased.fsproj"
 
-            this.AddPackageReference projectName
+            do! this.AddPackageReference projectName
 
             let! struct (stdout, _) = Utils.packAndGetPackageProperties projectName
 
@@ -212,7 +217,7 @@ type IntegrationTests() =
         task {
             let projectName = "WorksForUnreleased.fsproj"
 
-            this.AddPackageReference projectName
+            do! this.AddPackageReference projectName
 
             let! struct (stdout, _) =
                 Utils.packAndGetPackagePropertiesWithExtraArg

@@ -25,7 +25,8 @@
         </Ionide.KeepAChangelog.Tasks.ParseChangeLogs>
     </Target>
 
-    <Target Name="SetVersionFromChangelog" DependsOnTargets="GetChangelogVersion">
+    <Target Name="SetVersionFromChangelog" DependsOnTargets="GetChangelogVersion"
+            BeforeTargets="GetAssemblyVersion;GenerateAssemblyInfo" >
         <PropertyGroup Condition="'@(CurrentReleaseChangelog)' != ''">
             <!-- Set the version to the version of the latest release -->
             <Version>%(CurrentReleaseChangelog.Identity)</Version>
@@ -42,10 +43,10 @@
             <_ReleaseDate>%(UnreleasedChangelog.Date)</_ReleaseDate>
         </PropertyGroup> 
 
-        <ItemGroup Condition="'@(_ReleaseDate)' != '' and '$(GenerateAssemblyInfo)' == 'true'">
-            <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute" Condition="'$(GenerateRepositoryUrlAttribute)' == 'true' and ('$(RepositoryUrl)' != '' or '$(PublishRepositoryUrl)' == 'true')">
+        <ItemGroup Condition="'$(_ReleaseDate)' != '' and '$(GenerateAssemblyInfo)' == 'true'">
+            <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute" Condition="'$(GenerateAssemblyBuildDateAttribute)' == 'true'">
                 <_Parameter1>BuildDate</_Parameter1>
-                <_Parameter2>%(_ReleaseDate)</_Parameter2>
+                <_Parameter2>$(_ReleaseDate)</_Parameter2>
             </AssemblyAttribute>
         </ItemGroup>
     </Target>

@@ -2,5 +2,7 @@
     <PropertyGroup>
         <!-- If set, the assembly/package version and release notes will be set from Unreleased changes, if any are present -->
         <GenerateVersionForUnreleasedChanges Condition="'$(GenerateVersionForUnreleasedChanges)' == ''">true</GenerateVersionForUnreleasedChanges>
+        <!-- If true, assembly metadata for the build date of the release will be written -->
+        <GenerateAssemblyBuildDateAttribute Condition="'$(GenerateAssemblyBuildDateAttribute)' == ''">true</GenerateAssemblyBuildDateAttribute>
     </PropertyGroup>
 </Project>

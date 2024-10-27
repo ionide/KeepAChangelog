@@ -76,6 +76,7 @@ There's really only one property that matters for these targets, and that's `Cha
 | - | - |---------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | ChangelogFile | string | -             | Points to the changelog file to parse. Note that the value is relative to the _project_ root by default, so a repository-wide changelog would require this property be set to a different value, for example in a Directory.Build.props file |
 | GenerateVersionForUnreleasedChanges | boolean | true          | If set, the assembly/package version and release notes will be set from Unreleased changes, if any are present.                                                                                                                              |
+| GenerateAssemblyBuildDateAttribute | boolean | true | If set, an assembly metadata attribute named "BuildDate" will be generated with the date (YYYY-MM-DD) of the parsed release. |
 
 ## API
 
