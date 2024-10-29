@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+### Removed
+
+- A test removal line
+- And another removal
+
 ## [0.1.8] - 2022-03-31
 
 ### Changed

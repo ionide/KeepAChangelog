@@ -92,7 +92,7 @@ type UnitTests() =
         myTask.BuildEngine <- this.context.BuildEngine.Object
 
         let success = myTask.Execute()
-        %success.Should().BeTrue "Should have successfully parsed the changelog data"
+        %success.Should().BeTrue("Should have successfully parsed the changelog data")
         %myTask.AllReleasedChangelogs.Length.Should().Be(9, "Should have 9 versions")
 
         %myTask.CurrentReleaseChangelog.ItemSpec
@@ -112,24 +112,93 @@ type UnitTests() =
           |> Seq.cast
           |> _.Should().Contain("Date", "Should have date metadata"))
 
+        %myTask.UnreleasedChangelog.ItemSpec
+            .Should()
+            .Be("0.1.9-alpha", "Should have the alpha prefix from a patch release")
+
+        %(myTask.UnreleasedChangelog.MetadataNames
+          |> Seq.cast
+          |> _.Should().Contain("Removed", "Should have removed metadata"))
+
     [<TestMethod>]
     member this.``task produces expected markdown``() =
+        let myTask =
+            ParseChangeLogs(ChangelogFile = Workspace.changelogs.``CHANGELOG_detailed.md``)
+
+        myTask.BuildEngine <- this.context.BuildEngine.Object
+
+        let success = myTask.Execute()
+        %success.Should().BeTrue("Should have successfully parsed the changelog data")
+
+        %myTask.LatestReleaseNotes
+            .Should()
+            .BeLineEndingEquivalent(
+                """### Changed
+
+- Minor packaging fix for non-Core MSBuild versions"""
+            )
+
+        %myTask.UnreleasedReleaseNotes
+            .Should()
+            .BeLineEndingEquivalent(
+                """### Removed
+
+- A test removal line
+- And another removal"""
+            )
+
+    [<TestMethod>]
+    member this.``task correctly processes a changelog with no unreleased``() =
         let myTask = ParseChangeLogs(ChangelogFile = Workspace.changelogs.``CHANGELOG.md``)
 
         myTask.BuildEngine <- this.context.BuildEngine.Object
 
         let success = myTask.Execute()
-        %success.Should().BeTrue "Should have successfully parsed the changelog data"
+        %success.Should().BeTrue("Should have successfully parsed the changelog data")
 
-        %myTask.LatestReleaseNotes
+        %myTask.CurrentReleaseChangelog.ItemSpec
             .Should()
-            .BeLineEndingEquivalent(
-                """### Added
+            .Be("0.1.0", "It is the latest release")
 
-- Created the package
+        %myTask.LatestReleaseNotes.Should().NotBeNull().And.NotBeEmpty()
 
-### Changed
+        %myTask.AllReleasedChangelogs
+            .Should()
+            .HaveLength(1, "There is only a single release section")
 
-- Changed something in the package
-- Updated the target framework"""
-            )
+        %myTask.UnreleasedChangelog.Should().BeNull("There is no unreleased section")
+        %myTask.UnreleasedReleaseNotes.Should().BeNull("There is no unreleased section")
+
+    [<TestMethod>]
+    member this.``task correctly processes a changelog with only unreleased``() =
+        let myTask =
+            ParseChangeLogs(ChangelogFile = Workspace.changelogs.``CHANGELOG_unreleased.md``)
+
+        myTask.BuildEngine <- this.context.BuildEngine.Object
+
+        let success = myTask.Execute()
+        %success.Should().BeTrue("Should have successfully parsed the changelog data")
+        %myTask.CurrentReleaseChangelog.Should().BeNull("There are no released sections")
+        %myTask.LatestReleaseNotes.Should().BeNull("There are no released sections")
+        %myTask.AllReleasedChangelogs.Should().BeNull("There are no released sections")
+
+        %myTask.UnreleasedChangelog.ItemSpec
+            .Should()
+            .Be("0.0.1-alpha", "There is no previous version, so it starts from 0.0.0")
+
+        %myTask.UnreleasedReleaseNotes.Should().NotBeNull().And.NotBeEmpty()
+
+    [<TestMethod>]
+    member this.``task correctly processes a changelog with only introduction``() =
+        let myTask =
+            ParseChangeLogs(ChangelogFile = Workspace.changelogs.``CHANGELOG_empty.md``)
+
+        myTask.BuildEngine <- this.context.BuildEngine.Object
+
+        let success = myTask.Execute()
+        %success.Should().BeTrue("Should have successfully parsed the changelog data")
+        %myTask.CurrentReleaseChangelog.Should().BeNull("There are no released sections")
+        %myTask.LatestReleaseNotes.Should().BeNull("There are no released sections")
+        %myTask.AllReleasedChangelogs.Should().BeNull("There are no released sections")
+        %myTask.UnreleasedChangelog.Should().BeNull("There is no unreleased section")
+        %myTask.UnreleasedReleaseNotes.Should().BeNull("There is no unreleased section")

@@ -6,7 +6,9 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <ChangelogFile>$(MSBuildThisFileDirectory)CHANGELOG_KeepAChangelog.md</ChangelogFile>
+        <ChangelogFile>CHANGELOG_unreleased.md</ChangelogFile>
+        <GenerateAssemblyBuildDateAttribute>false</GenerateAssemblyBuildDateAttribute>
+        <GenerateVersionForUnreleasedChanges>false</GenerateVersionForUnreleasedChanges>
     </PropertyGroup>
 
     <ItemGroup>

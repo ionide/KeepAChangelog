@@ -6,7 +6,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <ChangelogFile>$(MSBuildThisFileDirectory)CHANGELOG_KeepAChangelog.md</ChangelogFile>
+        <ChangelogFile>CHANGELOG_unreleased.md</ChangelogFile>
     </PropertyGroup>
 
     <ItemGroup>

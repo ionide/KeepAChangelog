@@ -25,6 +25,7 @@
       <PackageReference Include="MSTest.TestFramework" />
       <PackageReference Include="Semver" />
       <PackageReference Include="SimpleExec" />
+      <PackageReference Include="System.Reflection.MetadataLoadContext" />
     </ItemGroup>
 
     <ItemGroup>
@@ -33,6 +34,7 @@
 
     <ItemGroup>
       <Content Include="changelogs\*.md" />
+        <None Include="fixtures\*"/>
     </ItemGroup>
 
 </Project>
