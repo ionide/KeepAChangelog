@@ -10,5 +10,8 @@ type VirtualWorkspace =
         """
 test-nupkgs/
 test-package-cache/
+fixtures/
+    bin/
+        Release/
 """
      >

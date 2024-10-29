@@ -111,6 +111,12 @@
         "resolved": "12.0.0",
         "contentHash": "ptxlWtxC8vM6Y6e3h9ZTxBBkOWnWrm/Sa1HT+2i1xcXY3Hx2hmKDZP5RShPf8Xr9D+ivlrXNy57ktzyH8kyt+Q=="
       },
+      "System.Reflection.MetadataLoadContext": {
+        "type": "Direct",
+        "requested": "[8.0.1, )",
+        "resolved": "8.0.1",
+        "contentHash": "c/hiLzoMeYWnoTsdeRY2o0Vbadfedt0b4ZawQ+qDr1BIoYBQo3ASei0Pyiz00n9pHBlfWXiUVy90tOWBEgJ8/Q=="
+      },
       "Castle.Core": {
         "type": "Transitive",
         "resolved": "5.1.1",

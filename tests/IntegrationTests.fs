@@ -1,6 +1,9 @@
 module Tests.IntegrationTests
 
 open System.IO
+open System.IO.Compression
+open System.Reflection
+open System.Runtime.InteropServices
 open System.Threading.Tasks
 open Ionide.KeepAChangelog.Tasks.Test
 open Microsoft.VisualStudio.TestTools.UnitTesting
@@ -23,7 +26,7 @@ module Utils =
             Directory.CreateDirectory packageCache |> ignore
 
             // Read improves the error logging when the command fails
-            let! (_, _) =
+            let! _, _ =
                 Command.ReadAsync(
                     "dotnet",
                     CmdLine.empty
@@ -53,6 +56,32 @@ module Utils =
 
     let packAndGetPackageProperties projectName =
         packAndGetPackagePropertiesWithExtraArg projectName None
+
+    let getAssemblyInfoFromNupkg (projectName: string) version =
+        let projectName = Path.GetFileNameWithoutExtension projectName
+
+        let packageFile =
+            Path.Combine(VirtualWorkspace.fixtures.bin.Release.``.``, $"{projectName}.{version}.nupkg")
+
+        File.Exists(packageFile).Should().BeTrue() |> ignore
+
+        use zip = ZipFile.OpenRead(packageFile)
+        use zipStream = zip.Entries |> Seq.find (_.Name.EndsWith(".dll")) |> _.Open()
+        use assemblyStream = new MemoryStream()
+        zipStream.CopyTo assemblyStream
+
+        let runtimeAssemblies =
+            Directory.GetFiles(RuntimeEnvironment.GetRuntimeDirectory(), "*.dll")
+
+        use mlc = new MetadataLoadContext(PathAssemblyResolver runtimeAssemblies)
+        let assembly = mlc.LoadFromStream assemblyStream
+
+        assembly.CustomAttributes
+        |> Seq.tryPick (fun attr ->
+            match attr.ConstructorArguments |> Seq.map _.Value.ToString() |> Seq.toArray with
+            | [| "BuildDate"; date |] -> Some date
+            | _ -> None
+        )
 
 [<TestClass>]
 type IntegrationTests() =
@@ -97,8 +126,6 @@ type IntegrationTests() =
         task {
             let projectName = "WorksForAbsolutePathWithKeepAChangelog.fsproj"
 
-            // this.AddPackageReference projectName
-
             let! struct (stdout, _) = Utils.packAndGetPackageProperties projectName
 
             stdout
@@ -114,6 +141,9 @@ type IntegrationTests() =
 """
                 )
             |> ignore
+
+            let buildDate = Utils.getAssemblyInfoFromNupkg projectName "0.1.0"
+            buildDate.Should().BeSome().WhoseValue.Should().Be("2022-01-13") |> ignore
         }
 
     [<TestMethod>]
@@ -124,6 +154,9 @@ type IntegrationTests() =
             do! this.AddPackageReference projectName
 
             let! struct (stdout, _) = Utils.packAndGetPackageProperties projectName
+
+            let buildDate = Utils.getAssemblyInfoFromNupkg projectName "0.1.0"
+            buildDate.Should().BeSome().WhoseValue.Should().Be("2022-01-13") |> ignore
 
             stdout
                 .Should()
@@ -210,19 +243,22 @@ type IntegrationTests() =
 """
                 )
             |> ignore
+
+            let buildDate = Utils.getAssemblyInfoFromNupkg projectName "0.1.1-alpha"
+            buildDate.Should().BeNone() |> ignore
         }
 
     [<TestMethod>]
     member this.``ignores a pre-release version if changelog has unreleased section but disabled``() : Task =
         task {
-            let projectName = "WorksForUnreleased.fsproj"
+            let projectName = "WorksForUnreleasedWhenIgnored.fsproj"
 
             do! this.AddPackageReference projectName
 
-            let! struct (stdout, _) =
-                Utils.packAndGetPackagePropertiesWithExtraArg
-                    projectName
-                    (Some "-p:GenerateVersionForUnreleasedChanges=false")
+            let! struct (stdout, _) = Utils.packAndGetPackageProperties projectName
+
+            let buildDate = Utils.getAssemblyInfoFromNupkg projectName "0.1.0"
+            buildDate.Should().BeSome().WhoseValue.Should().Be("2022-01-13") |> ignore
 
             stdout
                 .Should()
@@ -237,4 +273,31 @@ type IntegrationTests() =
 """
                 )
             |> ignore
+        }
+
+    [<TestMethod>]
+    member this.``doesn't write the build date if disabled``() : Task =
+        task {
+            let projectName = "IgnoresBuildDateIfConfigured.fsproj"
+
+            do! this.AddPackageReference projectName
+
+            let! struct (stdout, _) = Utils.packAndGetPackageProperties projectName
+
+            stdout
+                .Should()
+                .BeLineEndingEquivalent(
+                    """{
+  "Properties": {
+    "Version": "0.1.0",
+    "PackageVersion": "0.1.0",
+    "PackageReleaseNotes": "### Added\n\n- Created the package\n\n### Changed\n\n- Changed something in the package\n- Updated the target framework"
+  }
+}
+"""
+                )
+            |> ignore
+
+            let buildDate = Utils.getAssemblyInfoFromNupkg projectName "0.1.0"
+            buildDate.Should().BeNone() |> ignore
         }
