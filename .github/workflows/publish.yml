@@ -23,7 +23,7 @@ jobs:
     - name: Pack
       run: dotnet pack --no-restore -c Release -o packages
     - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v2.3.1
+      uses: actions/upload-artifact@v4
       with:
         path: packages
     - name: Create Release
