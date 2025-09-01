@@ -1,10 +1,19 @@
 # Changelog
 
-## Unreleased
+## [0.3.0-alpha001] - 2025.09.01
+
+### Changed
+
+* [Remove parser, port C# Task, and other modernisation](https://github.com/ionide/KeepAChangelog/pull/30) thanks @tboby
+* [Add formatting and Warnings as Errors](https://github.com/ionide/KeepAChangelog/pull/33) thanks @tboby
+* [Improve tests, correctly trigger warnings, and fix output markdown format](https://github.com/ionide/KeepAChangelog/pull/32) thanks @tboby
 
 ### Fixed
 
-* Fix bundled dependencies into the package for net6.0
+* [Fix bundled dependencies into the package for net6.0](https://github.com/ionide/KeepAChangelog/pull/29) thanks @MangelMaxime 
+* [Fix warnings so that they actually trigger!](https://github.com/ionide/KeepAChangelog/pull/31) thanks @tboby
+
+
 
 ## [0.2.0] - 2023.12.05
 
