@@ -1,6 +1,6 @@
 <Project>
     <PropertyGroup>
-        <Version>0.3.0-alpha003</Version>
+        <Version>0.3.0</Version>
         <PackageReleaseNotes>
 ### Changed
 
