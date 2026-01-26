@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.2] - 2026.01.26
+
+### Fixed
+
+* [Update KeepAChangelogParser to 2.0.1](https://github.com/ionide/KeepAChangelog/pull/41)
+
 ## [0.3.1] - 2025.10.13
 
 ### Fixed

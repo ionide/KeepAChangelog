@@ -1,10 +1,10 @@
 <Project>
     <PropertyGroup>
-        <Version>0.3.1</Version>
+        <Version>0.3.2</Version>
         <PackageReleaseNotes>
 ### Fixed
 
-* [Update KeepAChangelogParser to pick up bug fixes](https://github.com/ionide/KeepAChangelog/pull/38)
+* [Update KeepAChangelogParser to 2.0.1](https://github.com/ionide/KeepAChangelog/pull/41)
         </PackageReleaseNotes>
     </PropertyGroup>
 
