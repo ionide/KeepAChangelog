@@ -1,10 +1,10 @@
 <Project>
     <PropertyGroup>
-        <Version>0.3.2</Version>
+        <Version>0.3.3</Version>
         <PackageReleaseNotes>
-### Fixed
+### Changed
 
-* [Update KeepAChangelogParser to 2.0.1](https://github.com/ionide/KeepAChangelog/pull/41)
+* [Allow use of asterisks for list items, and support nested lists](https://github.com/ionide/KeepAChangelog/pull/42)
         </PackageReleaseNotes>
     </PropertyGroup>
 
