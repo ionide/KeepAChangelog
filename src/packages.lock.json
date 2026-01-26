@@ -25,9 +25,9 @@
       },
       "KeepAChangeLogParser": {
         "type": "Direct",
-        "requested": "[2.0.0, )",
-        "resolved": "2.0.0",
-        "contentHash": "/bl8ciYA+ocIBVN0N79M390j/HplHpv4Uyta2orqxzCD5UnEFqWKmRvUtY+Wd3mzfKWH404F++TKWHebiT2Fvg==",
+        "requested": "[2.0.1, )",
+        "resolved": "2.0.1",
+        "contentHash": "CECoVLBldPFcAldltzLrFJI74+WkUWOC8wCgkSDTqt3f/jz2Ke2ANU/DLdrLveP7f06ED8QR0UmjpQsV9/N6zw==",
         "dependencies": {
           "CSharpFunctionalExtensions": "3.6.0"
         }
@@ -47,6 +47,15 @@
           "System.Memory": "4.5.5",
           "System.Runtime.CompilerServices.Unsafe": "6.0.0",
           "System.Security.Principal.Windows": "5.0.0"
+        }
+      },
+      "Microsoft.NETFramework.ReferenceAssemblies": {
+        "type": "Direct",
+        "requested": "[1.0.3, )",
+        "resolved": "1.0.3",
+        "contentHash": "vUc9Npcs14QsyOD01tnv/m8sQUnGTGOw1BCmKcv77LBJY7OxhJ+zJF7UD/sCL3lYNFuqmQEVlkfS4Quif6FyYg==",
+        "dependencies": {
+          "Microsoft.NETFramework.ReferenceAssemblies.net472": "1.0.3"
         }
       },
       "Semver": {
@@ -86,6 +95,11 @@
           "System.Memory": "4.5.5",
           "System.Runtime.CompilerServices.Unsafe": "6.0.0"
         }
+      },
+      "Microsoft.NETFramework.ReferenceAssemblies.net472": {
+        "type": "Transitive",
+        "resolved": "1.0.3",
+        "contentHash": "0E7evZXHXaDYYiLRfpyXvCh+yzM2rNTyuZDI+ZO7UUqSc6GfjePiXTdqJGtgIKUwdI81tzQKmaWprnUiPj9hAw=="
       },
       "Microsoft.VisualStudio.Setup.Configuration.Interop": {
         "type": "Transitive",
@@ -180,9 +194,9 @@
       },
       "KeepAChangeLogParser": {
         "type": "Direct",
-        "requested": "[2.0.0, )",
-        "resolved": "2.0.0",
-        "contentHash": "/bl8ciYA+ocIBVN0N79M390j/HplHpv4Uyta2orqxzCD5UnEFqWKmRvUtY+Wd3mzfKWH404F++TKWHebiT2Fvg==",
+        "requested": "[2.0.1, )",
+        "resolved": "2.0.1",
+        "contentHash": "CECoVLBldPFcAldltzLrFJI74+WkUWOC8wCgkSDTqt3f/jz2Ke2ANU/DLdrLveP7f06ED8QR0UmjpQsV9/N6zw==",
         "dependencies": {
           "CSharpFunctionalExtensions": "3.6.0"
         }

@@ -43,9 +43,9 @@
       },
       "KeepAChangeLogParser": {
         "type": "Direct",
-        "requested": "[2.0.0, )",
-        "resolved": "2.0.0",
-        "contentHash": "/bl8ciYA+ocIBVN0N79M390j/HplHpv4Uyta2orqxzCD5UnEFqWKmRvUtY+Wd3mzfKWH404F++TKWHebiT2Fvg==",
+        "requested": "[2.0.1, )",
+        "resolved": "2.0.1",
+        "contentHash": "CECoVLBldPFcAldltzLrFJI74+WkUWOC8wCgkSDTqt3f/jz2Ke2ANU/DLdrLveP7f06ED8QR0UmjpQsV9/N6zw==",
         "dependencies": {
           "CSharpFunctionalExtensions": "3.6.0"
         }
