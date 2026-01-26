@@ -43,21 +43,21 @@
       },
       "KeepAChangeLogParser": {
         "type": "Direct",
-        "requested": "[1.2.9, )",
-        "resolved": "1.2.9",
-        "contentHash": "PjAL4uVWtDIJa8yXegoeehbpWedTOmZfEpWa52RAp5118F2Fq6nKPQxDtYeFoMnaNtRPGA3LAez0DCTX3qkBVA==",
+        "requested": "[2.0.1, )",
+        "resolved": "2.0.1",
+        "contentHash": "CECoVLBldPFcAldltzLrFJI74+WkUWOC8wCgkSDTqt3f/jz2Ke2ANU/DLdrLveP7f06ED8QR0UmjpQsV9/N6zw==",
         "dependencies": {
           "CSharpFunctionalExtensions": "3.6.0"
         }
       },
       "Microsoft.Build.Utilities.Core": {
         "type": "Direct",
-        "requested": "[17.8.3, )",
-        "resolved": "17.8.3",
-        "contentHash": "ex8Sjx02q0FmForLRFItB82sJx5s2JRWIpJgYDW1g7xLUoFlKLoNp67UwS5xN8YcYBkT7vRxXeYx/dQ96KaWtg==",
+        "requested": "[17.8.43, )",
+        "resolved": "17.8.43",
+        "contentHash": "vptXyfr6LSyD/7WpkjNnsCOaHLVME1cr2azsc8rX9laBqm+Fr+lqb3TOz0tlniXHzO6LS+6M7n9HNQoG9B9mFQ==",
         "dependencies": {
-          "Microsoft.Build.Framework": "17.8.3",
-          "Microsoft.NET.StringTools": "17.8.3",
+          "Microsoft.Build.Framework": "17.8.43",
+          "Microsoft.NET.StringTools": "17.8.43",
           "Microsoft.VisualStudio.Setup.Configuration.Interop": "3.2.2146",
           "System.Collections.Immutable": "7.0.0",
           "System.Configuration.ConfigurationManager": "7.0.0"
@@ -150,8 +150,8 @@
       },
       "Microsoft.Build.Framework": {
         "type": "Transitive",
-        "resolved": "17.8.3",
-        "contentHash": "NrQZJW8TlKVPx72yltGb8SVz3P5mNRk9fNiD/ao8jRSk48WqIIdCn99q4IjlVmPcruuQ+yLdjNQLL8Rb4c916g=="
+        "resolved": "17.8.43",
+        "contentHash": "TA6fCbd9qFSyhIKcUn5BhDN3/JrqpspO9KYsZKUvHyQpQrHVdzy4Hk6egjjBP3T0L562TLZuHEzQwJziyRBEkw=="
       },
       "Microsoft.CodeCoverage": {
         "type": "Transitive",
@@ -160,8 +160,8 @@
       },
       "Microsoft.NET.StringTools": {
         "type": "Transitive",
-        "resolved": "17.8.3",
-        "contentHash": "y6DiuacjlIfXH3XVQG5htf+4oheinZAo7sHbITB3z7yCXQec48f9ZhGSXkr+xn1bfl73Yc3ZQEW2peJ5X68AvQ=="
+        "resolved": "17.8.43",
+        "contentHash": "DglJrwfew+PEAzZp0FALdQl4y2ysgaUsddR78Xlnk2UFw4jBN/xmM6tIyT6sFkRXZ6Y0xZ8VKsk8Xii07lWqTA=="
       },
       "Microsoft.Testing.Extensions.Telemetry": {
         "type": "Transitive",
