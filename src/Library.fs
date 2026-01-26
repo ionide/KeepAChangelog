@@ -119,7 +119,14 @@ type ParseChangeLogs() =
 
     member this.ParseChangelog(fileInfo: FileInfo) : Result<Changelog, unit> =
         let changelogContent = File.ReadAllText(fileInfo.FullName)
-        let parserResult = ChangelogParser().Parse(changelogContent)
+
+        let changeLogParserSettings =
+            ChangelogParserSettings(
+                ChangelogListHandling = (ChangelogListHandling.AllowAsterisk ||| ChangelogListHandling.AllowNestedLists)
+            )
+
+        let parserResult =
+            ChangelogParser().Parse(changelogContent, changeLogParserSettings)
 
         if parserResult.IsSuccess then
             Ok parserResult.Value

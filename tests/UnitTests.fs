@@ -113,6 +113,34 @@ type UnitTests() =
           |> _.Should().Contain("Date", "Should have date metadata"))
 
     [<TestMethod>]
+    member this.``task correctly parses changelogs containing nested lists``() =
+        let myTask =
+            ParseChangeLogs(ChangelogFile = Workspace.changelogs.``CHANGELOG_lists.md``)
+
+        myTask.BuildEngine <- this.context.BuildEngine.Object
+
+        let success = myTask.Execute()
+        %success.Should().BeTrue "Should have successfully parsed the changelog data"
+        %myTask.AllReleasedChangelogs.Length.Should().Be(1, "Should have 1 version")
+
+        %myTask.CurrentReleaseChangelog.ItemSpec
+            .Should()
+            .Be("0.1.0", "Should have the most recent version")
+
+        %myTask.CurrentReleaseChangelog
+            .GetMetadata("Date")
+            .Should()
+            .Be("2026-01-26", "Should have the most recent version's date")
+
+        %(myTask.CurrentReleaseChangelog.MetadataNames
+          |> Seq.cast
+          |> _.Should().Contain("Changed", "Should have changed metadata"))
+
+        %(myTask.CurrentReleaseChangelog.MetadataNames
+          |> Seq.cast
+          |> _.Should().Contain("Added", "Should have added metadata"))
+
+    [<TestMethod>]
     member this.``task produces expected markdown``() =
         let myTask = ParseChangeLogs(ChangelogFile = Workspace.changelogs.``CHANGELOG.md``)
 
