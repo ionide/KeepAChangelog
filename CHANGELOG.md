@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+* [Allow use of asterisks for list items, and support nested lists](https://github.com/ionide/KeepAChangelog/pull/42)
+
 ## [0.3.2] - 2026.01.26
 
 ### Fixed
