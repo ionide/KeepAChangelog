@@ -161,3 +161,16 @@ type UnitTests() =
 - Changed something in the package
 - Updated the target framework"""
             )
+
+    [<TestMethod>]
+    member this.``task fails to parse changelogs containing only unreleased``() =
+        let myTask =
+            ParseChangeLogs(ChangelogFile = Workspace.changelogs.``CHANGELOG_unreleased.md``)
+
+        myTask.BuildEngine <- this.context.BuildEngine.Object
+
+        let success = myTask.Execute()
+
+        %success.Should().BeFalse()
+        %this.context.Errors.Count.Should().Be(1)
+        %this.context.Errors.[0].Code.Should().Be("IKC0002")
