@@ -1,16 +1,19 @@
 # Ionide.KeepAChangelog
 
-This project implements a Changelog parser according to the spec at KeepAChangelog. It also provides MSBuild tasks and targets to automate the setting of **Versions** and **Package Release Notes** for your NuGet packages, so that the Changelogs are your source of truth.
+This project implements a Changelog parser according to the spec at [KeepAChangelog](https://keepachangelog.com/). It also provides MSBuild tasks and targets to automate the setting of **Versions** and **Package Release Notes** for your NuGet packages, so that the Changelogs are your source of truth.
 
 When configured, this package will set the `Version`, `PackageVersion`, and `PackageReleaseNotes` of your packable project with the matching data from the latest Changelog release, as well as adding AssemblyMetadata for the `BuildDate` in the `YYYY-mm-dd` format.
 
 ## Installation
 
-The MSBuild package is authored as a set of tasks and targets that are used automatically.  You just have to install the `Ionide.KeepAChangelog.Tasks` package and you're all set!
+The MSBuild package is authored as a set of tasks and targets that are used automatically. You just have to install the `Ionide.KeepAChangelog.Tasks` package and you're all set!
 
 ```xml
 <ItemGroup>
-    <PackageReference Include="Ionide.KeepAChangelog.Tasks" Version="<insert here>" PrivateAssets="all" />
+  <PackageReference Include="Ionide.KeepAChangelog.Tasks" Version="<insert here>">
+    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    <PrivateAssets>all</PrivateAssets>
+  </PackageReference>
 </ItemGroup>
 ```
 
@@ -35,11 +38,13 @@ and a CHANGELOG.md file like this:
 ```md
 # Changelog
 
-## 1.0.0 - 2022-01-14
+## [1.0.0] - 2022-01-14
 
 ### Added
 
 * Initial release
+* Add portuguese translation
+* Add greek translation
 ```
 
 packaging the project with this library results in the same result as packing a project that looks like this:
@@ -52,11 +57,13 @@ packaging the project with this library results in the same result as packing a 
    <Version>1.0.0</Version>
    <PackageVersion>1.0.0</PackageVersion>
    <ReleaseNotes>
-## 1.0.0 - 2022-01-14
+## [1.0.0] - 2022-01-14
 
 ### Added
 
 * Initial release
+* Add portuguese translation
+* Add greek translation
    </ReleaseNotes>
  </PropertyGroup>
  <ItemGroup>
@@ -106,7 +113,6 @@ This structure is the same as `ChangelogData`, but it contains two more items of
 * the `Identity` of the `TaskItem` is the Semantic Version of the release
 * the `Date` of the `TaskItem` is the `YYYY-MM-DD`-formatted date of the release
 
-
 ## How to contribute
 
 *Imposter syndrome disclaimer*: I want your help. No really, I do.
@@ -122,7 +128,6 @@ The contribution guidelines outline the process that you'll need to follow to ge
 And you don't just have to write code. You can help out by writing documentation, tests, or even by giving feedback about this work. (And yes, that includes giving feedback about the contribution guidelines.)
 
 Thank you for contributing!
-
 
 ## Contributing and copyright
 
