@@ -22,6 +22,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="MSBuildMultiThreadableTaskAttribute.fs" />
       <Compile Include="Log.fs" />
     <Compile Include="Library.fs" />
     <!-- these lines pack the single-TFM build props/targets files to the `build` folder in the generated package.

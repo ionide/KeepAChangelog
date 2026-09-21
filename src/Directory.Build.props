@@ -1,10 +1,14 @@
 <Project>
     <PropertyGroup>
-        <Version>0.3.3</Version>
+        <Version>0.4.0</Version>
         <PackageReleaseNotes>
+### Added
+
+* Support MSBuild multithreaded execution without requiring newer MSBuild packages.
+
 ### Changed
 
-* [Allow use of asterisks for list items, and support nested lists](https://github.com/ionide/KeepAChangelog/pull/42)
+* Resolve changelog file inputs from `ITaskItem.FullPath` so relative paths remain project-relative during multithreaded execution.
         </PackageReleaseNotes>
     </PropertyGroup>
 
