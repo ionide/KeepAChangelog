@@ -3,12 +3,15 @@ module Tests.UnitTests
 open Ionide.KeepAChangelog.Tasks.Test
 open Moq
 open Microsoft.Build.Framework
+open Microsoft.Build.Utilities
 open Ionide.KeepAChangelog.Tasks
 open Faqt
 open Faqt.Operators
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open Workspace
 open Helpers
+
+let taskItem (path: string) = TaskItem(path) :> ITaskItem
 
 type TestContext = {
     BuildEngine: Mock<IBuildEngine>
@@ -38,7 +41,7 @@ type UnitTests() =
     [<TestMethod>]
     member this.``task fails when changelog file does not exist``() =
 
-        let myTask = ParseChangeLogs(ChangelogFile = "ThisFileDoesNotExist.md")
+        let myTask = ParseChangeLogs(ChangelogFile = taskItem "ThisFileDoesNotExist.md")
         myTask.BuildEngine <- this.context.BuildEngine.Object
 
         let success = myTask.Execute()
@@ -50,7 +53,8 @@ type UnitTests() =
     [<TestMethod>]
     member this.``task succeeds when changelog file exists (relative path)``() =
         // When running tests, the working directory is where the dll is located
-        let myTask = ParseChangeLogs(ChangelogFile = "../../../changelogs/CHANGELOG.md")
+        let myTask =
+            ParseChangeLogs(ChangelogFile = taskItem "../../../changelogs/CHANGELOG.md")
 
         myTask.BuildEngine <- this.context.BuildEngine.Object
 
@@ -63,7 +67,9 @@ type UnitTests() =
 
     [<TestMethod>]
     member this.``task succeeds when changelog file exists (absolute path)``() =
-        let myTask = ParseChangeLogs(ChangelogFile = Workspace.changelogs.``CHANGELOG.md``)
+        let myTask =
+            ParseChangeLogs(ChangelogFile = taskItem Workspace.changelogs.``CHANGELOG.md``)
+
         myTask.BuildEngine <- this.context.BuildEngine.Object
 
         let success = myTask.Execute()
@@ -72,9 +78,34 @@ type UnitTests() =
         %this.context.Errors.Count.Should().Be(0)
 
     [<TestMethod>]
+    member this.``task reads changelog from FullPath metadata``() =
+        let changelogFile = Mock<ITaskItem>()
+        changelogFile.SetupGet(fun item -> item.ItemSpec).Returns("ThisFileDoesNotExist.md") |> ignore
+
+        changelogFile
+            .Setup(fun item -> item.GetMetadata("FullPath"))
+            .Returns(Workspace.changelogs.``CHANGELOG.md``)
+        |> ignore
+
+        let myTask = ParseChangeLogs(ChangelogFile = changelogFile.Object)
+        myTask.BuildEngine <- this.context.BuildEngine.Object
+
+        let success = myTask.Execute()
+
+        %success.Should().BeTrue()
+        %this.context.Errors.Count.Should().Be(0)
+
+    [<TestMethod>]
+    member this.``task is marked as multithreadable``() =
+        let attributes =
+            typeof<ParseChangeLogs>.GetCustomAttributes(typeof<MSBuildMultiThreadableTaskAttribute>, false)
+
+        %attributes.Length.Should().Be(1)
+
+    [<TestMethod>]
     member this.``task fails when changelog file is invalid``() =
         let myTask =
-            ParseChangeLogs(ChangelogFile = Workspace.changelogs.``CHANGELOG_invalid.md``)
+            ParseChangeLogs(ChangelogFile = taskItem Workspace.changelogs.``CHANGELOG_invalid.md``)
 
         myTask.BuildEngine <- this.context.BuildEngine.Object
 
@@ -87,7 +118,7 @@ type UnitTests() =
     [<TestMethod>]
     member this.``task correctly parses details from changelog file``() =
         let myTask =
-            ParseChangeLogs(ChangelogFile = Workspace.changelogs.``CHANGELOG_detailed.md``)
+            ParseChangeLogs(ChangelogFile = taskItem Workspace.changelogs.``CHANGELOG_detailed.md``)
 
         myTask.BuildEngine <- this.context.BuildEngine.Object
 
@@ -115,7 +146,7 @@ type UnitTests() =
     [<TestMethod>]
     member this.``task correctly parses changelogs containing nested lists``() =
         let myTask =
-            ParseChangeLogs(ChangelogFile = Workspace.changelogs.``CHANGELOG_lists.md``)
+            ParseChangeLogs(ChangelogFile = taskItem Workspace.changelogs.``CHANGELOG_lists.md``)
 
         myTask.BuildEngine <- this.context.BuildEngine.Object
 
@@ -142,7 +173,8 @@ type UnitTests() =
 
     [<TestMethod>]
     member this.``task produces expected markdown``() =
-        let myTask = ParseChangeLogs(ChangelogFile = Workspace.changelogs.``CHANGELOG.md``)
+        let myTask =
+            ParseChangeLogs(ChangelogFile = taskItem Workspace.changelogs.``CHANGELOG.md``)
 
         myTask.BuildEngine <- this.context.BuildEngine.Object
 

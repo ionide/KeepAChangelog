@@ -77,26 +77,34 @@ type ChangelogExtensions =
         |> _.ToString()
         |> _.Trim()
 
+[<MSBuildMultiThreadableTask>]
 type ParseChangeLogs() =
     inherit Task()
 
+    /// Gets or sets the changelog file to parse.
     [<Required>]
-    member val ChangelogFile: string = null with get, set
+    member val ChangelogFile: ITaskItem = null with get, set
 
+    /// Gets the unreleased changelog section and its subsection metadata.
     [<Output>]
     member val UnreleasedChangelog: ITaskItem = null with get, set
 
+    /// Gets the most recent released changelog section and its subsection metadata.
     [<Output>]
     member val CurrentReleaseChangelog: ITaskItem = null with get, set
 
+    /// Gets all released changelog sections in descending version order.
     [<Output>]
     member val AllReleasedChangelogs: ITaskItem[] = null with get, set
 
+    /// Gets the Markdown release notes for the most recent released changelog section.
     [<Output>]
     member val LatestReleaseNotes: string = null with get, set
 
     override this.Execute() : bool =
-        let file = this.ChangelogFile |> FileInfo
+        // MSBuild resolves FullPath relative to the project directory.
+        // ItemSpec would depend on the shared process working directory during multithreaded execution.
+        let file = this.ChangelogFile.GetMetadata("FullPath") |> FileInfo
 
         // Using result CE to make code easier to read by avoiding nested if statements
         result {

@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.4.0] - 2026.09.21
+
+### Added
+
+* Support MSBuild multithreaded execution without requiring newer MSBuild packages.
+
+### Changed
+
+* Resolve changelog file inputs from `ITaskItem.FullPath` so relative paths remain project-relative during multithreaded execution.
+
 ## [0.3.3] - 2026.01.26
 
 ### Changed
