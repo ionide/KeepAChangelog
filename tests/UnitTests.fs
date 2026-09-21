@@ -80,7 +80,11 @@ type UnitTests() =
     [<TestMethod>]
     member this.``task reads changelog from FullPath metadata``() =
         let changelogFile = Mock<ITaskItem>()
-        changelogFile.SetupGet(fun item -> item.ItemSpec).Returns("ThisFileDoesNotExist.md") |> ignore
+
+        changelogFile
+            .SetupGet(fun item -> item.ItemSpec)
+            .Returns("ThisFileDoesNotExist.md")
+        |> ignore
 
         changelogFile
             .Setup(fun item -> item.GetMetadata("FullPath"))
@@ -98,7 +102,8 @@ type UnitTests() =
     [<TestMethod>]
     member this.``task is marked as multithreadable``() =
         let attributes =
-            typeof<ParseChangeLogs>.GetCustomAttributes(typeof<MSBuildMultiThreadableTaskAttribute>, false)
+            typeof<ParseChangeLogs>
+                .GetCustomAttributes(typeof<MSBuildMultiThreadableTaskAttribute>, false)
 
         %attributes.Length.Should().Be(1)
 
